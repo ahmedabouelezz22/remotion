@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+
+@theme {
+  /* الهوية البصرية: كحلي عميق للثقة، وذهبي هادئ للتمييز */
+  --color-navy-50: #f3f6f9;
+  --color-navy-100: #dde5ec;
+  --color-navy-200: #b9c8d6;
+  --color-navy-700: #234f6d;
+  --color-navy-800: #2a4a62;
+  --color-navy-900: #1a3a52;
+  --color-navy-950: #11293a;
+
+  --color-gold-300: #e8cf7c;
+  --color-gold-400: #e0c25e;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #c49d2f;
+
+  --color-sand-50: #faf9f6;
+  --color-sand-100: #f4f2ec;
+  --color-sand-200: #e8e4d9;
+
+  --font-sans: var(--font-cairo), 'Segoe UI', Tahoma, sans-serif;
+  --font-display: var(--font-tajawal), var(--font-cairo), 'Segoe UI', sans-serif;
+
+  --radius-card: 1rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-sand-50);
+    color: var(--color-navy-900);
+    font-family: var(--font-sans);
+    line-height: 1.85;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    line-height: 1.4;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  /* الأرقام العربية الهندية تُربك القراءة في الأسعار والتواريخ — نبقيها لاتينية */
+  .numeric {
+    font-feature-settings: 'lnum' 1;
+    font-variant-numeric: lining-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-500);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-500);
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* تنسيق المقالات الطويلة — بديل خفيف عن إضافة @tailwindcss/typography */
+  .article-body {
+    font-size: 1.0625rem;
+    line-height: 2.05;
+    color: #243447;
+  }
+  .article-body > * + * { margin-top: 1.15rem; }
+  .article-body h2 {
+    margin-top: 2.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--color-navy-900);
+    padding-inline-start: 0.85rem;
+    border-inline-start: 4px solid var(--color-gold-500);
+  }
+  .article-body h3 {
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    color: var(--color-navy-800);
+  }
+  .article-body p { margin-block: 0; }
+  .article-body strong { color: var(--color-navy-900); font-weight: 700; }
+  .article-body ul, .article-body ol {
+    padding-inline-start: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .article-body ul { list-style: disc; }
+  .article-body ol { list-style: decimal; }
+  .article-body li::marker { color: var(--color-gold-600); }
+  .article-body a {
+    color: var(--color-navy-700);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--color-gold-400);
+  }
+  .article-body a:hover { color: var(--color-gold-600); }
+  .article-body blockquote {
+    border-inline-start: 4px solid var(--color-gold-500);
+    background: var(--color-sand-100);
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    color: #33445c;
+    font-size: 0.97rem;
+  }
+  .article-body blockquote p { margin: 0; }
+  .article-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    display: block;
+    overflow-x: auto;
+  }
+  .article-body th, .article-body td {
+    border: 1px solid var(--color-sand-200);
+    padding: 0.7rem 0.9rem;
+    text-align: start;
+  }
+  .article-body th {
+    background: var(--color-sand-100);
+    font-weight: 700;
+    color: var(--color-navy-900);
+    white-space: nowrap;
+  }
+  .article-body code {
+    background: var(--color-sand-100);
+    padding: 0.15em 0.4em;
+    border-radius: 0.35rem;
+    font-size: 0.9em;
+  }
+}
+
+/* احترام تفضيل تقليل الحركة */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
