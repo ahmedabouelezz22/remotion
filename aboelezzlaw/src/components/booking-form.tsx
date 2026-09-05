@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarCheck, CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Honeypot, controlClass } from '@/components/ui/field';
@@ -57,6 +57,40 @@ export function BookingForm() {
 
   const slots = useMemo(() => slotsForDate(values.date), [values.date]);
   const dayIsClosed = Boolean(values.date) && slots.length === 0;
+
+  const [taken, setTaken] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  // المواعيد المحجوزة تُجلب من الخادم عند اختيار التاريخ.
+  // القيد الحقيقي يبقى في قاعدة البيانات؛ هذا فقط لتجنيب الزائر اختيار موعد مأخوذ.
+  useEffect(() => {
+    if (!values.date) {
+      setTaken([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingSlots(true);
+
+    fetch(`/api/booking/availability?date=${values.date}`)
+      .then((response) => response.json() as Promise<{ taken?: string[] }>)
+      .then((data) => {
+        if (!cancelled) setTaken(data.taken ?? []);
+      })
+      .catch(() => {
+        // تعذّر الجلب: نعرض كل المواعيد ويتكفّل الخادم بالرفض إن كان محجوزاً
+        if (!cancelled) setTaken([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSlots(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [values.date]);
+
+  const availableCount = slots.filter((slot) => !taken.includes(slot)).length;
 
   const update = (key: keyof typeof initialValues) => (value: string) => {
     setValues((current) => {
@@ -242,25 +276,39 @@ export function BookingForm() {
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
             هذا اليوم خارج أيام العمل. {site.workingHours.label}
           </p>
+        ) : loadingSlots ? (
+          <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-500">
+            جارٍ التحقّق من المواعيد المتاحة…
+          </p>
+        ) : availableCount === 0 ? (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+            كل مواعيد هذا اليوم محجوزة. اختر يوماً آخر أو راسلنا على واتساب لموعد استثنائي.
+          </p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {slots.map((slot) => (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => update('time')(slot)}
-                disabled={busy}
-                aria-pressed={values.time === slot}
-                className={cn(
-                  'numeric rounded-xl border px-3 py-2.5 text-sm font-bold transition-all',
-                  values.time === slot
-                    ? 'border-navy-900 bg-navy-900 text-white shadow-sm'
-                    : 'border-sand-200 bg-white text-navy-900 hover:border-gold-500 hover:bg-gold-500/8',
-                )}
-              >
-                {slot}
-              </button>
-            ))}
+            {slots.map((slot) => {
+              const isTaken = taken.includes(slot);
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => update('time')(slot)}
+                  disabled={busy || isTaken}
+                  aria-pressed={values.time === slot}
+                  title={isTaken ? 'هذا الموعد محجوز' : undefined}
+                  className={cn(
+                    'numeric rounded-xl border px-3 py-2.5 text-sm font-bold transition-all',
+                    isTaken
+                      ? 'cursor-not-allowed border-sand-200 bg-sand-100 text-slate-300 line-through'
+                      : values.time === slot
+                        ? 'border-navy-900 bg-navy-900 text-white shadow-sm'
+                        : 'border-sand-200 bg-white text-navy-900 hover:border-gold-500 hover:bg-gold-500/8',
+                  )}
+                >
+                  {slot}
+                </button>
+              );
+            })}
           </div>
         )}
 

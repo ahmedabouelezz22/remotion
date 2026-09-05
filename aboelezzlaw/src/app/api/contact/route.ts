@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { notifyOffice } from '@/lib/notifications/notify';
+import { saveMessage } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { contactSchema, fieldErrors } from '@/lib/validation';
 
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
   if (company) {
     return NextResponse.json({ ok: true, message: 'تم استلام رسالتك.' });
   }
+
+  // الحفظ لا يعطّل الإشعار: فشله لا يمنع وصول الرسالة إلى المكتب
+  await saveMessage({ name, email, phone, subject, body: message });
 
   const outcome = await notifyOffice({
     title: 'رسالة جديدة من نموذج «اتصل بنا»',

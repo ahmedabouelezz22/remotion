@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, Phone, ShoppingBag, X } from 'lucide-react';
+import { Menu, Phone, ShoppingBag, UserRound, X } from 'lucide-react';
 import { navigation, site } from '@/content/site';
 import { useCart } from '@/components/cart-provider';
 import { cn } from '@/lib/utils';
@@ -102,6 +102,14 @@ export function SiteHeader() {
                   {count}
                 </span>
               ) : null}
+            </Link>
+
+            <Link
+              href="/account"
+              className="rounded-lg p-2.5 text-navy-900 transition-colors hover:bg-navy-900/5"
+              aria-label="حسابي"
+            >
+              <UserRound className="h-5 w-5" />
             </Link>
 
             <a

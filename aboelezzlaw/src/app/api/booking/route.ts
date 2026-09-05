@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { site } from '@/content/site';
 import { notifyOffice } from '@/lib/notifications/notify';
+import { createBooking, deleteBooking } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { bookingSchema, fieldErrors } from '@/lib/validation';
 
@@ -53,10 +54,26 @@ export async function POST(request: Request) {
 
   const readableDate = formatArabicDate(date);
 
+  // القيد الفريد في القاعدة هو ما يمنع الحجز المزدوج فعلياً،
+  // لأن فحصاً في الكود وحده يمكن أن يتجاوزه طلبان متزامنان
+  const booking = await createBooking({ email, name, phone, type, channel, date, time, details });
+
+  if (booking.result === 'taken') {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: `الموعد ${readableDate} الساعة ${time} حُجز للتوّ. اختر موعداً آخر من المتاح.`,
+        errors: { time: 'هذا الموعد لم يعد متاحاً' },
+      },
+      { status: 409 },
+    );
+  }
+
   const outcome = await notifyOffice({
     title: '📅 طلب حجز استشارة جديد',
     intro: 'ورد طلب حجز استشارة عبر الموقع. يلزم تأكيد الموعد مع العميل.',
     fields: [
+      { label: 'رقم الحجز', value: booking.result === 'created' ? booking.id : 'لم يُحفظ (لا قاعدة بيانات)' },
       { label: 'الاسم', value: name },
       { label: 'البريد الإلكتروني', value: email },
       { label: 'رقم الهاتف', value: phone },
@@ -79,6 +96,10 @@ export async function POST(request: Request) {
   });
 
   if (!outcome.delivered) {
+    // لم يصل الإشعار إلى المكتب بأي قناة. لو أبقينا السجلّ لبقي الموعد
+    // محجوزاً في نظر بقية الزوار بينما لا أحد يعلم بالحجز — فنحرّره.
+    if (booking.result === 'created') await deleteBooking(booking.id);
+
     return NextResponse.json(
       {
         ok: false,

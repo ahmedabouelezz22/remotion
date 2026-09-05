@@ -17,13 +17,17 @@ export interface NotifyInput {
   title: string;
   intro: string;
   fields: Field[];
-  /** بيانات العميل — تُستخدم لإرسال تأكيد له ولرابط الرد السريع */
+  /**
+   * بيانات العميل — تُستخدم لرابط «الرد عبر واتساب» داخل بريد المكتب.
+   * رسالة التأكيد لا تُرسل إلا إذا وُجد نصّها؛ فبعض المسارات (كالتسليم بعد
+   * الدفع) ترسل للعميل بريداً أغنى بنفسها ولا يصحّ أن يصله بريدان.
+   */
   client?: {
     name: string;
     email?: string;
     phone?: string;
-    confirmationHeading: string;
-    confirmationBody: string;
+    confirmationHeading?: string;
+    confirmationBody?: string;
   };
 }
 
@@ -70,7 +74,7 @@ export async function notifyOffice(input: NotifyInput): Promise<NotifyOutcome> {
   };
 
   // رسالة تأكيد للعميل — اختيارية تماماً، فشلها لا يؤثر على النتيجة
-  if (input.client?.email) {
+  if (input.client?.email && input.client.confirmationHeading && input.client.confirmationBody) {
     const confirmation = buildClientConfirmation({
       name: input.client.name,
       heading: input.client.confirmationHeading,

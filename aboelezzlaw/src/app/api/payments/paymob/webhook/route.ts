@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { fulfillOrder } from '@/lib/fulfillment';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { verifyPaymobHmac } from '@/lib/payments/paymob';
+import { markOrderStatus } from '@/lib/repository';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,23 +33,33 @@ export async function POST(request: Request) {
 
   const success = transaction.success === true;
   const order = transaction.order as Record<string, unknown> | undefined;
-  const reference = (order?.merchant_order_id as string) || String(order?.id ?? 'غير معروف');
+  const reference = (order?.merchant_order_id as string) || String(order?.id ?? '');
+  const providerRef = String(transaction.id ?? '');
   const amount = Number(transaction.amount_cents ?? 0) / 100;
   const currency = String(transaction.currency ?? '');
 
-  await notifyOffice({
-    title: success ? `✅ دفعة ناجحة — ${reference}` : `⚠️ محاولة دفع فاشلة — ${reference}`,
-    intro: success
-      ? 'تم تحصيل الدفعة بنجاح عبر Paymob. يمكن البدء في تنفيذ الطلب.'
-      : 'فشلت محاولة الدفع. قد يحتاج العميل إلى متابعة.',
-    fields: [
-      { label: 'مرجع الطلب', value: reference },
-      { label: 'المبلغ', value: `${amount} ${currency}` },
-      { label: 'رقم العملية لدى Paymob', value: String(transaction.id ?? '') },
-      { label: 'النتيجة', value: success ? 'ناجحة' : 'فاشلة' },
-      { label: 'الوقت', value: String(transaction.created_at ?? '') },
-    ],
-  });
+  if (!reference) {
+    console.error('[paymob-webhook] الإشعار بلا مرجع طلب');
+    return NextResponse.json({ ok: true });
+  }
+
+  if (success) {
+    // fulfillOrder يتولّى: تعليم الطلب مدفوعاً، وروابط التحميل،
+    // وتفعيل الاشتراك، وإشعار المكتب — وهو آمن عند التكرار
+    await fulfillOrder(reference, url.origin, providerRef);
+  } else {
+    await markOrderStatus(reference, 'failed', providerRef);
+    await notifyOffice({
+      title: `⚠️ محاولة دفع فاشلة — ${reference}`,
+      intro: 'فشلت محاولة الدفع. قد يحتاج العميل إلى متابعة.',
+      fields: [
+        { label: 'مرجع الطلب', value: reference },
+        { label: 'المبلغ', value: `${amount} ${currency}` },
+        { label: 'رقم العملية لدى Paymob', value: providerRef },
+        { label: 'الوقت', value: String(transaction.created_at ?? '') },
+      ],
+    });
+  }
 
   // Paymob يعيد المحاولة إن لم يستلم 200
   return NextResponse.json({ ok: true });

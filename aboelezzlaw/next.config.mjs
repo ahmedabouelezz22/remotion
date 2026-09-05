@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   // المشروع يقع داخل مستودع أكبر له ملف قفل خاص به؛ نثبّت جذر التتبّع هنا
   outputFileTracingRoot: import.meta.dirname,
+  // مسار التحميل يقرأ الملفات من القرص وقت الطلب، وتتبّع Next لا يكتشف ذلك
+  // تلقائياً لأن المسار مبنيّ ديناميكياً — فنُدرجه صراحةً وإلا فُقدت الملفات بعد النشر
+  outputFileTracingIncludes: {
+    '/api/download': ['./private/downloads/**'],
+  },
   poweredByHeader: false,
   images: {
     remotePatterns: [

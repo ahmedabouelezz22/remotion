@@ -12,6 +12,18 @@ export function AddToCart({ product, size = 'md' }: { product: Product; size?: '
   const router = useRouter();
   const [justAdded, setJustAdded] = useState(false);
 
+  // منتج لم يُرفع ملفه بعد: نعرض مساراً للتواصل بدل زر شراء لا يُنتج تسليماً
+  if (product.comingSoon) {
+    return (
+      <a
+        href={`/contact?subject=${encodeURIComponent(`الإشعار عند توفّر: ${product.name}`)}`}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-navy-900 px-6 py-3 text-[0.95rem] font-semibold text-navy-900 transition-colors hover:bg-navy-900 hover:text-white"
+      >
+        أبلغني عند التوفّر
+      </a>
+    );
+  }
+
   const alreadyInCart = lines.some((line) => line.slug === product.slug);
   // الاشتراك يُشترى مرة واحدة — لا معنى لزيادة الكمية
   const locked = product.kind === 'subscription' && alreadyInCart;

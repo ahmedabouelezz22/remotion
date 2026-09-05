@@ -9,3 +9,8 @@ build
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# ملفات التحميل مولَّدة من content/templates عبر npm run build:downloads
+private/downloads/*.zip
+private/downloads/*.pdf
+private/downloads/*.docx

@@ -34,6 +34,11 @@ export interface Product {
   badge?: string;
   /** خدمات تُحجز بموعد تُوجّه إلى صفحة الحجز بعد الشراء */
   requiresBooking?: boolean;
+  /**
+   * منتج معلن ولم يُرفع ملفه بعد. يُعرض للزائر بوسم «قريباً» ولا يُضاف إلى
+   * السلة، ويرفضه الخادم عند الدفع — فلا يدفع أحد ثمن ملف غير موجود.
+   */
+  comingSoon?: boolean;
 }
 
 /** أجرة الشحن الثابتة داخل مصر */
@@ -275,6 +280,8 @@ export const products: Product[] = [
     currency: 'EGP',
     file: 'zakat-guide.pdf',
     pages: 210,
+    comingSoon: true,
+    badge: 'قريباً',
     summary: 'دراسة تطبيقية في أسس تقدير الوعاء الزكوي والاعتراض على الربط التقديري.',
     description:
       'دراسة تجمع التأصيل النظري بالتطبيق العملي: مفهوم الوعاء الزكوي وعناصره، وأسس التقدير، والفرق بين الربط الفعلي والتقديري، وإجراءات الاعتراض والطعن ومواعيدها، مع أمثلة محلولة ونماذج مذكّرات اعتراض.',
@@ -293,6 +300,8 @@ export const products: Product[] = [
     price: 750,
     currency: 'EGP',
     pages: 210,
+    comingSoon: true,
+    badge: 'قريباً',
     summary: 'النسخة الورقية من الدليل، تُشحن داخل جمهورية مصر العربية.',
     description:
       'النسخة المطبوعة بغلاف مقوّى وطباعة داخلية واضحة. تُشحن خلال 3–7 أيام عمل داخل مصر. للشحن خارج مصر تواصل معنا لتحديد الأجرة.',
@@ -369,6 +378,9 @@ export const products: Product[] = [
 export const productCategories = Array.from(new Set(products.map((product) => product.category)));
 
 export const getProduct = (slug: string) => products.find((product) => product.slug === slug);
+
+/** المنتجات القابلة للشراء فعلاً — تُستثنى منها المعلنة بـ «قريباً» */
+export const purchasableProducts = products.filter((product) => !product.comingSoon);
 
 export const kindLabels: Record<ProductKind, string> = {
   digital: 'منتج رقمي — تحميل فوري',

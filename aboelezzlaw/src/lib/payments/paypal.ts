@@ -9,6 +9,7 @@ import type { OrderDraft, PaymentInitResult, PaymentProvider } from './types';
  *   PAYPAL_ENV = sandbox | live        (الافتراضي sandbox)
  *   PAYPAL_CURRENCY = USD              (باي بال لا يدعم الجنيه المصري)
  *   PAYPAL_EGP_RATE = 50               (سعر تحويل الجنيه إلى عملة باي بال)
+ *   PAYPAL_PLANS                       (خطط الاشتراك: {"package-basic":"P-XXXX"})
  *
  * التوثيق: https://developer.paypal.com/docs/api/orders/v2/
  */
@@ -146,5 +147,156 @@ export async function capturePaypalOrder(
     return { ok: data.status === 'COMPLETED', status: data.status };
   } catch (error) {
     return { ok: false, error: (error as Error).message };
+  }
+}
+
+// ═══════════════════════ الاشتراكات المتكرّرة ═══════════════════════
+//
+// التجديد التلقائي الحقيقي يتطلّب خطة (Plan) منشأة مسبقاً في لوحة PayPal.
+// نربط كل منتج اشتراك بمعرّف خطته عبر متغيّر PAYPAL_PLANS بصيغة JSON:
+//   PAYPAL_PLANS={"package-basic":"P-1AB...","package-business":"P-2CD..."}
+// التوثيق: https://developer.paypal.com/docs/api/subscriptions/v1/
+
+/** يقرأ خريطة المنتجات إلى خطط PayPal من متغيّرات البيئة */
+export function paypalPlans(): Record<string, string> {
+  const raw = process.env.PAYPAL_PLANS;
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>)
+        .filter(([, value]) => typeof value === 'string' && value.length > 0)
+        .map(([key, value]) => [key, value as string]),
+    );
+  } catch {
+    console.error('[paypal] قيمة PAYPAL_PLANS ليست JSON صالحاً — تُتجاهل خطط الاشتراك');
+    return {};
+  }
+}
+
+export const planIdFor = (slug: string): string | undefined => paypalPlans()[slug];
+
+export interface SubscriptionInit {
+  planId: string;
+  reference: string;
+  customer: { name: string; email: string };
+  origin: string;
+}
+
+/** ينشئ اشتراكاً متكرّراً ويُرجع رابط الموافقة ومعرّف الاشتراك */
+export async function createPaypalSubscription(
+  input: SubscriptionInit,
+): Promise<
+  { ok: true; approveUrl: string; subscriptionId: string } | { ok: false; error: string }
+> {
+  const token = await accessToken();
+  if (!token) return { ok: false, error: 'تعذّر الاتصال بـ PayPal.' };
+
+  const parts = input.customer.name.trim().split(/\s+/);
+
+  try {
+    const res = await fetch(`${apiBase()}/v1/billing/subscriptions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'PayPal-Request-Id': input.reference,
+      },
+      body: JSON.stringify({
+        plan_id: input.planId,
+        custom_id: input.reference,
+        subscriber: {
+          name: { given_name: parts[0] || 'NA', surname: parts.slice(1).join(' ') || 'NA' },
+          email_address: input.customer.email,
+        },
+        application_context: {
+          brand_name: 'Abo Elezz Law Firm',
+          locale: 'ar-EG',
+          user_action: 'SUBSCRIBE_NOW',
+          shipping_preference: 'NO_SHIPPING',
+          return_url: `${input.origin}/api/payments/paypal/subscription?ref=${encodeURIComponent(input.reference)}`,
+          cancel_url: `${input.origin}/checkout?cancelled=1`,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('[paypal] فشل إنشاء الاشتراك', res.status, await res.text());
+      return { ok: false, error: 'تعذّر بدء الاشتراك عبر PayPal.' };
+    }
+
+    const data = (await res.json()) as {
+      id?: string;
+      links?: Array<{ rel: string; href: string }>;
+    };
+    const approve = data.links?.find((link) => link.rel === 'approve');
+    if (!approve || !data.id) {
+      return { ok: false, error: 'استجابة غير متوقعة من PayPal.' };
+    }
+
+    return { ok: true, approveUrl: approve.href, subscriptionId: data.id };
+  } catch (error) {
+    console.error('[paypal] خطأ شبكة أثناء إنشاء الاشتراك', error);
+    return { ok: false, error: 'تعذّر الاتصال بـ PayPal.' };
+  }
+}
+
+/** يقرأ حالة الاشتراك وموعد الدفعة التالية بعد عودة العميل من PayPal */
+export async function getPaypalSubscription(subscriptionId: string): Promise<{
+  ok: boolean;
+  status?: string;
+  nextBillingTime?: string;
+  customId?: string;
+  error?: string;
+}> {
+  const token = await accessToken();
+  if (!token) return { ok: false, error: 'تعذّر الاتصال بـ PayPal.' };
+
+  try {
+    const res = await fetch(`${apiBase()}/v1/billing/subscriptions/${subscriptionId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      console.error('[paypal] تعذّر قراءة الاشتراك', res.status, await res.text());
+      return { ok: false, error: 'تعذّر قراءة حالة الاشتراك.' };
+    }
+
+    const data = (await res.json()) as {
+      status?: string;
+      custom_id?: string;
+      billing_info?: { next_billing_time?: string };
+    };
+
+    return {
+      ok: true,
+      status: data.status,
+      nextBillingTime: data.billing_info?.next_billing_time,
+      customId: data.custom_id,
+    };
+  } catch (error) {
+    return { ok: false, error: (error as Error).message };
+  }
+}
+
+/** يلغي الاشتراك لدى PayPal فيتوقّف التجديد التلقائي */
+export async function cancelPaypalSubscription(
+  subscriptionId: string,
+  reason = 'بناءً على طلب العميل',
+): Promise<boolean> {
+  const token = await accessToken();
+  if (!token) return false;
+
+  try {
+    const res = await fetch(`${apiBase()}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    // 204 = أُلغي بنجاح
+    return res.status === 204;
+  } catch (error) {
+    console.error('[paypal] فشل إلغاء الاشتراك', error);
+    return false;
   }
 }

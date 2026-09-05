@@ -52,6 +52,14 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/account"
+                  className="text-navy-100/75 transition-colors hover:text-gold-400"
+                >
+                  حسابي
+                </Link>
+              </li>
             </ul>
           </nav>
 
