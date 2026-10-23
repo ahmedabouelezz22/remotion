@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Download, FileSignature, Package, RefreshCw } from 'lucide-react';
 import { Badge, Card } from '@/components/ui/card';
 import { AddToCart } from '@/components/add-to-cart';
-import { productCategories, products, type ProductKind } from '@/content/products';
+import { productCategories, type Product, type ProductKind } from '@/content/products';
 import { formatPrice } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -25,12 +25,16 @@ const kindShort: Record<ProductKind, string> = {
 
 const ALL = 'الكل';
 
-export function StoreGrid() {
+/**
+ * الكتالوج يأتي من الخادم لا من ملف المحتوى: حالة النشر قد يكون المالك
+ * غيّرها من اللوحة، والعميل لا يعرفها.
+ */
+export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
   const [category, setCategory] = useState<string>(ALL);
 
   const visible = useMemo(
-    () => (category === ALL ? products : products.filter((p) => p.category === category)),
-    [category],
+    () => (category === ALL ? catalogue : catalogue.filter((p) => p.category === category)),
+    [category, catalogue],
   );
 
   return (

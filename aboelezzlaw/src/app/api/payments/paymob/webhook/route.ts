@@ -50,6 +50,8 @@ export async function POST(request: Request) {
   } else {
     await markOrderStatus(reference, 'failed', providerRef);
     await notifyOffice({
+      kind: 'payment-failed',
+      reference,
       title: `⚠️ محاولة دفع فاشلة — ${reference}`,
       intro: 'فشلت محاولة الدفع. قد يحتاج العميل إلى متابعة.',
       fields: [

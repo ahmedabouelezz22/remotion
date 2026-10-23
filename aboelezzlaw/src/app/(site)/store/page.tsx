@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/page-header';
 import { StoreGrid } from '@/components/store-grid';
 import { Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
+import { catalogue } from '@/lib/catalogue';
 
 export const metadata: Metadata = {
   title: 'المتجر القانوني',
@@ -19,7 +20,12 @@ const assurances = [
   { icon: Truck, title: 'تسليم واضح', body: 'المنتجات الرقمية تُحمَّل فوراً، والخدمات تبدأ خلال يوم عمل، والمطبوعات تُشحن خلال 3–7 أيام.' },
 ];
 
-export default function StorePage() {
+// حالة النشر تُقرأ من القاعدة في كل طلب، فلا تُقدَّم صفحة ثابتة تعرض منتجاً سُحب
+export const dynamic = 'force-dynamic';
+
+export default async function StorePage() {
+  const items = await catalogue();
+
   return (
     <>
       <PageHeader
@@ -43,7 +49,7 @@ export default function StorePage() {
             })}
           </div>
 
-          <StoreGrid />
+          <StoreGrid catalogue={items} />
         </Container>
       </Section>
     </>

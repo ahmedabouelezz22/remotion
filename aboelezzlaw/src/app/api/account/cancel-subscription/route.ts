@@ -49,6 +49,8 @@ export async function POST(request: Request) {
   const productName = getProduct(subscription.product_slug)?.name ?? subscription.product_slug;
 
   await notifyOffice({
+    kind: 'subscription-cancel-request',
+    reference: subscription.id,
     title: `🔕 طلب إيقاف تجديد — ${subscription.id}`,
     intro: 'طلب عميل إيقاف التجديد التلقائي. الاشتراك يظل نشطاً حتى نهاية الدورة المدفوعة.',
     fields: [

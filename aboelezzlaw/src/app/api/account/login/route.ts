@@ -5,6 +5,7 @@ import { isDbConfigured } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications/email';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import { recentLoginTokenCount, recordLoginToken } from '@/lib/repository';
 import { LOGIN_LINK_TTL_MINUTES, createLoginToken, isAuthConfigured } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -20,7 +21,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const limit = rateLimit(`login:${clientIp(request)}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  const ip = clientIp(request);
+
+  const limit = rateLimit(`login:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
   if (!limit.allowed) {
     return NextResponse.json(
       { ok: false, message: 'طلبات كثيرة. حاول بعد قليل.' },
@@ -44,14 +47,42 @@ export async function POST(request: Request) {
   }
 
   const { email } = parsed.data;
+
+  // الكبح في الذاكرة لا يصمد على serverless (كل نسخة ذاكرتها الخاصة)، فنكبح
+  // أيضاً من القاعدة: عدد الرموز الصادرة فعلاً لهذا البريد أو العنوان.
+  const recent = await recentLoginTokenCount({ email, ip }, 15);
+  if (recent >= 5) {
+    return NextResponse.json(
+      { ok: false, message: 'طلبات كثيرة لرابط الدخول. حاول بعد ربع ساعة.' },
+      { status: 429 },
+    );
+  }
+
+  const login = createLoginToken(email);
+
+  // التسجيل قبل الإرسال: رمز لم يُسجَّل يُرفض عند التحقّق، فالفشل هنا آمن
+  const recorded = await recordLoginToken({
+    jti: login.jti,
+    email: email.trim().toLowerCase(),
+    ip,
+    expiresAt: login.expiresAt,
+  });
+  if (!recorded) {
+    console.error('[account-login] تعذّر تسجيل رمز الدخول — لن يُرسل الرابط');
+    return NextResponse.json(
+      { ok: false, message: 'خدمة الحساب غير متاحة حالياً. حاول لاحقاً.' },
+      { status: 503 },
+    );
+  }
+
   const link = `${new URL(request.url).origin}/api/account/verify?token=${encodeURIComponent(
-    createLoginToken(email),
+    login.token,
   )}`;
 
   const message = buildClientConfirmation({
     name: email.split('@')[0] ?? '',
     heading: 'رابط الدخول إلى حسابك',
-    body: `اضغط الرابط التالي لفتح حسابك ومتابعة طلباتك ومواعيدك:\n\n${link}\n\nالرابط صالح ${LOGIN_LINK_TTL_MINUTES} دقيقة ويُستخدم من هذا الجهاز.\n\nإن لم تطلب هذا الرابط فتجاهل الرسالة — لن يحدث شيء، ولا يستطيع أحد الدخول إلى حسابك دون فتح هذا الرابط من بريدك.`,
+    body: `اضغط الرابط التالي لفتح حسابك ومتابعة طلباتك ومواعيدك:\n\n${link}\n\nالرابط صالح ${LOGIN_LINK_TTL_MINUTES} دقيقة ويُستخدم مرّة واحدة فقط.\n\nإن لم تطلب هذا الرابط فتجاهل الرسالة — لن يحدث شيء، ولا يستطيع أحد الدخول إلى حسابك دون فتح هذا الرابط من بريدك.`,
   });
 
   const result = await sendEmail({

@@ -9,6 +9,7 @@ import { getPaypalSubscription } from '@/lib/payments/paypal';
 import {
   activateSubscription,
   markReminderSent,
+  purgeExpiredLoginTokens,
   setSubscriptionStatus,
   subscriptionsDueWithin,
   subscriptionsExpired,
@@ -95,7 +96,10 @@ export async function GET(request: Request) {
   }
 
   const origin = new URL(request.url).origin;
-  const summary = { reminded: 0, renewed: 0, pastDue: 0, cancelled: 0 };
+  const summary = { reminded: 0, renewed: 0, pastDue: 0, cancelled: 0, tokensPurged: 0 };
+
+  // تنظيف رموز الدخول المستهلكة/المنتهية — الجدول ينمو بلا حدّ بدونه
+  summary.tokensPurged = await purgeExpiredLoginTokens();
 
   // ── 1) التذكيرات ──
   for (const subscription of await subscriptionsDueWithin(MAX_REMINDER_DAYS)) {
@@ -161,6 +165,7 @@ export async function GET(request: Request) {
   // إشعار المكتب مرة واحدة بملخّص اليوم، لا رسالة لكل اشتراك
   if (officeNotes.length > 0) {
     await notifyOffice({
+      kind: 'subscriptions-cron',
       title: '📋 ملخّص الاشتراكات اليومي',
       intro: 'نتيجة الفحص اليومي لدورات الاشتراكات.',
       fields: [

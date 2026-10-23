@@ -1,4 +1,5 @@
 import { site } from '@/content/site';
+import { logNotifications } from '@/lib/repository';
 import { sendEmail } from './email';
 import { sendTelegram } from './telegram';
 import { sendWhatsApp } from './whatsapp';
@@ -17,6 +18,12 @@ export interface NotifyInput {
   title: string;
   intro: string;
   fields: Field[];
+  /**
+   * نوع الحدث ومرجعه — يُسجَّلان في `notification_log` لتظهر حالة الإيصال
+   * في لوحة المالك. بدونهما يعمل الإشعار لكن لا يُسجَّل.
+   */
+  kind?: string;
+  reference?: string | null;
   /**
    * بيانات العميل — تُستخدم لرابط «الرد عبر واتساب» داخل بريد المكتب.
    * رسالة التأكيد لا تُرسل إلا إذا وُجد نصّها؛ فبعض المسارات (كالتسليم بعد
@@ -94,6 +101,12 @@ export async function notifyOffice(input: NotifyInput): Promise<NotifyOutcome> {
   }
 
   const delivered = officeEmail.ok || whatsapp.ok || telegram.ok;
+
+  // السجلّ هو ما يسمح للمالك أن يرى أن إشعاراً لم يصله — وهو العيب الأصلي
+  // في الموقع القديم: الفشل كان صامتاً. التسجيل لا يرمي ولا يعطّل شيئاً.
+  if (input.kind) {
+    await logNotifications(input.kind, input.reference ?? null, channels);
+  }
 
   if (!delivered) {
     // يُسجَّل في لوحة Vercel > Logs حتى تُشخَّص المشكلة دون إزعاج الزائر

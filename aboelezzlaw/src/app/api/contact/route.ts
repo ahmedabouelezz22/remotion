@@ -47,6 +47,7 @@ export async function POST(request: Request) {
   await saveMessage({ name, email, phone, subject, body: message });
 
   const outcome = await notifyOffice({
+    kind: 'contact',
     title: 'رسالة جديدة من نموذج «اتصل بنا»',
     intro: 'وردت رسالة جديدة عبر الموقع. تفاصيلها كالآتي:',
     fields: [

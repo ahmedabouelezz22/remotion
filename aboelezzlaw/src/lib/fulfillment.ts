@@ -52,6 +52,8 @@ export async function fulfillOrder(
   // لا قاعدة بيانات مضبوطة: نكتفي بإشعار المكتب، فلا سجلّ نحدّثه
   if (!order) {
     await notifyOffice({
+      kind: 'payment-succeeded',
+      reference,
       title: `✅ دفعة ناجحة — ${reference}`,
       intro: 'وصل إشعار دفع ناجح. لم يُحفظ الطلب في قاعدة بيانات (DATABASE_URL غير مضبوط).',
       fields: [
@@ -99,6 +101,8 @@ async function deliverOrder(order: OrderRow, origin: string) {
   await sendClientDelivery(order, downloads, activatedSubscriptions);
 
   await notifyOffice({
+    kind: 'payment-succeeded',
+    reference: order.id,
     title: `✅ دفعة ناجحة — ${order.id}`,
     intro: 'تم تحصيل الدفعة. يمكن البدء في تنفيذ الطلب.',
     fields: [

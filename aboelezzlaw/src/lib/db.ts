@@ -108,10 +108,13 @@ async function migrate(sql: postgres.Sql): Promise<void> {
       jti         text PRIMARY KEY,
       email       text NOT NULL,
       issued_ip   text,
+      scope       text NOT NULL DEFAULT 'customer',
       expires_at  timestamptz NOT NULL,
       consumed_at timestamptz,
       created_at  timestamptz NOT NULL DEFAULT now()
     )`;
+  // ترحيل لقواعد أُنشئ فيها الجدول قبل إضافة النطاق
+  await sql`ALTER TABLE login_tokens ADD COLUMN IF NOT EXISTS scope text NOT NULL DEFAULT 'customer'`;
   await sql`CREATE INDEX IF NOT EXISTS login_tokens_email_idx ON login_tokens (lower(email), created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS login_tokens_ip_idx ON login_tokens (issued_ip, created_at DESC)`;
 

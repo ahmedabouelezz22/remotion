@@ -27,6 +27,8 @@ export async function GET(request: Request) {
   } else {
     await markOrderStatus(reference, 'failed', token);
     await notifyOffice({
+      kind: 'payment-failed',
+      reference: reference || null,
       title: `⚠️ فشل تحصيل PayPal — ${reference || 'بلا مرجع'}`,
       intro: 'لم يكتمل التحصيل عبر PayPal — يلزم التحقّق يدوياً من لوحة PayPal.',
       fields: [

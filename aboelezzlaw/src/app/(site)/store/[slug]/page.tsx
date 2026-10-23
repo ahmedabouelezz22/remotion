@@ -9,11 +9,11 @@ import { Badge, Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
 import { getProduct, kindLabels, products, SHIPPING_FLAT_RATE } from '@/content/products';
 import { site, waLink } from '@/content/site';
+import { catalogueProduct } from '@/lib/catalogue';
 import { formatPrice } from '@/lib/utils';
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
-}
+// صفحة المنتج تعرض زرّ الشراء، فحالة النشر تُقرأ في كل طلب لا وقت البناء
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -34,7 +34,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await catalogueProduct(slug);
   if (!product) notFound();
 
   const related = products

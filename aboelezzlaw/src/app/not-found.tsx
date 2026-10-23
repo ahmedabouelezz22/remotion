@@ -1,11 +1,17 @@
 import Link from 'next/link';
+import { SiteFooter } from '@/components/site-footer';
 import { ButtonLink } from '@/components/ui/button';
 import { Container, Section } from '@/components/ui/container';
 import { navigation } from '@/content/site';
 
+/**
+ * الـ 404 العام يقع خارج مجموعة `(site)`، فلا يرث ترويستها وتذييلها. نضيف
+ * التذييل وحده هنا: الترويسة تحتاج مزوّد السلّة، وتحميله لصفحة خطأ عبث.
+ */
 export default function NotFound() {
   return (
-    <Section className="py-28">
+    <>
+      <Section className="py-28 flex-1">
       <Container size="narrow" className="text-center">
         <p className="numeric mb-4 font-display text-6xl font-black text-gold-500">404</p>
         <h1 className="mb-4 text-2xl text-navy-900 sm:text-3xl">الصفحة غير موجودة</h1>
@@ -29,6 +35,8 @@ export default function NotFound() {
           العودة إلى الرئيسية
         </ButtonLink>
       </Container>
-    </Section>
+      </Section>
+      <SiteFooter />
+    </>
   );
 }

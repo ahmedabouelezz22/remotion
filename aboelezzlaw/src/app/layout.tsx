@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Cairo, Tajawal } from 'next/font/google';
 import { site } from '@/content/site';
-import { CartProvider } from '@/components/cart-provider';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { WhatsAppFab } from '@/components/whatsapp-fab';
 import './globals.css';
 
 const cairo = Cairo({
@@ -67,6 +63,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * هذا التخطيط يحمل الوسوم العامة فقط (html/body/الخطوط/البيانات المنظَّمة).
+ * واجهة الموقع العامة (الترويسة والتذييل وزرّ واتساب والسلّة) في
+ * `(site)/layout.tsx`، ولوحة المالك لها تخطيطها الخاص في `admin/layout.tsx` —
+ * فالفصل ليس تجميلياً: لا يصحّ أن تُحمَّل سلّة المشتريات أو زرّ واتساب داخل
+ * لوحة إدارية، ولا أن تظهر روابط اللوحة في واجهة الزوّار.
+ */
+
 /** بيانات منظَّمة تساعد محركات البحث على فهم طبيعة الجهة */
 const structuredData = {
   '@context': 'https://schema.org',
@@ -98,14 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           // eslint-disable-next-line react/no-danger -- بيانات منظَّمة ثابتة لا تحتوي مدخلات مستخدم
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <CartProvider>
-          <SiteHeader />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-          <WhatsAppFab />
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

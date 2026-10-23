@@ -353,6 +353,8 @@ export async function listMessagesByEmail(email: string) {
 
 // ───────────────────── رموز الدخول (استخدام واحد) ─────────────────────
 
+export type LoginScope = 'customer' | 'owner';
+
 /**
  * يسجّل رمز دخول قبل إرساله. الرمز الموقّع وحده لا يكفي لأنه قابل لإعادة
  * الاستخدام حتى انتهاء صلاحيته — والسجلّ هو ما يجعله لمرة واحدة.
@@ -362,11 +364,13 @@ export async function recordLoginToken(input: {
   email: string;
   ip: string;
   expiresAt: Date;
+  scope?: LoginScope;
 }): Promise<boolean> {
   const saved = await tryDb(async (sql) => {
     await sql`
-      INSERT INTO login_tokens (jti, email, issued_ip, expires_at)
-      VALUES (${input.jti}, ${input.email}, ${input.ip}, ${input.expiresAt})`;
+      INSERT INTO login_tokens (jti, email, issued_ip, scope, expires_at)
+      VALUES (${input.jti}, ${input.email}, ${input.ip}, ${input.scope ?? 'customer'},
+              ${input.expiresAt})`;
     return true;
   });
   return saved ?? false;
@@ -378,12 +382,14 @@ export async function recordLoginToken(input: {
  */
 export async function consumeLoginToken(
   jti: string,
+  scope: LoginScope = 'customer',
 ): Promise<{ ok: true; email: string } | { ok: false; reason: 'unknown' | 'used' | 'expired' }> {
   const consumed = await tryDb(
     (sql) => sql<{ email: string }[]>`
       UPDATE login_tokens
          SET consumed_at = now()
        WHERE jti = ${jti}
+         AND scope = ${scope}
          AND consumed_at IS NULL
          AND expires_at > now()
        RETURNING email`,
@@ -550,4 +556,233 @@ export async function setProductPublished(
         SET published = ${published}, note = ${note ?? null},
             updated_by = ${actor}, updated_at = now()`,
   );
+}
+
+// ──────────────────── استعلامات لوحة المالك ────────────────────
+//
+// هذه الدوال تقرأ بيانات كل العملاء، فلا يجوز أن تُنادى إلا من مسار مرّ على
+// `requireOwner()`. الحدّ (`limit`) إلزامي ضمناً لئلا تُسحب القاعدة كلها.
+
+export interface AdminMetrics {
+  ordersTotal: number;
+  ordersPending: number;
+  ordersPaid: number;
+  revenuePaid: number;
+  bookingsPending: number;
+  bookingsUpcoming: number;
+  subscriptionsActive: number;
+  subscriptionsPastDue: number;
+  messagesTotal: number;
+  notificationFailures24h: number;
+  customers: number;
+}
+
+export async function adminMetrics(): Promise<AdminMetrics | null> {
+  return tryDb(async (sql) => {
+    const [row] = await sql<
+      {
+        orders_total: string;
+        orders_pending: string;
+        orders_paid: string;
+        revenue_paid: string;
+        bookings_pending: string;
+        bookings_upcoming: string;
+        subs_active: string;
+        subs_past_due: string;
+        messages_total: string;
+        notif_failures: string;
+        customers: string;
+      }[]
+    >`
+      SELECT
+        (SELECT count(*) FROM orders)::text                                     AS orders_total,
+        (SELECT count(*) FROM orders WHERE status = 'pending')::text            AS orders_pending,
+        (SELECT count(*) FROM orders WHERE status = 'paid')::text               AS orders_paid,
+        (SELECT coalesce(sum(total), 0) FROM orders WHERE status = 'paid')::text AS revenue_paid,
+        (SELECT count(*) FROM bookings WHERE status = 'pending')::text          AS bookings_pending,
+        (SELECT count(*) FROM bookings
+          WHERE status IN ('pending', 'confirmed')
+            AND slot_date >= current_date)::text                               AS bookings_upcoming,
+        (SELECT count(*) FROM subscriptions WHERE status = 'active')::text      AS subs_active,
+        (SELECT count(*) FROM subscriptions WHERE status = 'past_due')::text    AS subs_past_due,
+        (SELECT count(*) FROM messages)::text                                   AS messages_total,
+        (SELECT count(*) FROM notification_log
+          WHERE ok = false AND created_at > now() - interval '24 hours')::text  AS notif_failures,
+        (SELECT count(DISTINCT lower(email)) FROM (
+            SELECT email FROM orders
+            UNION ALL SELECT email FROM bookings
+            UNION ALL SELECT email FROM subscriptions
+         ) AS everyone)::text                                                   AS customers`;
+
+    return {
+      ordersTotal: Number(row?.orders_total ?? 0),
+      ordersPending: Number(row?.orders_pending ?? 0),
+      ordersPaid: Number(row?.orders_paid ?? 0),
+      revenuePaid: Number(row?.revenue_paid ?? 0),
+      bookingsPending: Number(row?.bookings_pending ?? 0),
+      bookingsUpcoming: Number(row?.bookings_upcoming ?? 0),
+      subscriptionsActive: Number(row?.subs_active ?? 0),
+      subscriptionsPastDue: Number(row?.subs_past_due ?? 0),
+      messagesTotal: Number(row?.messages_total ?? 0),
+      notificationFailures24h: Number(row?.notif_failures ?? 0),
+      customers: Number(row?.customers ?? 0),
+    };
+  });
+}
+
+export async function adminListOrders(options: {
+  status?: OrderStatus;
+  search?: string;
+  limit?: number;
+}): Promise<OrderRow[]> {
+  const limit = Math.min(options.limit ?? 50, 200);
+  const search = options.search?.trim() ? `%${options.search.trim().toLowerCase()}%` : null;
+  const rows = await tryDb(
+    (sql) => sql<OrderRow[]>`
+      SELECT * FROM orders
+       WHERE (${options.status ?? null}::text IS NULL OR status = ${options.status ?? null})
+         AND (
+           ${search}::text IS NULL
+           OR lower(email) LIKE ${search}
+           OR lower(name) LIKE ${search}
+           OR lower(id) LIKE ${search}
+           OR phone LIKE ${search}
+         )
+       ORDER BY created_at DESC
+       LIMIT ${limit}`,
+  );
+  return rows ?? [];
+}
+
+export async function adminListBookings(options: {
+  status?: BookingStatus;
+  from?: string;
+  limit?: number;
+}): Promise<BookingRow[]> {
+  const limit = Math.min(options.limit ?? 100, 300);
+  const rows = await tryDb(
+    (sql) => sql<BookingRow[]>`
+      SELECT * FROM bookings
+       WHERE (${options.status ?? null}::text IS NULL OR status = ${options.status ?? null})
+         AND (${options.from ?? null}::date IS NULL OR slot_date >= ${options.from ?? null})
+       ORDER BY slot_date ASC, slot_time ASC
+       LIMIT ${limit}`,
+  );
+  return rows ?? [];
+}
+
+export async function adminListSubscriptions(options: {
+  status?: SubscriptionStatus;
+  limit?: number;
+}): Promise<SubscriptionRow[]> {
+  const limit = Math.min(options.limit ?? 100, 300);
+  const rows = await tryDb(
+    (sql) => sql<SubscriptionRow[]>`
+      SELECT * FROM subscriptions
+       WHERE (${options.status ?? null}::text IS NULL OR status = ${options.status ?? null})
+       ORDER BY created_at DESC
+       LIMIT ${limit}`,
+  );
+  return rows ?? [];
+}
+
+export interface AdminMessageRow {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  subject: string;
+  body: string;
+  created_at: Date;
+}
+
+export async function adminListMessages(limit = 50): Promise<AdminMessageRow[]> {
+  const rows = await tryDb(
+    (sql) => sql<AdminMessageRow[]>`
+      SELECT * FROM messages ORDER BY created_at DESC LIMIT ${Math.min(limit, 200)}`,
+  );
+  return rows ?? [];
+}
+
+export interface AdminCustomerRow {
+  email: string;
+  name: string;
+  phone: string;
+  orders: number;
+  paid_orders: number;
+  spent: number;
+  bookings: number;
+  subscriptions: number;
+  last_activity: Date;
+}
+
+/** العملاء مجمّعين من الطلبات والحجوزات والاشتراكات — لا جدول عملاء مستقل */
+export async function adminListCustomers(limit = 100): Promise<AdminCustomerRow[]> {
+  const rows = await tryDb(
+    (sql) => sql<AdminCustomerRow[]>`
+      WITH everyone AS (
+        SELECT lower(email) AS email, name, phone, created_at,
+               1 AS is_order, status AS order_status, total
+          FROM orders
+        UNION ALL
+        SELECT lower(email), name, phone, created_at, 0, NULL, 0 FROM bookings
+        UNION ALL
+        SELECT lower(email), name, phone, created_at, 0, NULL, 0 FROM subscriptions
+      )
+      SELECT
+        e.email,
+        (array_agg(e.name ORDER BY e.created_at DESC))[1]  AS name,
+        (array_agg(e.phone ORDER BY e.created_at DESC))[1] AS phone,
+        count(*) FILTER (WHERE e.is_order = 1)::int        AS orders,
+        count(*) FILTER (WHERE e.order_status = 'paid')::int AS paid_orders,
+        coalesce(sum(e.total) FILTER (WHERE e.order_status = 'paid'), 0)::int AS spent,
+        (SELECT count(*) FROM bookings b WHERE lower(b.email) = e.email)::int AS bookings,
+        (SELECT count(*) FROM subscriptions s WHERE lower(s.email) = e.email)::int
+                                                           AS subscriptions,
+        max(e.created_at)                                  AS last_activity
+        FROM everyone e
+       GROUP BY e.email
+       ORDER BY last_activity DESC
+       LIMIT ${Math.min(limit, 300)}`,
+  );
+  return rows ?? [];
+}
+
+/** تغيير حالة حجز من اللوحة — المواعيد الملغاة تُحرّر الموعد تلقائياً بالقيد الجزئي */
+export async function adminSetBookingStatus(
+  id: string,
+  status: BookingStatus,
+): Promise<BookingRow | null> {
+  const rows = await tryDb(
+    (sql) => sql<BookingRow[]>`
+      UPDATE bookings SET status = ${status}, updated_at = now()
+       WHERE id = ${id} RETURNING *`,
+  );
+  return rows?.[0] ?? null;
+}
+
+export async function getBooking(id: string): Promise<BookingRow | null> {
+  const rows = await tryDb(
+    (sql) => sql<BookingRow[]>`SELECT * FROM bookings WHERE id = ${id} LIMIT 1`,
+  );
+  return rows?.[0] ?? null;
+}
+
+export async function getSubscription(id: string): Promise<SubscriptionRow | null> {
+  const rows = await tryDb(
+    (sql) => sql<SubscriptionRow[]>`SELECT * FROM subscriptions WHERE id = ${id} LIMIT 1`,
+  );
+  return rows?.[0] ?? null;
+}
+
+export async function adminSetSubscriptionCancelAtPeriodEnd(
+  id: string,
+  cancel: boolean,
+): Promise<SubscriptionRow | null> {
+  const rows = await tryDb(
+    (sql) => sql<SubscriptionRow[]>`
+      UPDATE subscriptions SET cancel_at_period_end = ${cancel}, updated_at = now()
+       WHERE id = ${id} RETURNING *`,
+  );
+  return rows?.[0] ?? null;
 }

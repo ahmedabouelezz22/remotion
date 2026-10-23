@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
       // صفحات المعاملات لا قيمة لها في الفهرسة وقد تكشف مراجع طلبات
-      disallow: ['/api/', '/checkout', '/checkout/success', '/cart'],
+      disallow: ['/api/', '/checkout', '/checkout/success', '/cart', '/account', '/admin'],
     },
     sitemap: `${site.url}/sitemap.xml`,
     host: site.url,

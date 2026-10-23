@@ -70,6 +70,8 @@ export async function POST(request: Request) {
   }
 
   const outcome = await notifyOffice({
+    kind: 'booking',
+    reference: booking.result === 'created' ? booking.id : null,
     title: '📅 طلب حجز استشارة جديد',
     intro: 'ورد طلب حجز استشارة عبر الموقع. يلزم تأكيد الموعد مع العميل.',
     fields: [

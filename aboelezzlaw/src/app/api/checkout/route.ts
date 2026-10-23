@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getProduct, SHIPPING_FLAT_RATE } from '@/content/products';
 import { site } from '@/content/site';
+import { catalogue } from '@/lib/catalogue';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { generateOrderReference, getProvider, type OrderDraft, type OrderItem } from '@/lib/payments';
 import { createPaypalSubscription, planIdFor } from '@/lib/payments/paypal';
@@ -47,9 +48,12 @@ export async function POST(request: Request) {
   }
 
   // الأسعار تُقرأ من الكتالوج على الخادم دائماً — لا يُوثق بأي سعر قادم من المتصفّح
+  // الكتالوج الفعّال: يُحترم فيه سحب المالك لمنتج من اللوحة، لا ملف المحتوى وحده
+  const available = await catalogue();
+
   const items: OrderItem[] = [];
   for (const line of input.items) {
-    const product = getProduct(line.slug);
+    const product = available.find((item) => item.slug === line.slug);
     if (!product) {
       return NextResponse.json(
         { ok: false, message: 'أحد المنتجات في سلتك لم يعد متاحاً. حدّث الصفحة وأعد المحاولة.' },
@@ -156,6 +160,8 @@ export async function POST(request: Request) {
     });
 
     await notifyOffice({
+      kind: 'subscription-pending',
+      reference: order.reference,
       title: `🔁 اشتراك جديد قيد التفعيل — ${order.reference}`,
       intro: 'بدأ عميل إجراءات اشتراك متكرّر عبر PayPal. يُفعَّل تلقائياً بعد موافقته.',
       fields: [
@@ -207,6 +213,8 @@ export async function POST(request: Request) {
 
   // إشعار المكتب فور إنشاء الطلب — حتى قبل تأكيد الدفع، فالطلب المتروك معلومة مفيدة
   await notifyOffice({
+    kind: 'order-created',
+    reference: order.reference,
     title: `🛒 طلب جديد ${order.reference}`,
     intro:
       payment.kind === 'instructions'

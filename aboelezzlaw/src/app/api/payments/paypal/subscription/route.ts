@@ -29,6 +29,8 @@ export async function GET(request: Request) {
 
   if (!approved) {
     await notifyOffice({
+      kind: 'subscription-failed',
+      reference: reference || subscriptionId,
       title: `⚠️ لم يكتمل اشتراك — ${reference || subscriptionId}`,
       intro: 'عاد العميل من PayPal لكن الاشتراك ليس نشطاً. يلزم التحقّق من لوحة PayPal.',
       fields: [
@@ -59,6 +61,8 @@ export async function GET(request: Request) {
     : '';
 
   await notifyOffice({
+    kind: 'subscription-activated',
+    reference: reference || subscriptionId,
     title: `🔁 اشتراك مُفعَّل — ${reference || subscriptionId}`,
     intro: 'وافق العميل على الاشتراك وصار نشطاً، والتجديد يتم تلقائياً من PayPal.',
     fields: [
