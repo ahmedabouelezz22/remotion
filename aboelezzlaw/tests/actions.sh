@@ -122,7 +122,7 @@ O2=$(curl -sk -o "$WORK/chk.json" -w '%{http_code}' -H 'Content-Type: applicatio
  "name":"عميل","email":"b2@example.com","phone":"01012345678","method":"manual",
  "items":[{"slug":"contract-templates-pack","quantity":1}]}')
 check "الشراء مرفوض على الخادم بعد السحب" "$O2" "400"
-curl -sk $BASE/store > "$WORK/store.html"
+curl -sk $BASE/ar/store > "$WORK/store.html"
 grep -q 'قريباً' "$WORK/store.html" && ok "المتجر يُظهره كغير متاح" || bad "المتجر ما زال يعرضه للبيع"
 
 C=$(code /api/admin/products '{"slug":"contract-templates-pack","published":true}')
@@ -159,19 +159,19 @@ if [ "$FAILED" -ge 1 ]; then ok "فشل القنوات غير المضبوطة �
 
 echo
 echo "── 8) السجلّات تظهر في اللوحة ──"
-curl -sk -b "$JAR_DIR/owner.jar" $BASE/admin/audit > "$WORK/audit.html"
+curl -sk -b "$JAR_DIR/owner.jar" $BASE/ar/admin/audit > "$WORK/audit.html"
 grep -q 'تأكيد تحويل بنكي' "$WORK/audit.html" && ok "صفحة التدقيق تُظهر الإجراء" || bad "صفحة التدقيق لا تُظهره"
-curl -sk -b "$JAR_DIR/owner.jar" $BASE/admin/notifications?only=failures > "$WORK/notif.html"
+curl -sk -b "$JAR_DIR/owner.jar" $BASE/ar/admin/notifications?only=failures > "$WORK/notif.html"
 grep -q 'فشل' "$WORK/notif.html" && ok "صفحة الإشعارات تُظهر الفشل" || bad "صفحة الإشعارات لا تُظهر الفشل"
-curl -sk -b "$JAR_DIR/owner.jar" $BASE/admin/orders > "$WORK/ord.html"
+curl -sk -b "$JAR_DIR/owner.jar" $BASE/ar/admin/orders > "$WORK/ord.html"
 grep -q "$REF" "$WORK/ord.html" && ok "صفحة الطلبات تُظهر الطلب" || bad "الطلب غائب عن اللوحة"
-curl -sk -b "$JAR_DIR/owner.jar" $BASE/admin/customers > "$WORK/cust.html"
+curl -sk -b "$JAR_DIR/owner.jar" $BASE/ar/admin/customers > "$WORK/cust.html"
 grep -q 'buyer@example.com' "$WORK/cust.html" && ok "صفحة العملاء تجمع العميل" || bad "العميل غائب"
 
 echo
 echo "── 9) الخروج ──"
 curl -sk -b "$JAR_DIR/owner.jar" -c "$JAR_DIR/out.jar" -o /dev/null -X POST $BASE/api/admin/logout
-AFTER=$(curl -sk -b "$JAR_DIR/out.jar" -o /dev/null -w '%{http_code}' $BASE/admin)
+AFTER=$(curl -sk -b "$JAR_DIR/out.jar" -o /dev/null -w '%{http_code}' $BASE/ar/admin)
 check "بعد الخروج لا وصول" "$AFTER" "307"
 
 echo

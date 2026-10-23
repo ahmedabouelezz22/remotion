@@ -8,32 +8,36 @@ import { PageHeader } from '@/components/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { Badge, Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
-import { articles, getArticle, sortedArticles } from '@/content/blog';
+import { articles, blogCategoryLabelsEn, getArticle, sortedArticles } from '@/content/blog';
+import { dict, isLocale, locales, path, type Locale } from '@/content/i18n';
 import { site } from '@/content/site';
-import { formatDateAr, jsonLdScript, readingTime } from '@/lib/utils';
+import { formatDate, jsonLdScript, readingTime } from '@/lib/utils';
 
 export function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
+  return locales.flatMap((locale) => articles.map((article) => ({ locale, slug: article.slug })));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: raw, slug } = await params;
+  if (!isLocale(raw)) return {};
+  const locale = raw as Locale;
   const article = getArticle(slug);
-  if (!article) return { title: 'المقال غير موجود' };
+  if (!article) return { title: dict(locale).blogPage.notFound };
 
+  const text = locale === 'ar' ? { title: article.title, excerpt: article.excerpt } : article.en;
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: text.title,
+    description: text.excerpt,
     keywords: article.tags,
-    alternates: { canonical: `/blog/${article.slug}` },
+    alternates: { canonical: `/${locale}/blog/${article.slug}` },
     openGraph: {
       type: 'article',
-      title: article.title,
-      description: article.excerpt,
+      title: text.title,
+      description: text.excerpt,
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt ?? article.publishedAt,
       tags: [...article.tags],
@@ -41,10 +45,23 @@ export async function generateMetadata({
   };
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale: raw, slug } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const t = dict(locale);
+  const isArabic = locale === 'ar';
+
   const article = getArticle(slug);
   if (!article) notFound();
+
+  const text = isArabic ? { title: article.title, excerpt: article.excerpt } : article.en;
+  const articleText = (item: typeof article) =>
+    isArabic ? { title: item.title, excerpt: item.excerpt } : item.en;
 
   const related = sortedArticles
     .filter((item) => item.slug !== article.slug && item.category === article.category)
@@ -53,14 +70,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: article.title,
-    description: article.excerpt,
+    headline: text.title,
+    description: text.excerpt,
     datePublished: article.publishedAt,
     dateModified: article.updatedAt ?? article.publishedAt,
     author: { '@type': 'Person', name: 'أحمد أبو العز' },
     publisher: { '@type': 'Organization', name: site.name },
+    // المتن عربي دائماً، فاللغة المعلنة للمقال عربية في النسختين
     inLanguage: 'ar',
-    mainEntityOfPage: `${site.url}/blog/${article.slug}`,
+    mainEntityOfPage: `${site.url}/${locale}/blog/${article.slug}`,
   };
 
   return (
@@ -70,19 +88,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
 
-      <PageHeader eyebrow={article.category} title={article.title} description={article.excerpt} />
+      <PageHeader
+        eyebrow={isArabic ? article.category : (blogCategoryLabelsEn[article.category] ?? article.category)}
+        title={text.title}
+        description={text.excerpt}
+      />
 
       <Section>
         <Container size="narrow">
           <div className="mb-10 flex flex-wrap items-center gap-3 border-b border-sand-200 pb-6">
             <time className="numeric text-sm font-semibold text-slate-500" dateTime={article.publishedAt}>
-              {formatDateAr(article.publishedAt)}
+              {formatDate(article.publishedAt, locale)}
             </time>
             <span className="text-slate-300">·</span>
             <span className="numeric text-sm text-slate-500">
-              {readingTime(article.body)} دقائق قراءة
+              {t.blog.readingTime(readingTime(article.body))}
             </span>
-            <div className="flex flex-wrap gap-2 sm:mr-auto">
+            <div className="flex flex-wrap gap-2 sm:ltr:ml-auto sm:rtl:mr-auto">
               {article.tags.map((tag) => (
                 <Badge key={tag} tone="muted">
                   {tag}
@@ -91,12 +113,26 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
 
-          <div className="article-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.body}</ReactMarkdown>
-          </div>
+          {/*
+            المتن عربي في النسختين. في الإنجليزية نُعلن ذلك صريحاً ونوجّه إلى
+            الأصل بدلاً من نشر ترجمة آلية لتحليل قانوني باسم المكتب.
+          */}
+          {isArabic ? (
+            <div className="article-body">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.body}</ReactMarkdown>
+            </div>
+          ) : (
+            <Card className="border-gold-400/50 bg-gold-50">
+              <h2 className="mb-3 text-lg text-navy-900">{t.blogPage.arabicNoticeTitle}</h2>
+              <p className="mb-6 text-sm leading-8 text-slate-700">{t.blog.arabicOnlyNotice}</p>
+              <ButtonLink href={path('ar', `/blog/${article.slug}`)} lang="ar" dir="rtl">
+                {t.blogPage.readInArabic}
+              </ButtonLink>
+            </Card>
+          )}
 
           <Card className="mt-14 bg-sand-100">
-            <h2 className="mb-4 text-lg text-navy-900">المصادر والمراجع</h2>
+            <h2 className="mb-4 text-lg text-navy-900">{t.blogPage.sourcesTitle}</h2>
             <ul className="space-y-3">
               {article.sources.map((source) => (
                 <li key={source.url}>
@@ -112,44 +148,46 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 </li>
               ))}
             </ul>
-            <p className="mt-5 border-t border-sand-200 pt-4 text-xs leading-6 text-slate-500">
-              الروابط أعلاه تحيل إلى بوابات رسمية أو مؤسسات دولية. عند البناء على نصّ تشريعي في
-              واقعة بعينها، يجب الرجوع إلى النسخة النافذة المنشورة في الجريدة الرسمية أو البوابة
-              النظامية المختصة.
+            <p className="mt-5 border-t border-sand-200 pt-4 text-xs leading-6 text-slate-600">
+              {t.blogPage.sourcesNote}
             </p>
           </Card>
 
           <Card className="mt-6 border-navy-900/12 bg-navy-900 text-white">
-            <h2 className="mb-2.5 text-lg text-white">هل تنطبق هذه المسألة على حالتك؟</h2>
-            <p className="mb-6 text-sm leading-8 text-navy-100/75">
-              المقال تحليل عام. لتقييم أثره على وضعك تحديداً، احجز استشارة أو راسلنا بتفاصيل حالتك.
-            </p>
+            <h2 className="mb-2.5 text-lg text-white">{t.blogPage.appliesTitle}</h2>
+            <p className="mb-6 text-sm leading-8 text-navy-100/75">{t.blogPage.appliesBody}</p>
             <div className="flex flex-wrap gap-3">
-              <ButtonLink href="/booking" variant="gold" size="sm">
-                احجز استشارة
+              <ButtonLink href={path(locale, '/booking')} variant="gold" size="sm">
+                {t.servicesPage.bookConsultation}
               </ButtonLink>
               <ButtonLink
-                href="/contact"
+                href={path(locale, '/contact')}
                 variant="outline"
                 size="sm"
                 className="border-white text-white hover:bg-white hover:text-navy-900"
               >
-                اتصل بنا
+                {t.nav.contact}
               </ButtonLink>
             </div>
           </Card>
 
           {related.length > 0 ? (
             <div className="mt-14">
-              <h2 className="mb-6 text-xl text-navy-900">مقالات ذات صلة</h2>
+              <h2 className="mb-6 text-xl text-navy-900">{t.blog.relatedTitle}</h2>
               <div className="grid gap-5 sm:grid-cols-2">
                 {related.map((item) => (
-                  <Link key={item.slug} href={`/blog/${item.slug}`} className="group block">
+                  <Link
+                    key={item.slug}
+                    href={path(locale, `/blog/${item.slug}`)}
+                    className="group block"
+                  >
                     <Card hover className="h-full">
                       <h3 className="mb-2.5 text-base leading-8 text-navy-900 transition-colors group-hover:text-gold-600">
-                        {item.title}
+                        {articleText(item).title}
                       </h3>
-                      <p className="text-sm leading-7 text-slate-600">{item.excerpt}</p>
+                      <p className="text-sm leading-7 text-slate-600">
+                        {articleText(item).excerpt}
+                      </p>
                     </Card>
                   </Link>
                 ))}
@@ -158,11 +196,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           ) : null}
 
           <Link
-            href="/blog"
+            href={path(locale, '/blog')}
             className="mt-12 inline-flex min-h-[40px] items-center gap-2 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
           >
-            <ArrowRight className="h-4 w-4" />
-            العودة إلى المدونة
+            <ArrowRight className="h-4 w-4 rtl:rotate-0 ltr:rotate-180" />
+            {t.blog.backToBlog}
           </Link>
         </Container>
       </Section>

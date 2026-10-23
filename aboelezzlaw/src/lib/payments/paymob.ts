@@ -83,7 +83,9 @@ export const paymob: PaymentProvider = {
       },
       special_reference: order.reference,
       notification_url: `${origin}/api/payments/paymob/webhook`,
-      redirection_url: `${origin}/checkout/success?ref=${encodeURIComponent(order.reference)}`,
+      redirection_url: `${origin}/${order.locale}/checkout/success?ref=${encodeURIComponent(
+        order.reference,
+      )}`,
     };
 
     try {

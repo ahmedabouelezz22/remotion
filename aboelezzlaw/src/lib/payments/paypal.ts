@@ -1,3 +1,4 @@
+import type { Locale } from '@/content/i18n';
 import type { OrderDraft, PaymentInitResult, PaymentProvider } from './types';
 
 /**
@@ -98,10 +99,12 @@ export const paypal: PaymentProvider = {
             paypal: {
               experience_context: {
                 brand_name: 'Aboelezz Law Firm',
-                locale: 'ar-EG',
+                locale: order.locale === 'ar' ? 'ar-EG' : 'en-US',
                 user_action: 'PAY_NOW',
-                return_url: `${origin}/api/payments/paypal/capture?ref=${encodeURIComponent(order.reference)}`,
-                cancel_url: `${origin}/checkout?cancelled=1`,
+                return_url: `${origin}/api/payments/paypal/capture?ref=${encodeURIComponent(
+                  order.reference,
+                )}&locale=${order.locale}`,
+                cancel_url: `${origin}/${order.locale}/checkout?cancelled=1`,
               },
             },
           },
@@ -185,6 +188,8 @@ export interface SubscriptionInit {
   reference: string;
   customer: { name: string; email: string };
   origin: string;
+  /** لغة صفحة الدفع — تحدّد لغة واجهة PayPal ولغة صفحة العودة */
+  locale: Locale;
 }
 
 /** ينشئ اشتراكاً متكرّراً ويُرجع رابط الموافقة ومعرّف الاشتراك */
@@ -215,11 +220,13 @@ export async function createPaypalSubscription(
         },
         application_context: {
           brand_name: 'Abo Elezz Law Firm',
-          locale: 'ar-EG',
+          locale: input.locale === 'ar' ? 'ar-EG' : 'en-US',
           user_action: 'SUBSCRIBE_NOW',
           shipping_preference: 'NO_SHIPPING',
-          return_url: `${input.origin}/api/payments/paypal/subscription?ref=${encodeURIComponent(input.reference)}`,
-          cancel_url: `${input.origin}/checkout?cancelled=1`,
+          return_url: `${input.origin}/api/payments/paypal/subscription?ref=${encodeURIComponent(
+            input.reference,
+          )}&locale=${input.locale}`,
+          cancel_url: `${input.origin}/${input.locale}/checkout?cancelled=1`,
         },
       }),
     });

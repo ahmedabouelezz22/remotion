@@ -7,5 +7,5 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   await endAdminSession();
-  return NextResponse.redirect(new URL('/admin/login', requestOrigin(request)), 303);
+  return NextResponse.redirect(new URL('/ar/admin/login', requestOrigin(request)), 303);
 }

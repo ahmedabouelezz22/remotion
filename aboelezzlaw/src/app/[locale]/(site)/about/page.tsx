@@ -1,60 +1,49 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { Award, BookOpen, Building2, GraduationCap, Globe, Shield } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { Badge, Card } from '@/components/ui/card';
 import { Container, Section, SectionHeading } from '@/components/ui/container';
+import { dict, isLocale, path, type Locale } from '@/content/i18n';
 import { site } from '@/content/site';
 
-export const metadata: Metadata = {
-  title: 'من نحن',
-  description:
-    'تعرّف على أحمد أبو العز — مستشار قانوني متخصص في القانون التجاري وقانون الشركات والتقاضي، وباحث دكتوراه في القانون.',
-  alternates: { canonical: '/about' },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) return {};
+  const t = dict(raw as Locale);
+  return {
+    title: t.aboutPage.title,
+    description: t.aboutPage.metaDescription,
+    alternates: { canonical: `/${raw}/about` },
+  };
+}
 
 /**
- * ملاحظة للمالك: المحتوى أدناه منقول من موقعك الحالي.
+ * ملاحظة للمالك: المحتوى منقول من موقعك الحالي ويُحرَّر من `src/content/i18n`.
  * راجِعه وحدّثه كلما تغيّرت سيرتك المهنية، واحذف أي جهة لا ترغب في ذكرها.
  */
 
-const credentials = [
-  { icon: GraduationCap, title: 'ماجستير في القانون', body: 'مع دبلومات متخصصة متعددة في مجالات القانون التجاري والشركات.' },
-  { icon: BookOpen, title: 'باحث دكتوراه في القانون', body: 'بحث يتناول الأطر التنظيمية والاقتصادية، بمنهج يجمع التحليل القانوني بالتحليل الاقتصادي.' },
-  { icon: Award, title: 'أكثر من 1000 خدمة قانونية', body: 'صياغة ومراجعة عقود، ومذكّرات، وتمثيل، واستشارات منجزة لعملاء أفراد ومؤسسات.' },
-  { icon: Globe, title: 'دورات دولية', body: 'دورات من جامعات دولية، منها جامعة بنسلفانيا وجامعات في لندن ولوند.' },
-  { icon: Building2, title: 'عمل مع مؤسسات كبرى', body: 'تقديم الاستشارة القانونية لمؤسسات وشركات في مصر والمملكة العربية السعودية.' },
-  { icon: Shield, title: 'إتقان العربية والإنجليزية', body: 'صياغة ومراجعة العقود والمذكّرات باللغتين، بما يخدم التعاملات عبر الحدود.' },
-];
+// الأيقونات ترتيبها مطابق لترتيب `aboutPage.credentials` في القاموس
+const credentialIcons = [GraduationCap, BookOpen, Award, Globe, Building2, Shield];
 
-const clients = ['اتصالات مصر', 'إنفينيتي', 'مؤسسة بهية', 'مؤسسات في المملكة العربية السعودية'];
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const t = dict(locale);
 
-const expertise = [
-  'جميع أنواع العقود',
-  'التقاضي والنزاعات',
-  'الخدمات القانونية للشركات',
-  'عقود العمل',
-  'اتفاقيات السرّية (NDA)',
-  'مذكّرات التفاهم (MOU)',
-  'اللوائح الداخلية للشركات',
-  'المذكّرات القانونية',
-  'التمثيل أمام المحاكم والجهات',
-  'نزاعات الشركات',
-  'القطاع المصرفي والاستثماري',
-  'النزاعات التجارية والمدنية',
-  'الأخطاء الطبية',
-  'منازعات العمل',
-  'القانون الإداري',
-];
-
-export default function AboutPage() {
   return (
     <>
       <PageHeader
-        eyebrow="من نحن"
-        title="عن أحمد أبو العز"
-        description="مستشار قانوني ذو خبرة واسعة في تقديم الخدمات القانونية الشاملة، مع تخصّص في صياغة العقود والقانون التجاري وقانون الشركات والتقاضي وحل النزاعات."
+        eyebrow={t.aboutPage.eyebrow}
+        title={t.aboutPage.title}
+        description={t.aboutPage.description}
       />
 
       <Section>
@@ -64,7 +53,7 @@ export default function AboutPage() {
               {site.brand.founderPhoto ? (
                 <Image
                   src={site.brand.founderPhoto}
-                  alt="أحمد أبو العز — المؤسس والمستشار القانوني"
+                  alt={t.aboutPage.photoAlt}
                   width={720}
                   height={900}
                   className="h-auto w-full object-cover"
@@ -74,48 +63,29 @@ export default function AboutPage() {
                 /* لا صورة مضبوطة ⇒ بطاقة نصّية. صورة مكسورة أسوأ من غيابها. */
                 <div className="flex aspect-[4/5] flex-col items-center justify-center gap-4 bg-navy-900 p-8 text-center">
                   <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold-500/50 font-display text-2xl font-black text-gold-400">
-                    أ.ع
+                    {t.aboutPage.initials}
                   </span>
                   <span className="font-display text-xl font-extrabold text-white">
-                    أحمد أبو العز
+                    {t.aboutPage.founderName}
                   </span>
                   <span className="text-sm leading-7 text-navy-100/80">
-                    المؤسس والمستشار القانوني
+                    {t.about.founderRole}
                   </span>
                 </div>
               )}
             </div>
 
             <div className="article-body">
-              <h2>مستشار قانوني متخصص</h2>
-              <p>
-                يقدّم المكتب خدمات قانونية متخصصة عن بُعد لعملاء في مصر والمملكة العربية السعودية
-                وسائر المنطقة، بما يوفّر على الموكّل عناء الحضور الشخصي دون أن ينتقص من دقّة العمل
-                أو سرّيته.
-              </p>
+              <h2>{t.aboutPage.introHeading}</h2>
+              <p>{t.aboutPage.introBody}</p>
 
-              <h2>الفكرة التي يقوم عليها العمل</h2>
-              <p>
-                كثير من الاستشارات القانونية تُقدَّم بوصفها إجابة عن سؤال «ما الحكم؟» وحده. غير أن
-                صاحب القرار — شركةً كان أو فرداً — يحتاج إلى إجابة عن سؤالين متلازمين: ما الحكم
-                القانوني؟ وما كلفة كل خيار متاح في ضوئه؟
-              </p>
-              <p>
-                الجمع بين الممارسة القانونية والبحث الأكاديمي يجعل هذا السؤال المزدوج جزءاً من
-                منهج العمل لا إضافةً عليه. فالحل الذي يصمد قانوناً ولا يصمد اقتصادياً ليس حلاً
-                عملياً، والعكس صحيح.
-              </p>
+              <h2>{t.aboutPage.approachHeading}</h2>
+              <p>{t.aboutPage.approachBody1}</p>
+              <p>{t.aboutPage.approachBody2}</p>
 
-              <h2>الالتزام المهني</h2>
-              <p>
-                السرّية المهنية التزام قانوني لا خيار تجاري. لا تُفصح المستندات ولا محتوى الاستشارة
-                لأي طرف ثالث إلا بموافقة كتابية من الموكّل أو تنفيذاً لالتزام قانوني، ويمكن توقيع
-                اتفاقية عدم إفشاء قبل إرسال أي مستند.
-              </p>
-              <p>
-                كما تُحدَّد الأتعاب ونطاق العمل ومدة التنفيذ كتابةً قبل الشروع في أي عمل، فلا تنشأ
-                مفاجآت بعد التسليم.
-              </p>
+              <h2>{t.aboutPage.commitmentHeading}</h2>
+              <p>{t.aboutPage.commitmentBody1}</p>
+              <p>{t.aboutPage.commitmentBody2}</p>
             </div>
           </div>
         </Container>
@@ -123,10 +93,13 @@ export default function AboutPage() {
 
       <Section tone="sand">
         <Container size="wide">
-          <SectionHeading eyebrow="المؤهلات" title="الخلفية العلمية والمهنية" />
+          <SectionHeading
+            eyebrow={t.aboutPage.credentialsEyebrow}
+            title={t.aboutPage.credentialsTitle}
+          />
           <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {credentials.map((item) => {
-              const Icon = item.icon;
+            {t.aboutPage.credentials.map((item, index) => {
+              const Icon = credentialIcons[index] ?? Award;
               return (
                 <Card key={item.title} className="bg-white">
                   <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-900/6 text-navy-900">
@@ -144,12 +117,12 @@ export default function AboutPage() {
       <Section>
         <Container size="wide">
           <SectionHeading
-            eyebrow="جهات تعاملنا معها"
-            title="ثقة مؤسسات وشركات"
-            description="جهات قُدِّمت لها استشارات أو خدمات قانونية. تُذكر للتعريف بنطاق الخبرة، ولا يتضمّن ذلك إفشاء أي معلومة تخصّها."
+            eyebrow={t.aboutPage.clientsEyebrow}
+            title={t.aboutPage.clientsTitle}
+            description={t.aboutPage.clientsDescription}
           />
           <div className="mx-auto mt-12 flex max-w-3xl flex-wrap justify-center gap-3">
-            {clients.map((client) => (
+            {t.aboutPage.clients.map((client) => (
               <span
                 key={client}
                 className="rounded-xl border border-sand-200 bg-white px-6 py-4 text-sm font-bold text-navy-900 shadow-sm"
@@ -163,9 +136,12 @@ export default function AboutPage() {
 
       <Section tone="sand">
         <Container size="wide">
-          <SectionHeading eyebrow="مجالات الخبرة" title="ما نتعامل معه" />
+          <SectionHeading
+            eyebrow={t.aboutPage.expertiseEyebrow}
+            title={t.aboutPage.expertiseTitle}
+          />
           <div className="mt-12 flex flex-wrap justify-center gap-2.5">
-            {expertise.map((item) => (
+            {t.aboutPage.expertise.map((item) => (
               <Badge key={item} tone="navy">
                 {item}
               </Badge>
@@ -176,21 +152,21 @@ export default function AboutPage() {
 
       <Section tone="navy">
         <Container size="narrow" className="text-center">
-          <h2 className="text-2xl text-white sm:text-3xl">هل نبدأ بمسألتك؟</h2>
+          <h2 className="text-2xl text-white sm:text-3xl">{t.aboutPage.ctaTitle}</h2>
           <p className="mx-auto mt-5 max-w-xl leading-9 text-navy-100/80">
-            احجز استشارة لمناقشة مسألتك، أو تصفّح المتجر لمعرفة نطاق كل خدمة وسعرها مسبقاً.
+            {t.aboutPage.ctaBody}
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <ButtonLink href="/booking" variant="gold" size="lg">
-              احجز استشارة
+            <ButtonLink href={path(locale, '/booking')} variant="gold" size="lg">
+              {t.aboutPage.ctaPrimary}
             </ButtonLink>
             <ButtonLink
-              href="/store"
+              href={path(locale, '/store')}
               variant="outline"
               size="lg"
               className="border-white text-white hover:bg-white hover:text-navy-900"
             >
-              المتجر
+              {t.aboutPage.ctaSecondary}
             </ButtonLink>
           </div>
         </Container>

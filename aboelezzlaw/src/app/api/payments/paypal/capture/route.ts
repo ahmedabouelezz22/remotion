@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { defaultLocale, isLocale, type Locale } from '@/content/i18n';
 import { fulfillOrder } from '@/lib/fulfillment';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { requestOrigin } from '@/lib/origin';
@@ -7,6 +8,12 @@ import { markOrderStatus } from '@/lib/repository';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+/** لغة العودة تأتي من الرابط الذي بنيناه قبل التحويل إلى البوّابة */
+function returnLocale(url: URL): Locale {
+  const value = url.searchParams.get('locale');
+  return isLocale(value ?? '') ? (value as Locale) : defaultLocale;
+}
 
 /**
  * نقطة العودة من PayPal للمدفوعات لمرّة واحدة.
@@ -19,9 +26,12 @@ export async function GET(request: Request) {
   const origin = requestOrigin(request);
   const token = url.searchParams.get('token'); // معرّف الطلب لدى PayPal
   const reference = url.searchParams.get('ref') ?? '';
+  const locale = returnLocale(url);
 
   if (!token) {
-    return NextResponse.redirect(new URL('/checkout?error=missing_token', origin));
+    return NextResponse.redirect(
+      new URL(`/${locale}/checkout?error=missing_token`, origin),
+    );
   }
 
   const result = await capturePaypalOrder(token);
@@ -45,8 +55,8 @@ export async function GET(request: Request) {
 
   const target = new URL(
     result.ok
-      ? `/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`
-      : `/checkout?error=capture_failed&ref=${encodeURIComponent(reference)}`,
+      ? `/${locale}/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`
+      : `/${locale}/checkout?error=capture_failed&ref=${encodeURIComponent(reference)}`,
     origin,
   );
   return NextResponse.redirect(target);

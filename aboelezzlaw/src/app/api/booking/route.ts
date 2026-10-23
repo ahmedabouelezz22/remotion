@@ -106,6 +106,7 @@ export async function POST(request: Request) {
       name,
       email,
       phone,
+      confirmationLocale: locale,
       confirmationHeading: dict(locale).clientEmail.bookingHeading,
       confirmationBody: dict(locale).clientEmail.bookingBody(
         `${readableDate} — ${time}`,

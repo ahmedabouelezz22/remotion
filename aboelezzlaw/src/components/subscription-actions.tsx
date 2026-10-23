@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { dict, type Locale } from '@/content/i18n';
 
-export function CancelSubscriptionButton({ id }: { id: string }) {
+export function CancelSubscriptionButton({ id, locale }: { id: string; locale: Locale }) {
   const router = useRouter();
+  const t = dict(locale);
   const [state, setState] = useState<'idle' | 'confirming' | 'working' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
@@ -16,14 +18,14 @@ export function CancelSubscriptionButton({ id }: { id: string }) {
       const response = await fetch('/api/account/cancel-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, locale }),
       });
       const data = (await response.json()) as { ok: boolean; message: string };
       setMessage(data.message);
       setState(data.ok ? 'done' : 'error');
       if (data.ok) router.refresh();
     } catch {
-      setMessage('تعذّر الاتصال بالخادم.');
+      setMessage(t.common.serverError);
       setState('error');
     }
   }
@@ -43,12 +45,12 @@ export function CancelSubscriptionButton({ id }: { id: string }) {
   if (state === 'confirming') {
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-600">تأكيد إيقاف التجديد؟</span>
+        <span className="text-xs text-slate-600">{t.accountPage.cancelConfirm}</span>
         <Button size="sm" variant="outline" onClick={cancel}>
-          نعم، أوقفه
+          {t.accountPage.cancelYes}
         </Button>
         <Button size="sm" variant="ghost" onClick={() => setState('idle')}>
-          تراجع
+          {t.accountPage.cancelNo}
         </Button>
       </div>
     );
@@ -62,7 +64,11 @@ export function CancelSubscriptionButton({ id }: { id: string }) {
       onClick={() => setState('confirming')}
       className="text-slate-500 hover:text-red-600"
     >
-      {state === 'working' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'إيقاف التجديد التلقائي'}
+      {state === 'working' ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        t.account.stopRenewal
+      )}
     </Button>
   );
 }

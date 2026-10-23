@@ -84,7 +84,7 @@ export function StoreGrid({ catalogue, locale }: { catalogue: Product[]; locale:
                 </span>
                 {product.badge ? (
                   <Badge tone="gold">
-                    {product.comingSoon ? t.common.comingSoon : product.badge}
+                    {product.comingSoon ? t.common.comingSoon : text.badge}
                   </Badge>
                 ) : null}
               </div>

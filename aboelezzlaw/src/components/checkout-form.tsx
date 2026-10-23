@@ -131,7 +131,7 @@ export function CheckoutForm({
             href={waLink(t.checkoutExtra.receiptMessage(reference))}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#128C7E] px-4 py-2 text-sm font-bold text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-whatsapp-600 px-4 py-2 text-sm font-bold text-white"
           >
             {t.checkoutExtra.sendReceipt}
           </a>

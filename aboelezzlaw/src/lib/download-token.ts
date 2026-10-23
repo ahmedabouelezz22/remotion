@@ -28,10 +28,13 @@ export interface DownloadClaim {
   exp: number;
 }
 
+/** صلاحية رابط التحميل بالساعات — تُذكر للعميل في بريد التسليم */
+export const DOWNLOAD_TTL_HOURS = 72;
+
 export function createDownloadToken(
   slug: string,
   reference: string,
-  ttlHours = 72,
+  ttlHours = DOWNLOAD_TTL_HOURS,
 ): string {
   const claim: DownloadClaim = {
     slug,

@@ -1,3 +1,5 @@
+import type { Locale } from '@/content/i18n';
+
 export interface OrderItem {
   slug: string;
   name: string;
@@ -9,6 +11,8 @@ export interface OrderItem {
 
 export interface OrderDraft {
   reference: string;
+  /** لغة الصفحة التي أُنشئ منها الطلب — تحدّد لغة العودة من البوّابة والبريد */
+  locale: Locale;
   items: OrderItem[];
   subtotal: number;
   shipping: number;

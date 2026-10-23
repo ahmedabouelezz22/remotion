@@ -126,7 +126,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-[#128C7E] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#0f7a6d]"
+              className="mt-5 inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-whatsapp-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-whatsapp-700"
             >
               {t.common.whatsappUs}
             </a>

@@ -14,7 +14,24 @@ export interface Article {
   body: string;
   sources: Source[];
   featured?: boolean;
+  /**
+   * العنوان والملخّص بالإنجليزية فقط — بلا متن.
+   *
+   * هذا قرار تحريري لا نقص: نشر تحليل قانوني مترجَم باسم المكتب يحتاج
+   * مراجعة المالك واعتماده، فالترجمة الآلية لنصّ قانوني قد تغيّر المعنى
+   * ويُحتجّ بها عليه. فالنسخة الإنجليزية تعرّف بالمقال وتحيل إلى أصله
+   * العربي، ولا تدّعي أنها ترجمته.
+   */
+  en: { title: string; excerpt: string };
 }
+
+/** تسميات التصنيفات بالإنجليزية — القيم تبقى عربية فلا ينقسم التصنيف */
+export const blogCategoryLabelsEn: Record<string, string> = {
+  'العقود والمنازعات': 'Contracts and disputes',
+  'الزكاة والضرائب': 'Zakat and tax',
+  'الامتثال والتنظيم': 'Compliance and regulation',
+  'القانون والاقتصاد': 'Law and economics',
+};
 
 /**
  * ملاحظة تحريرية:
@@ -84,6 +101,12 @@ export const articles: Article[] = [
 شرط التحكيم أداة، والأداة تُختار بحسب العمل لا بحسب العادة. القاعدة العملية: كلّما كان العقد دولياً، أو كان محلّه فنّياً، أو كانت سرّيته ذات قيمة — رجحت كفّة التحكيم. وكلّما كان العقد محلياً ومتوسط القيمة والأطراف داخل ولاية قضائية واحدة — كان القضاء العادي أكفأ اقتصادياً.
 
 > **تنبيه:** هذا المقال تحليل عام لا يقوم مقام الاستشارة في واقعة بعينها. صياغة شرط التحكيم تتأثر بالقانون الواجب التطبيق وبطبيعة العلاقة التعاقدية.`,
+    en: {
+      title:
+        'The arbitration clause in commercial contracts: when is it protection, and when does it become a burden?',
+      excerpt:
+        'An arbitration clause is slipped into many contracts as a routine provision, when it is in truth the choice of an entire forum. This article weighs it against cost and time, and identifies where ordinary litigation serves better.',
+    },
   },
   {
     slug: 'limitation-of-liability-clause',
@@ -143,6 +166,12 @@ export const articles: Article[] = [
 بند تحديد المسؤولية ليس درعاً مطلقاً، بل توزيع للمخاطر داخل الحدود التي يسمح بها القانون. والصياغة الجيدة هي التي تعترف بهذه الحدود صراحةً بدل أن تتجاهلها — لأن البند المتّسق مع القاعدة الآمرة أقدر على الصمود من البند الذي يحاول تجاوزها.
 
 > **تنبيه:** الإحالات أعلاه استرشادية. راجِع النص النافذ والقانون الواجب التطبيق على عقدك قبل الاعتماد على أي منها.`,
+    en: {
+      title:
+        'Limitation of liability clauses: how far do they actually protect?',
+      excerpt:
+        'Many contracting parties assume that the liability cap written into the contract settles the matter. In fact the limits of such a clause’s validity are drawn by law, not by the parties’ will alone.',
+    },
   },
   {
     slug: 'zakat-base-deemed-assessment',
@@ -212,6 +241,12 @@ export const articles: Article[] = [
 الكلفة الحقيقية للربط التقديري ليست فرق الزكاة وحده، بل الغرامات والوقت الإداري المستنزف في التقاضي. مراجعة الموقف الزكوي **قبل** موعد الإقرار أرخص من الاعتراض بعد الربط بمقدار لا يقارَن.
 
 > **تنبيه:** الإجراءات والمواعيد المشار إليها تُراجع في الأنظمة واللوائح النافذة على بوابة الهيئة قبل الاعتماد عليها، فهي عرضة للتحديث.`,
+    en: {
+      title:
+        'The Zakat base and deemed assessment: where disputes arise and how to object',
+      excerpt:
+        'Most Zakat disputes do not arise over the rate but over the composition of the base itself. This article takes apart the bases of assessment and maps the objection route step by step.',
+    },
   },
   {
     slug: 'saudi-e-invoicing-compliance',
@@ -266,6 +301,12 @@ export const articles: Article[] = [
 المعيار العملي للامتثال ليس أن النظام «يعمل»، بل أن الفاتورة الصادرة عنه **مقبولة لدى المشتري ولدى الجهة الإدارية معاً**. اختبار عيّنة من الفواتير الصادرة فعلياً — لا الاكتفاء بشهادة المورّد التقني — هو الفحص الذي يكشف الخلل قبل أن يكشفه التفتيش.
 
 > **تنبيه:** الشرائح والمواعيد والمواصفات الفنية تُحدَّث دورياً على بوابة الهيئة، ويجب الرجوع إلى النسخة النافذة.`,
+    en: {
+      title:
+        'E-invoicing in Saudi Arabia: the practical obligations and the risks of non-compliance',
+      excerpt:
+        'E-invoicing has moved from a technical project to a full regulatory obligation. This article explains what the two phases mean in practice for a business, and where the costly mistakes lie.',
+    },
   },
   {
     slug: 'egypt-personal-data-protection',
@@ -339,6 +380,12 @@ export const articles: Article[] = [
 5. **خطة استجابة مكتوبة** للاختراق تحدّد المسؤول والمهلة والمسار.
 
 > **تنبيه:** الأحكام التنفيذية التفصيلية والجهة المنوط بها التطبيق تخضع للتحديث. تُراجع النصوص النافذة والقرارات الصادرة تنفيذاً للقانون قبل بناء برنامج امتثال.`,
+    en: {
+      title:
+        'Personal data protection in Egypt: what Law 151 of 2020 requires of companies',
+      excerpt:
+        'Every business holding customer or employee data falls within this law. The article sets out the core obligations and the gaps that surface at the first compliance review.',
+    },
   },
   {
     slug: 'circular-economy-regulation',
@@ -408,6 +455,12 @@ export const articles: Article[] = [
 الاقتصاد الدائري في جوهره القانوني إعادة تخصيص للمسؤولية والكلفة عبر سلسلة القيمة. والمنشأة التي تُدخل هذه المتغيّرات في عقودها وتسعيرها مبكراً تتحمّل كلفة تكيّف تدريجية؛ أما التي تنتظر الإلزام فتتحمّلها دفعةً واحدة وفي أضيق توقيت.
 
 > **تنبيه:** الأطر المشار إليها تتفاوت بين الولايات القضائية وتخضع لتحديث مستمر. تُراجع النصوص النافذة في كل ولاية قبل بناء موقف قانوني.`,
+    en: {
+      title:
+        'The circular economy and legal regulation: from waste management to extended producer responsibility',
+      excerpt:
+        'The circular economy is not an environmental slogan but a redistribution of legal responsibility and cost along the value chain. A reading of the regulatory instruments and their effect on business.',
+    },
   },
 ];
 

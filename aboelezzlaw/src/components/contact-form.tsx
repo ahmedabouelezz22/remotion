@@ -81,7 +81,7 @@ export function ContactForm({ locale }: { locale: Locale }) {
             href={waLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-xl bg-[#128C7E] px-4 py-2 text-sm font-bold text-white"
+            className="inline-flex items-center rounded-xl bg-whatsapp-600 px-4 py-2 text-sm font-bold text-white"
           >
             {t.forms.continueOnWhatsapp}
           </a>

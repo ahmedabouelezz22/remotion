@@ -71,30 +71,44 @@ function issue(
   return `${payload}.${sign(payload, purpose)}`;
 }
 
+/**
+ * سبب الرفض بصيغة لا لغة لها، إلى جانب نصّ عربي جاهز. الواجهة التي تعرف لغة
+ * الزائر (مسار اللغة) تترجم السبب؛ وما لا يعرفها — كلوحة الإدارة — يستعمل
+ * النصّ العربي كما هو.
+ */
+export type TokenFailure = 'invalid' | 'expired';
+
 function verify(
   token: string,
   purpose: Claim['purpose'],
-): { ok: true; email: string; jti?: string } | { ok: false; error: string } {
+):
+  | { ok: true; email: string; jti?: string }
+  | { ok: false; reason: TokenFailure; error: string } {
+  const invalid = { ok: false, reason: 'invalid', error: 'الرابط غير صالح.' } as const;
+  const expired = {
+    ok: false,
+    reason: 'expired',
+    error: 'انتهت صلاحية الرابط. اطلب رابطاً جديداً.',
+  } as const;
+
   const [payload, signature] = token.split('.');
-  if (!payload || !signature) return { ok: false, error: 'الرابط غير صالح.' };
+  if (!payload || !signature) return invalid;
 
   const expected = Buffer.from(sign(payload, purpose));
   const received = Buffer.from(signature);
   if (expected.length !== received.length || !timingSafeEqual(expected, received)) {
-    return { ok: false, error: 'الرابط غير صالح.' };
+    return invalid;
   }
 
   let claim: Claim;
   try {
     claim = JSON.parse(decode(payload)) as Claim;
   } catch {
-    return { ok: false, error: 'الرابط تالف.' };
+    return invalid;
   }
 
-  if (claim.purpose !== purpose) return { ok: false, error: 'الرابط غير صالح.' };
-  if (claim.exp < Math.floor(Date.now() / 1000)) {
-    return { ok: false, error: 'انتهت صلاحية الرابط. اطلب رابطاً جديداً.' };
-  }
+  if (claim.purpose !== purpose) return invalid;
+  if (claim.exp < Math.floor(Date.now() / 1000)) return expired;
 
   return { ok: true, email: claim.email, jti: claim.jti };
 }

@@ -76,15 +76,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: t.accountNotConfigured }, { status: 503 });
   }
 
+  // اللغة تُحمَل في الرابط: صفحة الحساب وأي رسالة خطأ تصل العميل بلغته
   const link = `${requestOrigin(request)}/api/account/verify?token=${encodeURIComponent(
     login.token,
-  )}`;
+  )}&locale=${locale}`;
 
   const loginEmail = dict(locale).loginEmail;
   const message = buildClientConfirmation({
     name: email.split('@')[0] ?? '',
     heading: loginEmail.heading,
     body: loginEmail.body(link, LOGIN_LINK_TTL_MINUTES),
+    locale,
   });
 
   const result = await sendEmail({

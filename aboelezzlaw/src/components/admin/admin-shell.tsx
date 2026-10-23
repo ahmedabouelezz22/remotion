@@ -14,15 +14,15 @@ import {
 import { site } from '@/content/site';
 
 const links = [
-  { href: '/admin', label: 'نظرة عامة', icon: LayoutDashboard },
-  { href: '/admin/orders', label: 'الطلبات', icon: ShoppingBag },
-  { href: '/admin/bookings', label: 'المواعيد', icon: CalendarDays },
-  { href: '/admin/subscriptions', label: 'الاشتراكات', icon: RefreshCw },
-  { href: '/admin/customers', label: 'العملاء', icon: Users },
-  { href: '/admin/products', label: 'المنتجات', icon: Package },
-  { href: '/admin/messages', label: 'الرسائل', icon: MessageSquare },
-  { href: '/admin/notifications', label: 'الإشعارات', icon: BellRing },
-  { href: '/admin/audit', label: 'سجلّ التدقيق', icon: ScrollText },
+  { href: '/ar/admin', label: 'نظرة عامة', icon: LayoutDashboard },
+  { href: '/ar/admin/orders', label: 'الطلبات', icon: ShoppingBag },
+  { href: '/ar/admin/bookings', label: 'المواعيد', icon: CalendarDays },
+  { href: '/ar/admin/subscriptions', label: 'الاشتراكات', icon: RefreshCw },
+  { href: '/ar/admin/customers', label: 'العملاء', icon: Users },
+  { href: '/ar/admin/products', label: 'المنتجات', icon: Package },
+  { href: '/ar/admin/messages', label: 'الرسائل', icon: MessageSquare },
+  { href: '/ar/admin/notifications', label: 'الإشعارات', icon: BellRing },
+  { href: '/ar/admin/audit', label: 'سجلّ التدقيق', icon: ScrollText },
 ];
 
 export function AdminShell({

@@ -117,6 +117,7 @@ export async function POST(request: Request) {
 
   const order: OrderDraft = {
     reference: generateOrderReference(),
+    locale,
     items,
     subtotal,
     shipping,
@@ -145,6 +146,7 @@ export async function POST(request: Request) {
       reference: order.reference,
       customer: { name: order.customer.name, email: order.customer.email },
       origin,
+      locale,
     });
 
     if (!recurring.ok) {

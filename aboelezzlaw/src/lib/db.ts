@@ -51,6 +51,7 @@ async function migrate(sql: postgres.Sql): Promise<void> {
       city           text,
       notes          text,
       provider_ref   text,
+      locale         text NOT NULL DEFAULT 'ar',
       created_at     timestamptz NOT NULL DEFAULT now(),
       updated_at     timestamptz NOT NULL DEFAULT now()
     )`;
@@ -115,6 +116,9 @@ async function migrate(sql: postgres.Sql): Promise<void> {
     )`;
   // ترحيل لقواعد أُنشئ فيها الجدول قبل إضافة النطاق
   await sql`ALTER TABLE login_tokens ADD COLUMN IF NOT EXISTS scope text NOT NULL DEFAULT 'customer'`;
+  // لغة الطلب: بريد التسليم وروابطه تصل العميل بلغة الصفحة التي اشترى منها.
+  // الطلبات السابقة عربية، وهو الافتراض الصحيح لها.
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale text NOT NULL DEFAULT 'ar'`;
   await sql`CREATE INDEX IF NOT EXISTS login_tokens_email_idx ON login_tokens (lower(email), created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS login_tokens_ip_idx ON login_tokens (issued_ip, created_at DESC)`;
 

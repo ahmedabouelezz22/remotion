@@ -61,6 +61,15 @@ export const categoryLabelsEn: Record<string, string> = {
   'باقات الشركات': 'Corporate retainers',
 };
 
+/** تسميات الأوسمة بالإنجليزية — مجموعة مغلقة، والقيمة العربية هي المرجع */
+export const badgeLabelsEn: Record<string, string> = {
+  'الأكثر طلباً': 'Most requested',
+  'تحميل فوري': 'Instant download',
+  'قريباً': 'Coming soon',
+  'الأنسب للشركات': 'Best for companies',
+  'الأشمل': 'Most comprehensive',
+};
+
 /** نصّ المنتج بلغة الصفحة */
 export function productText(product: Product, locale: 'ar' | 'en') {
   if (locale === 'ar') {
@@ -70,6 +79,7 @@ export function productText(product: Product, locale: 'ar' | 'en') {
       description: product.description,
       highlights: product.highlights,
       category: product.category,
+      badge: product.badge,
     };
   }
   return {
@@ -78,6 +88,7 @@ export function productText(product: Product, locale: 'ar' | 'en') {
     description: product.en.description ?? product.description,
     highlights: product.en.highlights,
     category: categoryLabelsEn[product.category] ?? product.category,
+    badge: product.badge ? (badgeLabelsEn[product.badge] ?? product.badge) : undefined,
   };
 }
 

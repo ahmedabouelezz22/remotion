@@ -58,21 +58,27 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             : 'border-transparent bg-sand-50',
         )}
       >
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-          <Link href={home} className="flex shrink-0 items-center gap-3">
+        {/*
+          * `min-w-0` على رابط الهوية مقصود: بدونه يصير أدنى عرض للصفّ مجموع
+          * عرض الهوية كاملةً + الأزرار، فيتجاوز 390px ويظهر تمرير أفقي على
+          * الهاتف — وهو أشهر ما يُشتكى منه. السطر الثاني والهاتف يظهران من
+          * `sm` فما فوق حيث تتوفّر المساحة.
+          */}
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-3 px-5 sm:gap-4 sm:px-8">
+          <Link href={home} className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Image
               src={site.brand.logo}
               alt=""
               width={44}
               height={44}
-              className="h-11 w-11 shrink-0 object-contain"
+              className="h-10 w-10 shrink-0 object-contain sm:h-11 sm:w-11"
               priority
             />
-            <span className="leading-tight">
-              <span className="block font-display text-[0.98rem] font-extrabold text-navy-900">
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate font-display text-[0.92rem] font-extrabold text-navy-900 sm:text-[0.98rem]">
                 {locale === 'ar' ? 'مكتب أبو العز' : 'Abo Elezz'}
               </span>
-              <span className="block text-[0.7rem] font-semibold tracking-wide text-slate-500">
+              <span className="hidden truncate text-[0.7rem] font-semibold tracking-wide text-slate-500 sm:block">
                 {locale === 'ar' ? 'للمحاماة والاستشارات القانونية' : 'Law & Legal Consultancy'}
               </span>
             </span>
@@ -98,16 +104,20 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            {/* تبديل اللغة يحافظ على نفس الصفحة، فلا يُعاد الزائر إلى البداية */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            {/*
+              * تبديل اللغة يحافظ على نفس الصفحة، فلا يُعاد الزائر إلى البداية.
+              * على الهاتف أيقونة وحدها — الاسم يبقى في `aria-label` فلا يفقد
+              * قارئ الشاشة شيئاً، ويبقى الصفّ داخل عرض الشاشة.
+              */}
             <Link
               href={switchPath(locale, pathname)}
               lang={locale === 'ar' ? 'en' : 'ar'}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-2 text-[0.8rem] font-bold text-navy-900 transition-colors hover:bg-navy-900/5"
+              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-[0.8rem] font-bold text-navy-900 transition-colors hover:bg-navy-900/5"
               aria-label={t.nav.switchLanguageLabel}
             >
               <Languages className="h-4 w-4" />
-              <span>{t.nav.switchLanguage}</span>
+              <span className="hidden sm:inline">{t.nav.switchLanguage}</span>
             </Link>
 
             <Link

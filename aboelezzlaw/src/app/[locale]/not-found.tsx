@@ -1,17 +1,26 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/site-footer';
 import { ButtonLink } from '@/components/ui/button';
 import { Container, Section } from '@/components/ui/container';
-import { defaultLocale, dict, path } from '@/content/i18n';
+import {
+  LOCALE_HEADER,
+  defaultLocale,
+  dict,
+  isLocale,
+  path,
+  type Locale,
+} from '@/content/i18n';
 import { navigation } from '@/content/site';
 
 /**
- * الـ 404 لا يعرف لغته: الوسيط يُسبق كل مسار بلغة، لكن المسار غير الموجود
- * داخل لغة ما يصل إلى هنا دون معلَمة. نستخدم الافتراضية — والزائر يجد
- * روابط الأقسام ليتابع منها.
+ * الـ 404 لا يستقبل معلَمات المسار، فلا يعرف لغته من المسار. الوسيط يضع
+ * اللغة في ترويسة الطلب ونقرأها هنا؛ وإن غابت (طلب لم يمرّ على الوسيط)
+ * نستخدم الافتراضية. والزائر يجد روابط الأقسام ليتابع منها.
  */
-export default function NotFound() {
-  const locale = defaultLocale;
+export default async function NotFound() {
+  const raw = (await headers()).get(LOCALE_HEADER) ?? '';
+  const locale: Locale = isLocale(raw) ? (raw as Locale) : defaultLocale;
   const t = dict(locale);
 
   return (

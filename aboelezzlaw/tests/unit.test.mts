@@ -24,6 +24,15 @@ const { products, getProduct, SHIPPING_FLAT_RATE } = await import('@/content/pro
 const { clientWaLink } = await import('@/lib/notifications/templates');
 const { jsonLdScript } = await import('@/lib/utils');
 const { articles } = await import('@/content/blog');
+const { ar } = await import('@/content/i18n/ar');
+const { en } = await import('@/content/i18n/en');
+const { locales, defaultLocale, dict, direction, htmlLang, path, otherLocale, switchPath } =
+  await import('@/content/i18n');
+const { productText } = await import('@/content/products');
+const { services, serviceText } = await import('@/content/services');
+const { faqs, faqText } = await import('@/content/faq');
+const { privacyPolicy, termsOfUse } = await import('@/content/legal');
+const { default: sitemap } = await import('@/app/sitemap');
 
 // ───────────────────── توقيع Paymob ─────────────────────
 
@@ -529,5 +538,267 @@ describe('مقالات المدونة', () => {
         );
       }
     }
+  });
+});
+
+
+// ───────────────────── القاموسان ─────────────────────
+
+const ARABIC_LETTER = /[ء-ي]/;
+
+/**
+ * مسارات يُستثنى محتواها من الفحص، ولكل منها سبب:
+ *  • `nav.switchLanguage*`: اسم اللغة الأخرى بلغتها هي — فالعربي يقرأ
+ *    «English» والإنجليزي يقرأ «العربية»، وهذا هو المطلوب.
+ *  • خرائط التسميات: مفاتيحها هي القيمة العربية القانونية (ما يُخزَّن في
+ *    القاعدة ويصل إشعار المكتب)، والقيمة هي التسمية المعروضة. القاموس
+ *    العربي لا يحتاج خريطة أصلاً لأن القيمة هي التسمية.
+ */
+const EXEMPT_TRAILS = new Set([
+  'dict.nav.switchLanguage',
+  'dict.nav.switchLanguageLabel',
+  'dict.storeExtra.billingPeriods',
+  'dict.bookingForm.consultationTypes',
+  'dict.bookingForm.consultationChannels',
+]);
+
+/**
+ * يمشي على القاموسين معاً ويُرجع كل اختلاف. النوع وحده لا يكفي: `Dictionary`
+ * يفرض وجود المفاتيح وأنواعها، لكنه لا يمنع نسخ النصّ العربي كما هو إلى
+ * الملف الإنجليزي — وهو الخطأ الأرجح عند إضافة قسم جديد على عجل.
+ */
+function walkDictionaries(
+  arabic: unknown,
+  english: unknown,
+  trail: string,
+  problems: string[],
+): void {
+  if (EXEMPT_TRAILS.has(trail)) return;
+
+  if (typeof arabic === 'function') {
+    if (typeof english !== 'function') problems.push(`${trail}: ليست دالّة في الإنجليزية`);
+    return;
+  }
+
+  if (Array.isArray(arabic)) {
+    if (!Array.isArray(english)) {
+      problems.push(`${trail}: ليست مصفوفة في الإنجليزية`);
+      return;
+    }
+    if (arabic.length !== english.length) {
+      problems.push(`${trail}: الطول ${arabic.length} ≠ ${english.length}`);
+      return;
+    }
+    arabic.forEach((item, index) =>
+      walkDictionaries(item, english[index], `${trail}[${index}]`, problems),
+    );
+    return;
+  }
+
+  if (arabic !== null && typeof arabic === 'object') {
+    if (english === null || typeof english !== 'object') {
+      problems.push(`${trail}: ليست كائناً في الإنجليزية`);
+      return;
+    }
+    const arabicKeys = Object.keys(arabic as Record<string, unknown>);
+    const englishKeys = Object.keys(english as Record<string, unknown>);
+    for (const key of arabicKeys) {
+      if (!englishKeys.includes(key)) {
+        problems.push(`${trail}.${key}: مفقود في الإنجليزية`);
+        continue;
+      }
+      walkDictionaries(
+        (arabic as Record<string, unknown>)[key],
+        (english as Record<string, unknown>)[key],
+        `${trail}.${key}`,
+        problems,
+      );
+    }
+    for (const key of englishKeys) {
+      if (!arabicKeys.includes(key)) problems.push(`${trail}.${key}: زائد في الإنجليزية`);
+    }
+    return;
+  }
+
+  if (typeof arabic === 'string') {
+    if (typeof english !== 'string') {
+      problems.push(`${trail}: ليست نصّاً في الإنجليزية`);
+      return;
+    }
+    if (ARABIC_LETTER.test(english)) problems.push(`${trail}: نصّ عربي في الملف الإنجليزي`);
+  }
+}
+
+describe('القاموسان العربي والإنجليزي', () => {
+  it('متطابقا البنية وبلا نصّ عربي في الإنجليزية', () => {
+    const problems: string[] = [];
+    walkDictionaries(ar, en, 'dict', problems);
+    assert.deepEqual(problems, []);
+  });
+
+  it('كل لغة لها قاموس، والافتراضية العربية', () => {
+    assert.deepEqual([...locales], ['ar', 'en']);
+    assert.equal(defaultLocale, 'ar');
+    assert.equal(dict('ar'), ar);
+    assert.equal(dict('en'), en);
+  });
+
+  it('الاتجاه ولغة المستند لكل لغة', () => {
+    assert.equal(direction('ar'), 'rtl');
+    assert.equal(direction('en'), 'ltr');
+    assert.ok(htmlLang('ar').startsWith('ar'));
+    assert.ok(htmlLang('en').startsWith('en'));
+  });
+});
+
+// ───────────────────── مسارات اللغة ─────────────────────
+
+describe('مسارات اللغة', () => {
+  it('المسار يحمل بادئة اللغة بلا شرطة زائدة', () => {
+    assert.equal(path('ar', '/'), '/ar');
+    assert.equal(path('en', '/'), '/en');
+    assert.equal(path('ar', '/store'), '/ar/store');
+    assert.equal(path('en', '/store/contract-templates-pack'), '/en/store/contract-templates-pack');
+  });
+
+  it('اللغة الأخرى هي الأخرى فعلاً', () => {
+    assert.equal(otherLocale('ar'), 'en');
+    assert.equal(otherLocale('en'), 'ar');
+  });
+
+  it('التبديل من لغة الصفحة يحفظ باقي المسار', () => {
+    // الوسيط الأول هو لغة الصفحة الحالية، والناتج مسارها في اللغة الأخرى
+    assert.equal(
+      switchPath('ar', '/ar/store/contract-templates-pack'),
+      '/en/store/contract-templates-pack',
+    );
+    assert.equal(switchPath('en', '/en/booking'), '/ar/booking');
+    // الجذر: لا يصير `/en/`
+    assert.equal(switchPath('ar', '/ar'), '/en');
+    assert.equal(switchPath('en', '/en'), '/ar');
+    // استعلام ومرساة يبقيان كما هما
+    assert.equal(switchPath('ar', '/ar/store?category=x'), '/en/store?category=x');
+  });
+});
+
+// ───────────────────── المحتوى بلغتين ─────────────────────
+
+describe('المحتوى بلغتين', () => {
+  it('كل منتج له نصّ إنجليزي كامل', () => {
+    for (const product of products) {
+      const text = productText(product, 'en');
+      for (const [field, value] of Object.entries({
+        name: text.name,
+        summary: text.summary,
+        category: text.category,
+      })) {
+        assert.ok(value && value.length > 1, `${product.slug}: ${field} فارغ`);
+        assert.ok(
+          !ARABIC_LETTER.test(value),
+          `${product.slug}: ${field} عربي في النسخة الإنجليزية (${value})`,
+        );
+      }
+      assert.ok(text.highlights.length > 0, `${product.slug}: لا مزايا إنجليزية`);
+      for (const highlight of text.highlights) {
+        assert.ok(
+          !ARABIC_LETTER.test(highlight),
+          `${product.slug}: ميزة عربية في النسخة الإنجليزية`,
+        );
+      }
+      if (product.badge) {
+        assert.ok(
+          !ARABIC_LETTER.test(text.badge ?? ''),
+          `${product.slug}: وسم عربي في النسخة الإنجليزية (${text.badge})`,
+        );
+      }
+    }
+  });
+
+  it('كل خدمة لها نصّ إنجليزي', () => {
+    for (const service of services) {
+      const text = serviceText(service, 'en');
+      assert.ok(text.title && !ARABIC_LETTER.test(text.title), `${service.slug}: عنوان`);
+      assert.ok(text.short && !ARABIC_LETTER.test(text.short), `${service.slug}: ملخّص`);
+    }
+  });
+
+  it('كل سؤال شائع له نصّ إنجليزي', () => {
+    for (const faq of faqs) {
+      const text = faqText(faq, 'en');
+      assert.ok(text.question && !ARABIC_LETTER.test(text.question));
+      assert.ok(text.answer && !ARABIC_LETTER.test(text.answer));
+    }
+  });
+
+  it('مقالات المدونة لها عنوان وملخّص إنجليزيان', () => {
+    for (const article of articles) {
+      assert.ok(article.en.title && !ARABIC_LETTER.test(article.en.title), article.slug);
+      assert.ok(article.en.excerpt && !ARABIC_LETTER.test(article.en.excerpt), article.slug);
+    }
+  });
+
+  it('وثيقتا الخصوصية والشروط موجودتان بكل لغة', () => {
+    for (const locale of locales) {
+      for (const [name, doc] of Object.entries({
+        privacy: privacyPolicy[locale],
+        terms: termsOfUse[locale],
+      })) {
+        assert.ok(doc.title.length > 3, `${name}/${locale}: لا عنوان`);
+        assert.ok(doc.sections.length > 0, `${name}/${locale}: لا أقسام`);
+        for (const section of doc.sections) {
+          assert.ok(section.blocks.length > 0, `${name}/${locale}: قسم فارغ (${section.heading})`);
+        }
+      }
+      if (locale === 'en') {
+        assert.ok(!ARABIC_LETTER.test(privacyPolicy.en.title));
+        assert.ok(!ARABIC_LETTER.test(termsOfUse.en.title));
+      }
+    }
+  });
+});
+
+// ───────────────────── خريطة الموقع ─────────────────────
+
+describe('خريطة الموقع', () => {
+  const entries = sitemap();
+
+  it('كل عنوان يحمل بادئة لغة', () => {
+    for (const entry of entries) {
+      const { pathname } = new URL(entry.url);
+      const [, first] = pathname.split('/');
+      assert.ok(
+        locales.includes(first as (typeof locales)[number]),
+        `عنوان بلا بادئة لغة: ${entry.url}`,
+      );
+    }
+  });
+
+  it('كل صفحة موجودة بكل لغة', () => {
+    const byLocale = new Map<string, Set<string>>();
+    for (const locale of locales) byLocale.set(locale, new Set());
+    for (const entry of entries) {
+      const { pathname } = new URL(entry.url);
+      const [, locale, ...rest] = pathname.split('/');
+      byLocale.get(locale!)?.add(`/${rest.join('/')}`);
+    }
+    const arabic = byLocale.get('ar')!;
+    const english = byLocale.get('en')!;
+    assert.ok(arabic.size > 10, `عدد الصفحات العربية ${arabic.size}`);
+    assert.deepEqual([...arabic].sort(), [...english].sort());
+  });
+
+  it('كل مدخل يُصرّح ببديله في اللغة الأخرى و x-default', () => {
+    for (const entry of entries) {
+      const languages = entry.alternates?.languages ?? {};
+      for (const locale of locales) {
+        assert.ok(languages[locale], `${entry.url}: لا بديل للغة ${locale}`);
+      }
+      assert.ok(languages['x-default'], `${entry.url}: لا x-default`);
+    }
+  });
+
+  it('لا عنوان مكرّر', () => {
+    const urls = entries.map((entry) => entry.url);
+    assert.equal(new Set(urls).size, urls.length);
   });
 });

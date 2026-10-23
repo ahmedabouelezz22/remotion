@@ -59,7 +59,7 @@ export default async function AdminBookingsPage({
         {FILTERS.map((filter) => (
           <Link
             key={filter.value}
-            href={`/admin/bookings?${new URLSearchParams({
+            href={`/ar/admin/bookings?${new URLSearchParams({
               ...(filter.value === 'all' ? {} : { status: filter.value }),
               ...(showPast ? { all: '1' } : {}),
             })}`}
@@ -73,7 +73,7 @@ export default async function AdminBookingsPage({
           </Link>
         ))}
         <Link
-          href={`/admin/bookings?${new URLSearchParams({
+          href={`/ar/admin/bookings?${new URLSearchParams({
             ...(active === 'all' ? {} : { status: active }),
             ...(showPast ? {} : { all: '1' }),
           })}`}
@@ -107,7 +107,7 @@ export default async function AdminBookingsPage({
                   href={clientWaLink(booking.phone, booking.name) ?? `tel:${booking.phone}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-bold text-[#128C7E] underline"
+                  className="text-xs font-bold text-whatsapp-700 underline"
                   dir="ltr"
                 >
                   {booking.phone}

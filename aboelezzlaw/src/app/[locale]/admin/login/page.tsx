@@ -21,7 +21,7 @@ export default async function AdminLoginPage({
 
   // من يملك جلسة إدارية صالحة لا يُطلب منه الدخول مرّة أخرى
   const check = await requireOwner();
-  if (check.ok) redirect('/admin');
+  if (check.ok) redirect('/ar/admin');
 
   const { error } = await searchParams;
 

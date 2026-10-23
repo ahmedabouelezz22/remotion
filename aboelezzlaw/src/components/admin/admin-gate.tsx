@@ -21,7 +21,7 @@ export async function ownerOrRedirect(): Promise<string> {
   }
 
   // بريد غير مصرَّح أو بلا جلسة ⇒ صفحة الدخول. لا نكشف أيّ الحالتين.
-  redirect('/admin/login');
+  redirect('/ar/admin/login');
 }
 
 export class AdminUnconfigured extends Error {

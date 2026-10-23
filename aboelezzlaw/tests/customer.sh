@@ -239,7 +239,7 @@ curl -sk -o /dev/null -H 'Content-Type: application/json' -X POST $BASE/api/acco
 wait_mail paid@example.com 'api/account/verify' || true
 L1=$(link_for paid@example.com 'api/account/verify')
 curl -sk -c "$JAR_DIR/buyer.jar" -o /dev/null "$L1"
-curl -sk -b "$JAR_DIR/buyer.jar" "$BASE/account" > "$WORK/acc1.html"
+curl -sk -b "$JAR_DIR/buyer.jar" "$BASE/ar/account" > "$WORK/acc1.html"
 grep -q "$PREF" "$WORK/acc1.html" && ok "العميل يرى طلبه" || bad "العميل لا يرى طلبه"
 grep -q 'مدفوع' "$WORK/acc1.html" && ok "الحالة معروضة" || bad "الحالة غائبة"
 grep -q 'api/download' "$WORK/acc1.html" && ok "رابط التحميل في الصفحة" || bad "لا رابط تحميل"
@@ -248,12 +248,12 @@ curl -sk -o /dev/null -H 'Content-Type: application/json' -X POST $BASE/api/acco
 wait_mail tamper@example.com 'api/account/verify' || true
 L2=$(link_for tamper@example.com 'api/account/verify')
 curl -sk -c "$JAR_DIR/other.jar" -o /dev/null "$L2"
-curl -sk -b "$JAR_DIR/other.jar" "$BASE/account" > "$WORK/acc2.html"
+curl -sk -b "$JAR_DIR/other.jar" "$BASE/ar/account" > "$WORK/acc2.html"
 grep -q "$PREF" "$WORK/acc2.html" && bad "عميل آخر يرى طلب غيره!" || ok "عميل آخر لا يرى طلب غيره"
 grep -q "$REF" "$WORK/acc2.html" && ok "ويرى طلبه هو" || bad "لا يرى طلبه"
 
 printf '127.0.0.1\tFALSE\t/\tTRUE\t0\tabz_session\tZm9yZ2VkLnNpZw\n' > "$JAR_DIR/forged-session.jar"
-curl -sk -b "$JAR_DIR/forged-session.jar" "$BASE/account" > "$WORK/acc3.html"
+curl -sk -b "$JAR_DIR/forged-session.jar" "$BASE/ar/account" > "$WORK/acc3.html"
 grep -q "$PREF" "$WORK/acc3.html" && bad "كعكة مُلفَّقة منحت وصولاً!" || ok "كعكة جلسة مُلفَّقة لا تمنح شيئاً"
 
 echo

@@ -1,6 +1,7 @@
-import { getProduct } from '@/content/products';
+import { defaultLocale, dict, isLocale, type Locale } from '@/content/i18n';
+import { getProduct, productText } from '@/content/products';
 import { site } from '@/content/site';
-import { createDownloadToken } from '@/lib/download-token';
+import { DOWNLOAD_TTL_HOURS, createDownloadToken } from '@/lib/download-token';
 import { sendEmail } from '@/lib/notifications/email';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
@@ -68,8 +69,15 @@ export async function fulfillOrder(
   return { ok: true, alreadyFulfilled: false, downloads };
 }
 
+/** لغة الطلب كما حُفظت عند الدفع؛ الطلبات الأقدم من هذا العمود عربية */
+function orderLocale(order: OrderRow): Locale {
+  return isLocale(order.locale) ? (order.locale as Locale) : defaultLocale;
+}
+
 /** يُصدر روابط التحميل، يفعّل الاشتراكات، ويراسل العميل والمكتب */
 async function deliverOrder(order: OrderRow, origin: string) {
+  const locale = orderLocale(order);
+  const t = dict(locale);
   const downloads: { name: string; url: string }[] = [];
   const activatedSubscriptions: string[] = [];
 
@@ -79,7 +87,7 @@ async function deliverOrder(order: OrderRow, origin: string) {
 
     if (product.kind === 'digital' && product.file) {
       downloads.push({
-        name: product.name,
+        name: productText(product, locale).name,
         url: absoluteDownloadUrl(origin, product.slug, order.id),
       });
     }
@@ -92,7 +100,12 @@ async function deliverOrder(order: OrderRow, origin: string) {
       );
       if (activated) {
         activatedSubscriptions.push(
-          `${product.name} — حتى ${activated.current_period_end?.toLocaleDateString('ar-EG')}`,
+          t.deliveryEmail.subscriptionUntil(
+            productText(product, locale).name,
+            activated.current_period_end?.toLocaleDateString(
+              locale === 'ar' ? 'ar-EG' : 'en-GB',
+            ) ?? '',
+          ),
         );
       }
     }
@@ -139,16 +152,20 @@ async function sendClientDelivery(
   downloads: { name: string; url: string }[],
   subscriptions: string[],
 ): Promise<void> {
-  const lines: string[] = [`تم تأكيد الدفع لطلبك رقم ${order.id}.`, ''];
+  const locale = orderLocale(order);
+  const t = dict(locale);
+  const e = t.deliveryEmail;
+
+  const lines: string[] = [e.confirmed(order.id), ''];
 
   if (downloads.length > 0) {
-    lines.push('روابط التحميل (صالحة 72 ساعة):');
+    lines.push(e.downloadsTitle(DOWNLOAD_TTL_HOURS));
     for (const item of downloads) lines.push(`• ${item.name}: ${item.url}`);
     lines.push('');
   }
 
   if (subscriptions.length > 0) {
-    lines.push('الاشتراكات المفعّلة:');
+    lines.push(e.subscriptionsTitle);
     for (const item of subscriptions) lines.push(`• ${item}`);
     lines.push('');
   }
@@ -158,20 +175,21 @@ async function sendClientDelivery(
     return product?.requiresBooking;
   });
   if (needsBooking) {
-    lines.push(`لتحديد موعد جلستك: ${site.url}/booking`, '');
+    lines.push(e.bookingLine(`${site.url}/${locale}/booking`), '');
   }
 
-  lines.push(`يمكنك متابعة طلباتك في أي وقت من: ${site.url}/account`);
+  lines.push(e.accountLine(`${site.url}/${locale}/account`));
 
   const confirmation = buildClientConfirmation({
     name: order.name,
-    heading: `تم تأكيد الدفع — طلب ${order.id}`,
+    heading: e.heading(order.id),
     body: lines.join('\n'),
+    locale,
   });
 
   const result = await sendEmail({
     to: order.email,
-    subject: `${site.shortName} — تم تأكيد طلبك ${order.id}`,
+    subject: `${t.common.firmShort} — ${e.subject(order.id)}`,
     html: confirmation.html,
     text: confirmation.text,
     replyTo: site.contact.email,

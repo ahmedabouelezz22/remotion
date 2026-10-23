@@ -46,7 +46,7 @@ export default async function AdminNotificationsPage({
     >
       <div className="mb-5 flex gap-2">
         <Link
-          href="/admin/notifications"
+          href="/ar/admin/notifications"
           className={
             onlyFailures
               ? 'rounded-full border border-sand-300 bg-white px-4 py-2 text-xs font-bold text-slate-600'
@@ -56,7 +56,7 @@ export default async function AdminNotificationsPage({
           الكل
         </Link>
         <Link
-          href="/admin/notifications?only=failures"
+          href="/ar/admin/notifications?only=failures"
           className={
             onlyFailures
               ? 'rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white'

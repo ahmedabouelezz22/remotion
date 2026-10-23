@@ -1,3 +1,4 @@
+import type { Locale } from '@/content/i18n';
 import { site } from '@/content/site';
 import { logNotifications } from '@/lib/repository';
 import { sendEmail } from './email';
@@ -34,6 +35,8 @@ export interface NotifyInput {
     email?: string;
     phone?: string;
     confirmationHeading?: string;
+    /** لغة بريد التأكيد — بلغة الصفحة التي راسلنا منها العميل */
+    confirmationLocale?: Locale;
     confirmationBody?: string;
   };
 }
@@ -86,6 +89,7 @@ export async function notifyOffice(input: NotifyInput): Promise<NotifyOutcome> {
       name: input.client.name,
       heading: input.client.confirmationHeading,
       body: input.client.confirmationBody,
+      locale: input.client.confirmationLocale,
     });
     const clientEmail = await sendEmail({
       to: input.client.email,

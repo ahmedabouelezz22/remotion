@@ -44,4 +44,10 @@ export const switchPath = (locale: Locale, pathname: string): string => {
   return `/${otherLocale(locale)}${rest || ''}`;
 };
 
+/**
+ * ترويسة يضعها الوسيط على الطلب لتُقرأ حيث لا تتاح معلَمة المسار — وأبرزه
+ * `not-found.tsx`، فهو لا يستقبل معلَمات ولا يعرف لغته من غيرها.
+ */
+export const LOCALE_HEADER = 'x-abz-locale';
+
 export type { Dictionary };

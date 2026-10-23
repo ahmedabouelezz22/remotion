@@ -67,14 +67,26 @@ check "لم تصدر جلسة من الاستخدام الثاني" "$S2" "0"
 
 echo
 echo "── 2) تفويض اللوحة ──"
-A1=$(curl -sk -o /dev/null -w '%{http_code}' $BASE/admin)
+A1=$(curl -sk -o /dev/null -w '%{http_code}' $BASE/ar/admin)
 check "/admin بلا جلسة يُحوِّل لصفحة الدخول" "$A1" "307"
 
 # جلسة عميل عادي لا تفتح اللوحة
-A2=$(curl -sk -b "$JAR_DIR/c1.jar" -o /dev/null -w '%{redirect_url}' $BASE/admin)
+A2=$(curl -sk -b "$JAR_DIR/c1.jar" -o /dev/null -w '%{redirect_url}' $BASE/ar/admin)
 case "$A2" in
   *admin/login*) ok "جلسة العميل لا تفتح اللوحة" ;;
   *) bad "جلسة العميل فتحت اللوحة! ($A2)" ;;
+esac
+
+# اللوحة بالعربية وحدها: طلبها بالإنجليزية يُحوَّل بمساره كاملاً
+EN1=$(curl -sk -o /dev/null -w '%{redirect_url}' $BASE/en/admin)
+case "$EN1" in
+  */ar/admin) ok "/en/admin يُحوَّل إلى /ar/admin" ;;
+  *) bad "/en/admin لم يُحوَّل ($EN1)" ;;
+esac
+EN2=$(curl -sk -o /dev/null -w '%{redirect_url}' $BASE/en/admin/orders)
+case "$EN2" in
+  */ar/admin/orders) ok "/en/admin/orders يحفظ مساره عند التحويل" ;;
+  *) bad "/en/admin/orders فقد مساره ($EN2)" ;;
 esac
 
 for ep in orders bookings subscriptions products; do
@@ -107,7 +119,7 @@ curl -sk -c "$JAR_DIR/owner.jar" -o /dev/null "$OLINK"
 grep -q abz_admin "$JAR_DIR/owner.jar" && ok "صدرت كعكة الإدارة abz_admin" || bad "لم تصدر كعكة إدارة"
 grep abz_admin "$JAR_DIR/owner.jar" | grep -q HttpOnly && ok "الكعكة HttpOnly" || bad "الكعكة ليست HttpOnly"
 
-AH=$(curl -sk -b "$JAR_DIR/owner.jar" -o "$WORK/admin.html" -w '%{http_code}' $BASE/admin)
+AH=$(curl -sk -b "$JAR_DIR/owner.jar" -o "$WORK/admin.html" -w '%{http_code}' $BASE/ar/admin)
 check "المالك يفتح اللوحة" "$AH" "200"
 grep -q 'نظرة عامة' "$WORK/admin.html" && grep -q 'سجلّ التدقيق' "$WORK/admin.html" && ok "اللوحة تُرسم بأقسامها" || bad "اللوحة لم تُرسم"
 grep -q 'إيراد الطلبات المدفوعة' "$WORK/admin.html" && ok "اللوحة تُظهر المؤشّرات" || bad "المؤشّرات غائبة"
@@ -118,13 +130,13 @@ case "$R2" in *error*) ok "رابط المالك لمرة واحدة" ;; *) bad 
 
 # كعكة إدارة مُلفَّقة
 printf '127.0.0.1\tFALSE\t/\tFALSE\t0\tabz_admin\tZm9yZ2VkLnBheWxvYWQ.c2ln\n' > "$JAR_DIR/forged.jar"
-F=$(curl -sk -b "$JAR_DIR/forged.jar" -o /dev/null -w '%{http_code}' $BASE/admin)
+F=$(curl -sk -b "$JAR_DIR/forged.jar" -o /dev/null -w '%{http_code}' $BASE/ar/admin)
 check "كعكة إدارة مُلفَّقة مرفوضة" "$F" "307"
 
 echo
 echo "── 5) صفحات اللوحة ──"
 for page in orders bookings subscriptions customers products messages notifications audit; do
-  S=$(curl -sk -b "$JAR_DIR/owner.jar" -o "$WORK/p.html" -w '%{http_code}' $BASE/admin/$page)
+  S=$(curl -sk -b "$JAR_DIR/owner.jar" -o "$WORK/p.html" -w '%{http_code}' $BASE/ar/admin/$page)
   check "/admin/$page" "$S" "200"
 done
 

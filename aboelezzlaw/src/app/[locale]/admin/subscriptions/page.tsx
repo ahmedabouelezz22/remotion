@@ -45,8 +45,8 @@ export default async function AdminSubscriptionsPage({
             key={filter.value}
             href={
               filter.value === 'all'
-                ? '/admin/subscriptions'
-                : `/admin/subscriptions?status=${filter.value}`
+                ? '/ar/admin/subscriptions'
+                : `/ar/admin/subscriptions?status=${filter.value}`
             }
             className={
               active === filter.value
@@ -79,7 +79,7 @@ export default async function AdminSubscriptionsPage({
                   href={clientWaLink(subscription.phone, subscription.name) ?? `tel:${subscription.phone}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-bold text-[#128C7E] underline"
+                  className="text-xs font-bold text-whatsapp-700 underline"
                   dir="ltr"
                 >
                   {subscription.phone}

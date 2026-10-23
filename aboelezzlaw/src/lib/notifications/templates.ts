@@ -1,3 +1,4 @@
+import { defaultLocale, dict, direction, htmlLang, type Locale } from '@/content/i18n';
 import { site, waLink } from '@/content/site';
 
 export interface Field {
@@ -47,7 +48,7 @@ export function buildEmailHtml(opts: {
 
   const action =
     opts.actionUrl && opts.actionLabel
-      ? `<p style="margin:22px 0 0"><a href="${opts.actionUrl}" style="display:inline-block;background:#128C7E;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700">${escapeHtml(
+      ? `<p style="margin:22px 0 0"><a href="${opts.actionUrl}" style="display:inline-block;background:#107f72;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700">${escapeHtml(
           opts.actionLabel,
         )}</a></p>`
       : '';
@@ -94,25 +95,37 @@ export function buildTelegramText(title: string, fields: Field[]): string {
   return [`🔔 <b>${escapeHtml(title)}</b>`, '', ...lines].join('\n');
 }
 
-/** رسالة تأكيد تُرسل للعميل نفسه */
+/**
+ * رسالة تأكيد تُرسل للعميل نفسه.
+ *
+ * `locale` تضبط اتجاه المستند ولغته ونصوص المجاملة؛ فبريد إنجليزي يصل
+ * بـ `dir=ltr` و`lang=en` لا بقالب عربي يحمل نصّاً إنجليزياً مقلوباً.
+ * إشعار المكتب يبقى عربياً دائماً في `buildOfficeEmail`.
+ */
 export function buildClientConfirmation(opts: {
   name: string;
   heading: string;
   body: string;
+  locale?: Locale;
 }): { html: string; text: string } {
+  const locale = opts.locale ?? defaultLocale;
+  const t = dict(locale).clientEmail;
+  const dir = direction(locale);
+  const greeting = t.greeting(opts.name);
+
   const html = `<!doctype html>
-<html dir="rtl" lang="ar"><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:24px;background:#eef1f5;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl">
+<html dir="${dir}" lang="${htmlLang(locale)}"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#eef1f5;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:${dir}">
   <table role="presentation" style="max-width:600px;margin:0 auto;background:#fff;border-radius:14px;border:1px solid #dfe3e8" width="100%">
     <tr><td style="background:#1a3a52;padding:22px 24px;border-radius:14px 14px 0 0">
       <div style="color:#fff;font-size:19px;font-weight:800">${escapeHtml(site.name)}</div>
     </td></tr>
     <tr><td style="padding:26px 24px;color:#1f2937;font-size:15px;line-height:1.9">
-      <p style="margin:0 0 12px">الأستاذ/ة ${escapeHtml(opts.name)}، تحية طيبة،</p>
+      <p style="margin:0 0 12px">${escapeHtml(greeting)}</p>
       <p style="margin:0 0 12px;font-weight:700;color:#1a3a52">${escapeHtml(opts.heading)}</p>
       <p style="margin:0 0 18px;white-space:pre-wrap">${escapeHtml(opts.body)}</p>
-      <p style="margin:0">للتواصل العاجل: <a href="${waLink()}" style="color:#128C7E;font-weight:700">واتساب ${escapeHtml(
-        site.contact.phoneLocal,
+      <p style="margin:0">${escapeHtml(t.urgentPrefix)} <a href="${waLink()}" style="color:#0c6358;font-weight:700">${escapeHtml(
+        t.whatsappWith(site.contact.phoneLocal),
       )}</a></p>
     </td></tr>
     <tr><td style="padding:16px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-radius:0 0 14px 14px">
@@ -121,6 +134,8 @@ export function buildClientConfirmation(opts: {
   </table>
 </body></html>`;
 
-  const text = `الأستاذ/ة ${opts.name}، تحية طيبة،\n\n${opts.heading}\n\n${opts.body}\n\nللتواصل العاجل واتساب: ${site.contact.phoneLocal}\n${site.url}`;
+  const text = `${greeting}\n\n${opts.heading}\n\n${opts.body}\n\n${t.urgentPrefix} ${t.whatsappWith(
+    site.contact.phoneLocal,
+  )}\n${site.url}`;
   return { html, text };
 }

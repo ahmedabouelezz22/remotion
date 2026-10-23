@@ -65,6 +65,7 @@ export async function POST(request: Request) {
       name,
       email,
       phone,
+      confirmationLocale: locale,
       confirmationHeading: dict(locale).clientEmail.contactHeading,
       confirmationBody: dict(locale).clientEmail.contactBody,
     },

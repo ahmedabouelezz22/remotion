@@ -1,27 +1,47 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { PageHeader } from '@/components/page-header';
 import { Badge, Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
-import { blogCategories, sortedArticles } from '@/content/blog';
-import { formatDateAr, readingTime } from '@/lib/utils';
+import { blogCategories, blogCategoryLabelsEn, sortedArticles } from '@/content/blog';
+import { dict, isLocale, path, type Locale } from '@/content/i18n';
+import { formatDate, readingTime } from '@/lib/utils';
 
-export const metadata: Metadata = {
-  title: 'المدونة القانونية',
-  description:
-    'مقالات وتحليلات قانونية أصلية في العقود والتحكيم والزكاة والضرائب وحماية البيانات والاقتصاد الدائري — موثّقة بمصادرها الرسمية.',
-  alternates: { canonical: '/blog' },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) return {};
+  const t = dict(raw as Locale);
+  return {
+    title: t.blogPage.title,
+    description: t.blogPage.metaDescription,
+    alternates: { canonical: `/${raw}/blog` },
+  };
+}
 
-export default function BlogPage() {
+export default async function BlogPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const t = dict(locale);
+  const isArabic = locale === 'ar';
+  const categoryLabel = (value: string) =>
+    isArabic ? value : (blogCategoryLabelsEn[value] ?? value);
+  const articleText = (article: (typeof sortedArticles)[number]) =>
+    isArabic ? { title: article.title, excerpt: article.excerpt } : article.en;
+
   const [lead, ...rest] = sortedArticles;
 
   return (
     <>
       <PageHeader
-        eyebrow="المدونة"
-        title="تحليلات قانونية موثّقة بمصادرها"
-        description="مقالات مكتوبة بصياغة أصلية، تُحيل إلى نصوصها ومصادرها الرسمية بروابط مباشرة، ولا تُقدَّم بديلاً عن الاستشارة في واقعة بعينها."
+        eyebrow={t.blogPage.eyebrow}
+        title={t.blogPage.title}
+        description={t.blogPage.description}
       />
 
       <Section>
@@ -32,41 +52,54 @@ export default function BlogPage() {
                 key={category}
                 className="rounded-full border border-sand-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600"
               >
-                {category}
+                {categoryLabel(category)}
               </span>
             ))}
           </div>
 
           {lead ? (
-            <Link href={`/blog/${lead.slug}`} className="group mb-10 block">
+            <Link href={path(locale, `/blog/${lead.slug}`)} className="group mb-10 block">
               <Card hover className="bg-navy-900 text-white">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <Badge tone="gold">{lead.category}</Badge>
+                  <Badge tone="gold">{categoryLabel(lead.category)}</Badge>
                   <span className="numeric text-xs text-navy-100/70">
-                    {formatDateAr(lead.publishedAt)} · {readingTime(lead.body)} دقائق قراءة
+                    {formatDate(lead.publishedAt, locale)} ·{' '}
+                    {t.blog.readingTime(readingTime(lead.body))}
                   </span>
                 </div>
                 <h2 className="mb-4 text-2xl leading-relaxed text-white transition-colors group-hover:text-gold-400 sm:text-[1.7rem]">
-                  {lead.title}
+                  {articleText(lead).title}
                 </h2>
-                <p className="max-w-3xl leading-9 text-navy-100/80">{lead.excerpt}</p>
-                <p className="mt-6 text-sm font-bold text-gold-400">اقرأ المقال ←</p>
+                <p className="max-w-3xl leading-9 text-navy-100/80">
+                  {articleText(lead).excerpt}
+                </p>
+                <p className="mt-6 text-sm font-bold text-gold-400">
+                  {t.blogPage.readArticle} {isArabic ? '←' : '→'}
+                </p>
               </Card>
             </Link>
           ) : null}
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {rest.map((article) => (
-              <Link key={article.slug} href={`/blog/${article.slug}`} className="group block">
+              <Link
+                key={article.slug}
+                href={path(locale, `/blog/${article.slug}`)}
+                className="group block"
+              >
                 <Card hover className="flex h-full flex-col">
-                  <Badge tone="navy">{article.category}</Badge>
+                  <Badge tone="navy">{categoryLabel(article.category)}</Badge>
                   <h2 className="mt-4 mb-3 text-lg leading-8 text-navy-900 transition-colors group-hover:text-gold-600">
-                    {article.title}
+                    {articleText(article).title}
                   </h2>
-                  <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{article.excerpt}</p>
+                  <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">
+                    {articleText(article).excerpt}
+                  </p>
                   <div className="numeric flex items-center justify-between text-xs text-slate-500">
-                    <time dateTime={article.publishedAt}>{formatDateAr(article.publishedAt)}</time>
-                    <span>{readingTime(article.body)} دقائق</span>
+                    <time dateTime={article.publishedAt}>
+                      {formatDate(article.publishedAt, locale)}
+                    </time>
+                    <span>{t.blogPage.minutesShort(readingTime(article.body))}</span>
                   </div>
                 </Card>
               </Link>

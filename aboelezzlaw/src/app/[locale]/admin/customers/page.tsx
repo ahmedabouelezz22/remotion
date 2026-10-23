@@ -37,7 +37,7 @@ export default async function AdminCustomersPage() {
                     href={clientWaLink(customer.phone, customer.name) ?? `tel:${customer.phone}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-bold text-[#128C7E] underline"
+                    className="text-xs font-bold text-whatsapp-700 underline"
                     dir="ltr"
                   >
                     {customer.phone}

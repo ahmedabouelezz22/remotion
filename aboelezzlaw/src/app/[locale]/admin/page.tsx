@@ -87,49 +87,49 @@ export default async function AdminHomePage() {
         <Stat
           label="إيراد الطلبات المدفوعة"
           value={formatPrice(metrics.revenuePaid)}
-          href="/admin/orders?status=paid"
+          href="/ar/admin/orders?status=paid"
         />
         <Stat
           label="طلبات بانتظار الدفع"
           value={String(metrics.ordersPending)}
-          href="/admin/orders?status=pending"
+          href="/ar/admin/orders?status=pending"
           tone={metrics.ordersPending > 0 ? 'warn' : 'default'}
         />
         <Stat
           label="مواعيد تنتظر التأكيد"
           value={String(metrics.bookingsPending)}
-          href="/admin/bookings?status=pending"
+          href="/ar/admin/bookings?status=pending"
           tone={metrics.bookingsPending > 0 ? 'warn' : 'default'}
         />
         <Stat
           label="إشعارات فشلت (24 ساعة)"
           value={String(metrics.notificationFailures24h)}
-          href="/admin/notifications?only=failures"
+          href="/ar/admin/notifications?only=failures"
           tone={metrics.notificationFailures24h > 0 ? 'warn' : 'default'}
         />
         <Stat
           label="إجمالي الطلبات"
           value={String(metrics.ordersTotal)}
-          href="/admin/orders"
+          href="/ar/admin/orders"
         />
         <Stat
           label="مواعيد قادمة"
           value={String(metrics.bookingsUpcoming)}
-          href="/admin/bookings"
+          href="/ar/admin/bookings"
         />
         <Stat
           label="اشتراكات نشطة"
           value={String(metrics.subscriptionsActive)}
-          href="/admin/subscriptions?status=active"
+          href="/ar/admin/subscriptions?status=active"
         />
         <Stat
           label="اشتراكات متأخّرة"
           value={String(metrics.subscriptionsPastDue)}
-          href="/admin/subscriptions?status=past_due"
+          href="/ar/admin/subscriptions?status=past_due"
           tone={metrics.subscriptionsPastDue > 0 ? 'warn' : 'default'}
         />
-        <Stat label="عملاء" value={String(metrics.customers)} href="/admin/customers" />
-        <Stat label="رسائل" value={String(metrics.messagesTotal)} href="/admin/messages" />
+        <Stat label="عملاء" value={String(metrics.customers)} href="/ar/admin/customers" />
+        <Stat label="رسائل" value={String(metrics.messagesTotal)} href="/ar/admin/messages" />
       </div>
 
       {failures.length > 0 ? (
@@ -148,7 +148,7 @@ export default async function AdminHomePage() {
             ))}
           </ul>
           <Link
-            href="/admin/notifications?only=failures"
+            href="/ar/admin/notifications?only=failures"
             className="mt-4 inline-block text-sm font-bold text-red-800 underline"
           >
             كل حالات الفشل
@@ -158,11 +158,11 @@ export default async function AdminHomePage() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { href: '/admin/orders', label: 'إدارة الطلبات', icon: ShoppingBag },
-          { href: '/admin/bookings', label: 'تأكيد المواعيد', icon: CalendarDays },
-          { href: '/admin/subscriptions', label: 'الاشتراكات', icon: RefreshCw },
-          { href: '/admin/customers', label: 'سجلّ العملاء', icon: Users },
-          { href: '/admin/notifications', label: 'حالة الإشعارات', icon: BellRing },
+          { href: '/ar/admin/orders', label: 'إدارة الطلبات', icon: ShoppingBag },
+          { href: '/ar/admin/bookings', label: 'تأكيد المواعيد', icon: CalendarDays },
+          { href: '/ar/admin/subscriptions', label: 'الاشتراكات', icon: RefreshCw },
+          { href: '/ar/admin/customers', label: 'سجلّ العملاء', icon: Users },
+          { href: '/ar/admin/notifications', label: 'حالة الإشعارات', icon: BellRing },
         ].map((item) => (
           <Link
             key={item.href}

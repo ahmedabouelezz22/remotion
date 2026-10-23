@@ -39,7 +39,7 @@ export default async function AdminMessagesPage() {
                           href={clientWaLink(message.phone, message.name) ?? `tel:${message.phone}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-bold text-[#128C7E] underline"
+                          className="font-bold text-whatsapp-700 underline"
                           dir="ltr"
                         >
                           {message.phone}

@@ -12,7 +12,7 @@ const variants: Record<Variant, string> = {
   outline:
     'border-2 border-navy-900 text-navy-900 hover:bg-navy-900 hover:text-white bg-transparent',
   ghost: 'text-navy-900 hover:bg-navy-50',
-  whatsapp: 'bg-[#128C7E] text-white hover:bg-[#0f7a6d] shadow-sm',
+  whatsapp: 'bg-whatsapp-600 text-white hover:bg-whatsapp-700 shadow-sm',
 };
 
 /*

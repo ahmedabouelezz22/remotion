@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   const fail = (message: string) =>
     NextResponse.redirect(
-      new URL(`/admin/login?error=${encodeURIComponent(message)}`, url.origin),
+      new URL(`/ar/admin/login?error=${encodeURIComponent(message)}`, url.origin),
     );
 
   if (!token) return fail('الرابط غير مكتمل.');
@@ -54,5 +54,5 @@ export async function GET(request: Request) {
     detail: { ip: clientIp(request) },
   });
 
-  return NextResponse.redirect(new URL('/admin', url.origin));
+  return NextResponse.redirect(new URL('/ar/admin', url.origin));
 }

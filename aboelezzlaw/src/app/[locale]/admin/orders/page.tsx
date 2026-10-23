@@ -60,7 +60,7 @@ export default async function AdminOrdersPage({
         {FILTERS.map((filter) => (
           <Link
             key={filter.value}
-            href={filter.value === 'all' ? '/admin/orders' : `/admin/orders?status=${filter.value}`}
+            href={filter.value === 'all' ? '/ar/admin/orders' : `/ar/admin/orders?status=${filter.value}`}
             className={
               active === filter.value
                 ? 'rounded-full bg-navy-900 px-4 py-2 text-xs font-bold text-white'
@@ -109,7 +109,7 @@ export default async function AdminOrdersPage({
                   href={clientWaLink(order.phone, order.name) ?? `tel:${order.phone}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-bold text-[#128C7E] underline"
+                  className="text-xs font-bold text-whatsapp-700 underline"
                   dir="ltr"
                 >
                   {order.phone}

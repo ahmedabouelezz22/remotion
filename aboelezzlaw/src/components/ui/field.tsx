@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
+/*
+ * `slate-500` تباينه 4.76:1 على الأبيض (مقبول) لكن 4.25:1 على `sand-100`
+ * (مرفوض). فنصّ الحقل المعطَّل يجلس على `sand-100` ⇒ `slate-600`.
+ */
 const controlBase =
-  'w-full rounded-xl border bg-white px-4 py-3 text-[0.95rem] text-navy-900 transition-colors placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500/35 disabled:bg-sand-100 disabled:text-slate-500';
+  'w-full rounded-xl border bg-white px-4 py-3 text-[0.95rem] text-navy-900 transition-colors placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500/35 disabled:bg-sand-100 disabled:text-slate-600';
 
 export function Field({
   label,

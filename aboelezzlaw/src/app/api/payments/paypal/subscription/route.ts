@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { defaultLocale, isLocale, type Locale } from '@/content/i18n';
 import { getProduct } from '@/content/products';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { requestOrigin } from '@/lib/origin';
@@ -8,6 +9,12 @@ import { nextPeriodEnd } from '@/lib/subscriptions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+/** لغة العودة تأتي من الرابط الذي بنيناه قبل التحويل إلى البوّابة */
+function returnLocale(url: URL): Locale {
+  const value = url.searchParams.get('locale');
+  return isLocale(value ?? '') ? (value as Locale) : defaultLocale;
+}
 
 /**
  * نقطة عودة العميل بعد موافقته على اشتراك PayPal المتكرّر.
@@ -23,9 +30,12 @@ export async function GET(request: Request) {
   const origin = requestOrigin(request);
   const subscriptionId = url.searchParams.get('subscription_id');
   const reference = url.searchParams.get('ref') ?? '';
+  const locale = returnLocale(url);
 
   if (!subscriptionId) {
-    return NextResponse.redirect(new URL('/checkout?error=missing_subscription', origin));
+    return NextResponse.redirect(
+      new URL(`/${locale}/checkout?error=missing_subscription`, origin),
+    );
   }
 
   const remote = await getPaypalSubscription(subscriptionId);
@@ -44,7 +54,10 @@ export async function GET(request: Request) {
       ],
     });
     return NextResponse.redirect(
-      new URL(`/checkout?error=subscription_not_active&ref=${encodeURIComponent(reference)}`, origin),
+      new URL(
+        `/${locale}/checkout?error=subscription_not_active&ref=${encodeURIComponent(reference)}`,
+        origin,
+      ),
     );
   }
 
@@ -91,6 +104,9 @@ export async function GET(request: Request) {
   });
 
   return NextResponse.redirect(
-    new URL(`/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`, origin),
+    new URL(
+      `/${locale}/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`,
+      origin,
+    ),
   );
 }

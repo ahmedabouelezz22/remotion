@@ -30,6 +30,7 @@ export interface OrderRow {
   city: string | null;
   notes: string | null;
   provider_ref: string | null;
+  locale: string;
   created_at: Date;
 }
 
@@ -82,14 +83,14 @@ export async function saveOrder(order: OrderDraft, method: string): Promise<bool
     await sql`
       INSERT INTO orders (
         id, email, name, phone, items, subtotal, shipping, total,
-        currency, method, status, address, city, notes
+        currency, method, status, address, city, notes, locale
       ) VALUES (
         ${order.reference}, ${order.customer.email}, ${order.customer.name},
         ${order.customer.phone},
         ${sql.json(order.items as unknown as postgres.JSONValue)}, ${order.subtotal},
         ${order.shipping}, ${order.total}, ${order.currency}, ${method},
         'pending', ${order.customer.address ?? null}, ${order.customer.city ?? null},
-        ${order.customer.notes ?? null}
+        ${order.customer.notes ?? null}, ${order.locale}
       )
       ON CONFLICT (id) DO NOTHING`;
     return true;

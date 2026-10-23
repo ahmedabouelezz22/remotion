@@ -5,11 +5,19 @@ import { CheckCircle2, Loader2, Mail, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, controlClass } from '@/components/ui/field';
+import { dict, type Locale } from '@/content/i18n';
 import { site, waLink } from '@/content/site';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
-export function AccountLoginForm({ initialError }: { initialError?: string }) {
+export function AccountLoginForm({
+  locale,
+  initialError,
+}: {
+  locale: Locale;
+  initialError?: string;
+}) {
+  const t = dict(locale);
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [feedback, setFeedback] = useState('');
@@ -23,7 +31,7 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
       const response = await fetch('/api/account/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale }),
       });
       const data = (await response.json()) as { ok: boolean; message: string };
 
@@ -31,7 +39,7 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
       setFeedback(data.message);
     } catch {
       setStatus('error');
-      setFeedback('تعذّر الاتصال بالخادم. حاول مرة أخرى.');
+      setFeedback(t.common.serverError);
     }
   }
 
@@ -39,13 +47,13 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
     return (
       <Card className="border-emerald-200 bg-emerald-50 text-center">
         <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-600" />
-        <h2 className="mb-3 text-xl text-emerald-900">تفقّد بريدك</h2>
+        <h2 className="mb-3 text-xl text-emerald-900">{t.account.checkEmail}</h2>
         <p className="mx-auto mb-6 max-w-md text-sm leading-8 text-emerald-800">{feedback}</p>
         <p className="text-xs text-emerald-700">
-          لم تجد الرسالة؟ راجِع مجلد «البريد غير المرغوب» (Spam).
+          {t.account.spamHint}
         </p>
         <Button variant="outline" size="sm" className="mt-6" onClick={() => setStatus('idle')}>
-          إرسال رابط جديد
+          {t.account.sendNewLink}
         </Button>
       </Card>
     );
@@ -59,10 +67,9 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
         <Mail className="h-6 w-6" />
       </span>
 
-      <h2 className="mb-2.5 text-xl text-navy-900">الدخول إلى حسابك</h2>
+      <h2 className="mb-2.5 text-xl text-navy-900">{t.account.loginTitle}</h2>
       <p className="mb-7 text-sm leading-8 text-slate-600">
-        أدخل البريد الذي استخدمته في طلباتك، ويصلك رابط دخول مؤقّت. لا حاجة إلى كلمة مرور —
-        فلا شيء يمكن أن يُسرق أو يُنسى.
+        {t.account.loginBody}
       </p>
 
       {initialError ? (
@@ -76,7 +83,7 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
       ) : null}
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        <Field label="البريد الإلكتروني" htmlFor="login-email" required>
+        <Field label={t.account.loginTitle} htmlFor="login-email" required>
           <input
             id="login-email"
             type="email"
@@ -105,7 +112,7 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
                 rel="noopener noreferrer"
                 className="mt-1 inline-block font-bold underline"
               >
-                مراسلتنا على واتساب {site.contact.phoneLocal}
+                {t.forms.contactOnWhatsapp(site.contact.phoneLocal)}
               </a>
             </div>
           </div>
@@ -115,10 +122,10 @@ export function AccountLoginForm({ initialError }: { initialError?: string }) {
           {busy ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              جارٍ الإرسال...
+              {t.common.sending}
             </>
           ) : (
-            'أرسل رابط الدخول'
+            t.account.loginSubmit
           )}
         </Button>
       </form>

@@ -61,31 +61,87 @@ export const en: Dictionary = {
   },
 
   home: {
-    heroEyebrow: 'Remote legal counsel',
-    heroTitle: 'A written legal opinion you can act on',
+    heroBadge: 'Remote legal services across the Arab world',
+    heroTitle1: 'Specialised legal services',
+    heroTitle2: 'remote, with the precision of being there',
     heroBody:
-      'A practice focused on drafting and reviewing contracts, corporate disputes, and Zakat and tax matters, for clients in Egypt and Saudi Arabia. Every consultation ends with a written summary setting out the opinion, the risks, and the next step.',
+      'Contract drafting and review, litigation and disputes, corporate and start-up services, employment law and digital compliance. Scope and fees are agreed in writing before work begins, and the deliverable is a written opinion you can act on.',
     heroCta: 'Book a consultation',
-    heroSecondary: 'Browse services',
+    heroWhatsapp: 'Message us on WhatsApp',
+    heroWhatsappMessage: 'Hello, I would like to ask about your legal services.',
+    stats: [
+      { value: '1000+', label: 'legal services delivered' },
+      { value: '2', label: 'jurisdictions' },
+      { value: '24h', label: 'usual response time' },
+    ],
+    howTitle: 'How we work',
+    howBody: 'Four clear steps from first contact.',
+    steps: [
+      {
+        step: '1',
+        title: 'Contact and scoping',
+        body: 'You describe the matter, and we identify the documents we need.',
+      },
+      {
+        step: '2',
+        title: 'Written proposal',
+        body: 'Scope, fees and timeline — in writing, before work begins.',
+      },
+      {
+        step: '3',
+        title: 'Analysis and execution',
+        body: 'Reviewing the documents and preparing the opinion or document requested.',
+      },
+      {
+        step: '4',
+        title: 'Delivery and follow-up',
+        body: 'A written document and a discussion session on the next steps.',
+      },
+    ],
     servicesEyebrow: 'Practice areas',
-    servicesTitle: 'What we work on',
-    servicesBody:
-      'Each service has a defined scope and a written deliverable — you know what you are getting before you pay.',
+    servicesTitle: 'Services built on specialisation, not generalities',
+    servicesDescription:
+      'Every service has a defined scope and known deliverables, so you know what you will receive before you start.',
     serviceDetails: 'Service details',
-    whyEyebrow: 'How we work',
-    whyTitle: 'Why this firm',
+    pillarsEyebrow: 'Method',
+    pillarsTitle: 'What sets this work apart',
+    pillarsDescription:
+      'The difference is not knowing the texts — the texts are available to everyone. The difference is ordering the priorities and estimating the cost.',
+    pillars: [
+      {
+        title: 'A written, reasoned opinion',
+        body: 'Every consultation ends in a written document setting out the opinion, its basis and the alternatives — not a verbal answer that is forgotten.',
+      },
+      {
+        title: 'A cost estimate before starting',
+        body: 'Scope, fees and delivery time are agreed in writing before work begins, so there are no surprises on the invoice.',
+      },
+      {
+        title: 'An economic reading of the matter',
+        body: 'The legally correct solution is not always the financially sounder one. We put cost and time on the scales of the decision.',
+      },
+      {
+        title: 'Committed confidentiality',
+        body: 'Documents are not circulated outside the firm, and a non-disclosure agreement can be signed before any paper is sent.',
+      },
+    ],
     storeEyebrow: 'Store',
-    storeTitle: 'Services at published prices',
-    storeBody: 'Pick what fits and see the price before you buy — no opening negotiation on fees.',
-    storeCta: 'Browse the store',
-    blogEyebrow: 'Insights',
-    blogTitle: 'Articles with their sources cited',
+    storeTitle: 'Services and products at known prices',
+    storeDescription:
+      'See the scope and the price before getting in touch — with no preliminary negotiation over fees.',
+    storeCta: 'Browse the full store',
+    blogEyebrow: 'Blog',
+    blogTitle: 'Legal analysis documented from its sources',
+    blogDescription:
+      'Original articles that link directly to their official texts and sources.',
     blogCta: 'All articles',
-    ctaTitle: 'Have a specific matter?',
+    faqEyebrow: 'FAQ',
+    faqTitle: 'What most clients ask about',
+    ctaTitle: 'Do you have a matter that needs a legal opinion?',
     ctaBody:
-      'Send the details and documents, and you will receive an estimate of scope, price and timeline before you commit to anything.',
+      'Book a consultation or message us directly. We will set out the scope, the fees and the timeline before any commitment from you.',
     ctaPrimary: 'Book a consultation',
-    ctaSecondary: 'Message us on WhatsApp',
+    ctaSecondary: 'Contact us',
   },
 
   booking: {
@@ -366,6 +422,9 @@ export const en: Dictionary = {
   },
 
   clientEmail: {
+    greeting: (name: string) => `Dear ${name},`,
+    urgentPrefix: 'For urgent matters:',
+    whatsappWith: (phone: string) => `WhatsApp ${phone}`,
     contactHeading: 'We have your message',
     contactBody:
       'Thank you for contacting the firm. We have read your message and will reply within one business day under normal circumstances. If the matter is urgent, message us directly on WhatsApp.',
@@ -378,6 +437,18 @@ export const en: Dictionary = {
     heading: 'Your sign-in link',
     body: (link: string, minutes: number) =>
       `Open the link below to access your account and follow your orders and appointments:\n\n${link}\n\nThe link is valid for ${minutes} minutes and can be used once only.\n\nIf you did not request it, ignore this message — nothing will happen, and nobody can reach your account without opening this link from your inbox.`,
+  },
+
+  /** بريد تسليم الطلب — بلغة الصفحة التي اشترى العميل منها */
+  deliveryEmail: {
+    subject: (reference: string) => `Your order ${reference} is confirmed`,
+    heading: (reference: string) => `Payment confirmed — order ${reference}`,
+    confirmed: (reference: string) => `Payment for your order ${reference} has been confirmed.`,
+    downloadsTitle: (hours: number) => `Download links (valid for ${hours} hours):`,
+    subscriptionsTitle: 'Subscriptions activated:',
+    subscriptionUntil: (name: string, date: string) => `${name} — until ${date}`,
+    bookingLine: (url: string) => `To schedule your session: ${url}`,
+    accountLine: (url: string) => `You can follow your orders at any time at: ${url}`,
   },
 
   forms: {
@@ -646,6 +717,169 @@ export const en: Dictionary = {
       },
       { title: 'The summary', body: 'You receive a written summary of the opinion and next steps.' },
     ],
+  },
+
+  servicesPage: {
+    eyebrow: 'Practice areas',
+    title: 'Legal services',
+    description:
+      'Every service is defined by its scope, its deliverables and who it suits, so you know what you will receive before you begin.',
+    metaDescription:
+      'The firm’s services: corporate advisory, contract review and drafting, Zakat and tax, employment contracts, disputes and arbitration, and regulatory compliance.',
+    outsideTitle: 'Is your matter outside this list?',
+    outsideBody:
+      'Write to us with the details and we will say whether it falls within our scope, or point you to the right place.',
+    contactUs: 'Contact us',
+    notFound: 'Service not found',
+    serviceEyebrow: 'Service',
+    scopeHeading: 'Scope of the service',
+    receiveHeading: 'What you receive',
+    forWhomHeading: 'Who this is for',
+    startTitle: 'Start now',
+    startBody:
+      'Book a consultation to discuss your matter and settle the scope of work and the fees in writing before anything begins.',
+    bookConsultation: 'Book a consultation',
+    enquireOnWhatsapp: 'Enquire on WhatsApp',
+    enquiryMessage: (title: string) => `Hello, I would like to enquire about: ${title}`,
+  },
+
+  blogPage: {
+    eyebrow: 'Insights',
+    title: 'Legal analysis, with its sources cited',
+    description:
+      'Originally written articles that link directly to their texts and official sources, and are not offered as a substitute for advice on a particular matter.',
+    metaDescription:
+      'Original legal analysis on contracts, arbitration, Zakat and tax, data protection and the circular economy — each citing its official sources.',
+    readArticle: 'Read the article',
+    minutesShort: (minutes: number) => `${minutes} min`,
+    sourcesTitle: 'Sources and references',
+    sourcesNote:
+      'The links above lead to official portals or international institutions. When building on a legislative text in a particular matter, refer to the operative version published in the official gazette or the competent official portal.',
+    appliesTitle: 'Does this apply to your situation?',
+    appliesBody:
+      'This article is general analysis. To assess its effect on your position specifically, book a consultation or write to us with the details.',
+    notFound: 'Article not found',
+    publishedOn: 'Published',
+    updatedOn: 'Updated',
+    arabicNoticeTitle: 'This article is published in Arabic',
+    readInArabic: 'Read the full article in Arabic',
+  },
+
+  accountPage: {
+    eyebrow: 'My account',
+    dashboardTitle: 'Customer dashboard',
+    dashboardShort: 'Dashboard',
+    description:
+      'Follow your orders, appointments and subscriptions, and re-download your digital products at any time.',
+    notConfiguredTitle: 'The account area is not configured yet',
+    notConfiguredBody:
+      'This page needs DATABASE_URL and AUTH_SECRET set in the environment variables. See the README. Until then, every order and appointment still reaches you by email and WhatsApp as usual.',
+    filesToDownload: 'Files to download',
+    logout: 'Sign out',
+    yourDownloads: 'Your digital products',
+    downloadsNote: 'The links are regenerated each time you open this page, so expiry is not a concern.',
+    yourSubscriptions: 'Your subscriptions',
+    yourOrders: 'Your orders',
+    yourBookings: 'Your appointments',
+    yourMessages: 'Your messages to us',
+    noOrdersBrowse: 'No orders yet.',
+    noBookingsBook: 'No appointments yet.',
+    renewSubscription: 'Renew subscription',
+    stoppedEndsOn: 'Automatic renewal stopped — ends on ',
+    currentPeriodUntil: 'Current period until ',
+    endedOn: 'Ended on ',
+    daysLeft: (days: number) => ` (${days} day${days === 1 ? '' : 's'} left)`,
+    atTime: (date: string, time: string) => `${date} — ${time}`,
+    cancelConfirm: 'Stop automatic renewal?',
+    cancelYes: 'Yes, stop it',
+    cancelNo: 'Cancel',
+  },
+
+  aboutPage: {
+    eyebrow: 'About',
+    title: 'About Ahmed Aboelezz',
+    metaDescription:
+      'Ahmed Aboelezz — legal consultant specialising in commercial law, corporate law and litigation, and a PhD researcher in law.',
+    description:
+      'A legal consultant with broad experience across the full range of legal services, specialising in contract drafting, commercial and corporate law, litigation and dispute resolution.',
+    photoAlt: 'Ahmed Aboelezz — founder and legal consultant',
+    initials: 'AA',
+    founderName: 'Ahmed Aboelezz',
+    introHeading: 'A specialised legal consultant',
+    introBody:
+      'The firm provides specialised legal services remotely to clients in Egypt, the Kingdom of Saudi Arabia and the wider region, sparing the client the burden of attending in person without any loss of precision or confidentiality.',
+    approachHeading: 'The idea the work rests on',
+    approachBody1:
+      'Much legal advice is delivered as an answer to one question alone: what does the law say? Yet the decision-maker — a company or an individual — needs an answer to two questions at once: what is the legal position, and what does each available option cost in light of it?',
+    approachBody2:
+      'Combining legal practice with academic research makes that double question part of the method rather than an addition to it. A solution that holds up in law but not in economics is not a practical solution, and the reverse is equally true.',
+    commitmentHeading: 'Professional commitment',
+    commitmentBody1:
+      'Professional confidentiality is a legal obligation, not a commercial choice. Neither documents nor the content of a consultation are disclosed to any third party except with the client’s written consent or in discharge of a legal obligation, and a non-disclosure agreement can be signed before any document is sent.',
+    commitmentBody2:
+      'Fees, scope of work and delivery time are also agreed in writing before any work begins, so no surprises arise after delivery.',
+    credentialsEyebrow: 'Credentials',
+    credentialsTitle: 'Academic and professional background',
+    credentials: [
+      {
+        title: 'Master of Laws',
+        body: 'With several specialised diplomas in commercial and corporate law.',
+      },
+      {
+        title: 'PhD researcher in law',
+        body: 'Research on regulatory and economic frameworks, combining legal analysis with economic analysis.',
+      },
+      {
+        title: 'More than 1,000 legal services',
+        body: 'Contract drafting and review, legal memoranda, representation and advisory work completed for individual and institutional clients.',
+      },
+      {
+        title: 'International courses',
+        body: 'Courses from international universities, among them the University of Pennsylvania and universities in London and Lund.',
+      },
+      {
+        title: 'Work with major institutions',
+        body: 'Legal advisory work for institutions and companies in Egypt and the Kingdom of Saudi Arabia.',
+      },
+      {
+        title: 'Fluent in Arabic and English',
+        body: 'Drafting and reviewing contracts and memoranda in both languages, which serves cross-border dealings.',
+      },
+    ],
+    clientsEyebrow: 'Organisations we have worked with',
+    clientsTitle: 'Trusted by institutions and companies',
+    clientsDescription:
+      'Organisations that have received legal advice or services. They are named to indicate the scope of experience, and naming them discloses no information belonging to them.',
+    clients: [
+      'Etisalat Egypt',
+      'Infinity',
+      'Baheya Foundation',
+      'Institutions in the Kingdom of Saudi Arabia',
+    ],
+    expertiseEyebrow: 'Areas of expertise',
+    expertiseTitle: 'What we handle',
+    expertise: [
+      'Contracts of every kind',
+      'Litigation and disputes',
+      'Corporate legal services',
+      'Employment contracts',
+      'Non-disclosure agreements (NDA)',
+      'Memoranda of understanding (MOU)',
+      'Corporate bylaws',
+      'Legal memoranda',
+      'Representation before courts and authorities',
+      'Corporate disputes',
+      'Banking and investment sector',
+      'Commercial and civil disputes',
+      'Medical negligence',
+      'Labour disputes',
+      'Administrative law',
+    ],
+    ctaTitle: 'Shall we start with your matter?',
+    ctaBody:
+      'Book a consultation to discuss your matter, or browse the store to see the scope and price of each service in advance.',
+    ctaPrimary: 'Book a consultation',
+    ctaSecondary: 'Store',
   },
 
   orderStatus: {

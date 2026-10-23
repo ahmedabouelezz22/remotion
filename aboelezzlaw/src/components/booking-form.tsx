@@ -149,7 +149,7 @@ export function BookingForm({ locale }: { locale: Locale }) {
             href={waLink(t.bookingForm.confirmMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-xl bg-[#128C7E] px-4 py-2 text-sm font-bold text-white"
+            className="inline-flex items-center rounded-xl bg-whatsapp-600 px-4 py-2 text-sm font-bold text-white"
           >
             {t.bookingForm.quickConfirm}
           </a>
@@ -266,7 +266,7 @@ export function BookingForm({ locale }: { locale: Locale }) {
         </span>
 
         {!values.date ? (
-          <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-500">
+          <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-600">
             {t.bookingForm.pickDateFirst}
           </p>
         ) : dayIsClosed ? (
@@ -274,7 +274,7 @@ export function BookingForm({ locale }: { locale: Locale }) {
             {t.bookingForm.dayClosedWithHours(t.contactPage.workingHoursLabel)}
           </p>
         ) : loadingSlots ? (
-          <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-500">
+          <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-600">
             {t.bookingForm.checkingSlots}
           </p>
         ) : availableCount === 0 ? (
