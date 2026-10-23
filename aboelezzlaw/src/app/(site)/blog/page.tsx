@@ -42,7 +42,7 @@ export default function BlogPage() {
               <Card hover className="bg-navy-900 text-white">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                   <Badge tone="gold">{lead.category}</Badge>
-                  <span className="numeric text-xs text-navy-100/60">
+                  <span className="numeric text-xs text-navy-100/70">
                     {formatDateAr(lead.publishedAt)} · {readingTime(lead.body)} دقائق قراءة
                   </span>
                 </div>
@@ -64,7 +64,7 @@ export default function BlogPage() {
                     {article.title}
                   </h2>
                   <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{article.excerpt}</p>
-                  <div className="numeric flex items-center justify-between text-xs text-slate-400">
+                  <div className="numeric flex items-center justify-between text-xs text-slate-500">
                     <time dateTime={article.publishedAt}>{formatDateAr(article.publishedAt)}</time>
                     <span>{readingTime(article.body)} دقائق</span>
                   </div>

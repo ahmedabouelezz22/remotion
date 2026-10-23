@@ -166,7 +166,7 @@ export default function HomePage() {
                   <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{service.short}</p>
                   <Link
                     href={`/services/${service.slug}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
+                    className="-my-2 inline-flex min-h-[40px] items-center gap-1.5 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
                   >
                     تفاصيل الخدمة
                     <ArrowLeft className="h-3.5 w-3.5" />
@@ -260,7 +260,7 @@ export default function HomePage() {
                     {article.title}
                   </h3>
                   <p className="mb-5 flex-1 text-sm leading-8 text-slate-600">{article.excerpt}</p>
-                  <time className="numeric text-xs font-semibold text-slate-400" dateTime={article.publishedAt}>
+                  <time className="numeric text-xs font-semibold text-slate-500" dateTime={article.publishedAt}>
                     {formatDateAr(article.publishedAt)}
                   </time>
                 </Card>
@@ -313,7 +313,7 @@ export default function HomePage() {
               اتصل بنا
             </ButtonLink>
           </div>
-          <p className="numeric mt-8 text-sm text-navy-100/60" dir="ltr">
+          <p className="numeric mt-8 text-sm text-navy-100/70" dir="ltr">
             {site.contact.phoneLocal} · {site.contact.email}
           </p>
         </Container>

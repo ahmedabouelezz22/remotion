@@ -87,7 +87,7 @@ export default async function AdminSubscriptionsPage({
               </td>
               <td className="px-4 py-3 text-xs leading-6 text-slate-600">
                 {getProduct(subscription.product_slug)?.name ?? subscription.product_slug}
-                <span className="block text-slate-400">{subscription.period}</span>
+                <span className="block text-slate-500">{subscription.period}</span>
               </td>
               <td className="numeric px-4 py-3 whitespace-nowrap text-xs text-slate-600">
                 {subscription.current_period_end
@@ -102,7 +102,7 @@ export default async function AdminSubscriptionsPage({
               <td className="px-4 py-3 text-xs text-slate-600">
                 {subscription.provider}
                 {subscription.provider_subscription_id ? (
-                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-400">
+                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-500">
                     {subscription.provider_subscription_id}
                   </span>
                 ) : null}

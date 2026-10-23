@@ -84,7 +84,7 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
                   {formatPrice(product.price, product.currency)}
                 </span>
                 {product.compareAtPrice ? (
-                  <span className="numeric text-sm text-slate-400 line-through">
+                  <span className="numeric text-sm text-slate-500 line-through">
                     {formatPrice(product.compareAtPrice, product.currency)}
                   </span>
                 ) : null}
@@ -99,7 +99,7 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
 
               <Link
                 href={`/store/${product.slug}`}
-                className="mt-3 text-center text-xs font-bold text-slate-500 transition-colors hover:text-navy-900"
+                className="mt-3 inline-flex min-h-[40px] items-center justify-center text-center text-xs font-bold text-slate-500 transition-colors hover:text-navy-900"
               >
                 عرض التفاصيل الكاملة
               </Link>

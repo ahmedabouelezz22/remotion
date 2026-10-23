@@ -14,7 +14,8 @@
     "test:unit": "tsx --test tests/unit.test.mts",
     "test:integration": "bash tests/run-integration.sh",
     "verify": "npm run typecheck && npm run lint && npm run test:unit && npm run build",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:browser": "node tests/browser.mjs"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -36,10 +37,12 @@
     "@types/nodemailer": "7.0.4",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
+    "axe-core": "^4.12.0",
     "docx": "^9.0.2",
     "eslint": "^9.39.1",
     "eslint-config-next": "^15.5.28",
     "jszip": "^3.10.1",
+    "playwright": "^1.56.1",
     "tailwindcss": "4.3.3",
     "tsx": "^4.20.3",
     "typescript": "5.7.3"

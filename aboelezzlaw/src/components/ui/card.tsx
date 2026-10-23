@@ -31,11 +31,16 @@ export function Badge({
   children: ReactNode;
   tone?: 'gold' | 'navy' | 'muted' | 'green';
 }) {
+  /*
+   * الخلفيات معتمة بقصد. الشفّافية تجعل تباين الشارة رهناً بما تحتها: نفس
+   * الشارة الذهبية كانت 4.8:1 فوق الأبيض و1.7:1 فوق قسم كحلي — أي غير
+   * مقروءة في البطل العلوي للمدونة. اللون المعتم يجعل الشارة مكتفية بنفسها.
+   */
   const tones = {
-    gold: 'bg-gold-500/15 text-gold-600 border-gold-500/30',
-    navy: 'bg-navy-900/8 text-navy-800 border-navy-900/15',
+    gold: 'bg-gold-50 text-gold-600 border-gold-500/40',
+    navy: 'bg-navy-50 text-navy-800 border-navy-200',
     muted: 'bg-sand-100 text-slate-600 border-sand-200',
-    green: 'bg-emerald-500/12 text-emerald-700 border-emerald-500/25',
+    green: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   };
   return (
     <span

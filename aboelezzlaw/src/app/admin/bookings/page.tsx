@@ -96,7 +96,7 @@ export default async function AdminBookingsPage({
               <td className="px-4 py-3 whitespace-nowrap">
                 <p className="font-semibold text-navy-900">{formatDateAr(booking.slot_date)}</p>
                 <p className="numeric text-xs text-slate-500">{booking.slot_time}</p>
-                <p className="mt-1 font-mono text-[0.65rem] text-slate-400">{booking.id}</p>
+                <p className="mt-1 font-mono text-[0.65rem] text-slate-500">{booking.id}</p>
               </td>
               <td className="px-4 py-3">
                 <p className="font-semibold text-navy-900">{booking.name}</p>

@@ -287,7 +287,7 @@ export function CheckoutForm({ providers }: { providers: ProviderOption[] }) {
             <li key={product.slug} className="flex justify-between gap-3">
               <span className="min-w-0 text-slate-700">
                 {product.name}
-                {quantity > 1 ? <span className="numeric text-slate-400"> × {quantity}</span> : null}
+                {quantity > 1 ? <span className="numeric text-slate-500"> × {quantity}</span> : null}
               </span>
               <span className="numeric shrink-0 font-bold text-navy-900">
                 {formatPrice(product.price * quantity, product.currency)}

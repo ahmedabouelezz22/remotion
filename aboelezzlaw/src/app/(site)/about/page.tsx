@@ -61,14 +61,29 @@ export default function AboutPage() {
         <Container size="wide">
           <div className="grid items-start gap-12 lg:grid-cols-[0.85fr_1.15fr]">
             <div className="overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-sm">
-              <Image
-                src={site.brand.founderPhoto}
-                alt="أحمد أبو العز — المؤسس والمستشار القانوني"
-                width={720}
-                height={900}
-                className="h-auto w-full object-cover"
-                priority
-              />
+              {site.brand.founderPhoto ? (
+                <Image
+                  src={site.brand.founderPhoto}
+                  alt="أحمد أبو العز — المؤسس والمستشار القانوني"
+                  width={720}
+                  height={900}
+                  className="h-auto w-full object-cover"
+                  priority
+                />
+              ) : (
+                /* لا صورة مضبوطة ⇒ بطاقة نصّية. صورة مكسورة أسوأ من غيابها. */
+                <div className="flex aspect-[4/5] flex-col items-center justify-center gap-4 bg-navy-900 p-8 text-center">
+                  <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold-500/50 font-display text-2xl font-black text-gold-400">
+                    أ.ع
+                  </span>
+                  <span className="font-display text-xl font-extrabold text-white">
+                    أحمد أبو العز
+                  </span>
+                  <span className="text-sm leading-7 text-navy-100/80">
+                    المؤسس والمستشار القانوني
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="article-body">

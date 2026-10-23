@@ -79,7 +79,47 @@ jobs:
 
       - run: npm ci
 
+      # المتصفّح يُنزَّل في وظيفة منفصلة؛ هنا نكتفي بمجموعات الخادم
       - name: اختبارات التكامل
         run: npm run test:integration
         env:
           DATABASE_URL: postgres://app:app@127.0.0.1:5432/aboelezz
+          SKIP_BROWSER: '1'
+
+  browser:
+    name: المتصفّح — تخطيط واتجاه وإمكانية وصول
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: aboelezz
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: aboelezzlaw/package-lock.json
+
+      - run: npm ci
+
+      - name: تنزيل Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: فحص المتصفّح
+        # المسار الافتراضي خاصّ ببيئة التطوير؛ في CI تتولّاه playwright
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgres://app:app@127.0.0.1:5432/aboelezz
+          CHROMIUM_PATH: ''
+          SKIP_SERVER_SUITES: '1'

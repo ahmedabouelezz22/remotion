@@ -54,7 +54,7 @@ export default function ServicesPage() {
                   </ul>
                   <Link
                     href={`/services/${service.slug}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
+                    className="-my-2 inline-flex min-h-[40px] items-center gap-1.5 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
                   >
                     تفاصيل الخدمة والمخرجات
                     <ArrowLeft className="h-3.5 w-3.5" />

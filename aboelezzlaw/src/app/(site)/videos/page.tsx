@@ -97,7 +97,7 @@ export default async function VideosPage() {
                       ) : (
                         <div className="flex-1" />
                       )}
-                      <div className="flex items-center justify-between text-xs text-slate-400">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
                         {video.publishedAt ? (
                           <time className="numeric" dateTime={video.publishedAt}>
                             {formatDateAr(video.publishedAt)}
@@ -118,7 +118,7 @@ export default async function VideosPage() {
           )}
 
           {source === 'fallback' && videos.length > 0 ? (
-            <p className="mt-8 text-center text-xs text-slate-400">
+            <p className="mt-8 text-center text-xs text-slate-500">
               تُعرض قائمة احتياطية — تعذّر الاتصال بتغذية اليوتيوب في هذه اللحظة.
             </p>
           ) : null}

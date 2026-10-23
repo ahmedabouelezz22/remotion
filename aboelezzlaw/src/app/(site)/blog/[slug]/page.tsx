@@ -159,7 +159,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
           <Link
             href="/blog"
-            className="mt-12 inline-flex items-center gap-2 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
+            className="mt-12 inline-flex min-h-[40px] items-center gap-2 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
           >
             <ArrowRight className="h-4 w-4" />
             العودة إلى المدونة

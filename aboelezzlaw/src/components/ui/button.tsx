@@ -15,10 +15,15 @@ const variants: Record<Variant, string> = {
   whatsapp: 'bg-[#128C7E] text-white hover:bg-[#0f7a6d] shadow-sm',
 };
 
+/*
+ * الحدّ الأدنى للارتفاع مقصود: المقاس الصغير كان 36px، وهو أصغر من أن يُلمس
+ * بثقة بإصبع على الهاتف. 40px حدّ عملي مريح، والمقاسان الآخران يتجاوزانه
+ * بحشوهما أصلاً — فالقيد هنا لا يغيّر شكلهما.
+ */
 const sizes: Record<Size, string> = {
-  sm: 'px-4 py-2 text-sm',
-  md: 'px-6 py-3 text-[0.95rem]',
-  lg: 'px-8 py-4 text-base',
+  sm: 'min-h-[40px] px-4 py-2 text-sm',
+  md: 'min-h-[48px] px-6 py-3 text-[0.95rem]',
+  lg: 'min-h-[56px] px-8 py-4 text-base',
 };
 
 const base =

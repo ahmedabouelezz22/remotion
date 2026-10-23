@@ -75,6 +75,14 @@ if [ -z "${DATABASE_URL:-}" ]; then
 
   PGDATA=/home/pgtest/pgdata
   id pgtest >/dev/null 2>&1 || useradd -m pgtest
+  # نسخة سابقة ما زالت تعمل تمنع التهيئة. نُوقفها بالطريقة النظيفة إن وُجد
+  # ملف المعرّف، ثم نُحرّر المنفذ على أي حال: حذف مجلّد القاعدة في تشغيل
+  # سابق يُفقد ملف المعرّف بينما تبقى العملية حيّة ممسكة بالمنفذ.
+  if [ -f "$PGDATA/postmaster.pid" ]; then
+    su pgtest -c "PATH=$PGBIN:\$PATH pg_ctl -D $PGDATA stop -m immediate" >/dev/null 2>&1 || true
+    sleep 2
+  fi
+  free_port 55432
   rm -rf "$PGDATA" /home/pgtest/sock
   mkdir -p "$PGDATA" /home/pgtest/sock
   chown -R pgtest:pgtest /home/pgtest
@@ -147,6 +155,9 @@ echo "   الخادم جاهز على $BASE"
 
 # ── التشغيل ──
 FAILED=0
+if [ "${SKIP_SERVER_SUITES:-0}" = "1" ]; then
+  echo "   مجموعات الخادم مُتجاوَزة (SKIP_SERVER_SUITES=1)"
+else
 step "المجموعة 1: الدخول والتفويض"
 psql "$DATABASE_URL" -c "TRUNCATE orders, bookings, subscriptions, messages, login_tokens, admin_audit, notification_log, product_flags" >/dev/null 2>&1 || true
 : > "$MAILBOX"
@@ -159,6 +170,15 @@ step "المجموعة 3: مسارات العميل — الأعطال الأص�
 psql "$DATABASE_URL" -c "TRUNCATE orders, bookings, subscriptions, messages, login_tokens, admin_audit, notification_log, product_flags" >/dev/null 2>&1 || true
 : > "$MAILBOX"
 (cd "$ROOT" && bash "$ROOT/tests/customer.sh") || FAILED=1
+
+fi
+
+step "المجموعة 4: المتصفّح — التخطيط والاتجاه وإمكانية الوصول"
+if [ "${SKIP_BROWSER:-0}" = "1" ]; then
+  echo "   تُجوهزت (SKIP_BROWSER=1)"
+else
+  (cd "$ROOT" && node "$ROOT/tests/browser.mjs") || FAILED=1
+fi
 
 rm -f "$ROOT/.env.production.local"
 

@@ -136,7 +136,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     {formatPrice(product.price, product.currency)}
                   </span>
                   {product.compareAtPrice ? (
-                    <span className="numeric text-base text-slate-400 line-through">
+                    <span className="numeric text-base text-slate-500 line-through">
                       {formatPrice(product.compareAtPrice, product.currency)}
                     </span>
                   ) : null}
@@ -219,7 +219,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           <Link
             href="/store"
-            className="mt-12 inline-flex items-center gap-2 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
+            className="mt-12 inline-flex min-h-[40px] items-center gap-2 text-sm font-bold text-navy-900 transition-colors hover:text-gold-600"
           >
             <ArrowRight className="h-4 w-4" />
             العودة إلى المتجر

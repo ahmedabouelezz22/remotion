@@ -53,7 +53,7 @@ export default async function AdminAuditPage() {
               <td className="px-4 py-3 text-xs text-slate-600">
                 {entry.target_type}
                 {entry.target_id ? (
-                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-400">
+                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-500">
                     {entry.target_id}
                   </span>
                 ) : null}

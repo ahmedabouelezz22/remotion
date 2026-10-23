@@ -86,7 +86,7 @@ export default async function AdminNotificationsPage({
               <td className="px-4 py-3 text-xs text-slate-600">
                 {CHANNELS[entry.channel] ?? entry.channel}
               </td>
-              <td className="px-4 py-3 font-mono text-[0.65rem] text-slate-400">
+              <td className="px-4 py-3 font-mono text-[0.65rem] text-slate-500">
                 {entry.reference ?? '—'}
               </td>
               <td className="px-4 py-3">

@@ -50,7 +50,7 @@ export default async function AdminProductsPage() {
             <tr key={product.slug} className="border-b border-sand-100 align-top last:border-0">
               <td className="px-4 py-3">
                 <p className="font-semibold text-navy-900">{product.name}</p>
-                <p className="font-mono text-[0.65rem] text-slate-400">{product.slug}</p>
+                <p className="font-mono text-[0.65rem] text-slate-500">{product.slug}</p>
               </td>
               <td className="px-4 py-3 text-xs text-slate-600">{kindLabels[product.kind]}</td>
               <td className="numeric px-4 py-3 whitespace-nowrap text-sm text-navy-900">
@@ -58,7 +58,7 @@ export default async function AdminProductsPage() {
               </td>
               <td className="px-4 py-3 text-xs">
                 {product.kind !== 'digital' ? (
-                  <span className="text-slate-400">—</span>
+                  <span className="text-slate-500">—</span>
                 ) : !product.file ? (
                   <span className="font-bold text-amber-700">لا ملف محدَّد</span>
                 ) : fileMissing ? (
@@ -74,7 +74,7 @@ export default async function AdminProductsPage() {
                   <Badge tone="muted">مسحوب</Badge>
                 )}
                 {product.slug in flags ? (
-                  <span className="mt-1 block text-[0.65rem] text-slate-400">قرار المالك</span>
+                  <span className="mt-1 block text-[0.65rem] text-slate-500">قرار المالك</span>
                 ) : null}
               </td>
               <td className="px-4 py-3">

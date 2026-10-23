@@ -48,7 +48,7 @@ export default async function AdminMessagesPage() {
                     ) : null}
                   </p>
                 </div>
-                <p className="numeric text-xs text-slate-400">
+                <p className="numeric text-xs text-slate-500">
                   {message.created_at.toLocaleString('ar-EG')}
                 </p>
               </div>

@@ -31,7 +31,7 @@ export function SiteFooter() {
                 href={site.social.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:border-gold-500 hover:text-gold-400"
+                className="mt-5 inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:border-gold-500 hover:text-gold-400"
               >
                 <Youtube className="h-4 w-4" />
                 قناة اليوتيوب
@@ -116,21 +116,29 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-xs text-navy-100/55 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-xs text-navy-100/70 sm:flex-row">
           <p className="numeric">
             © {year} {site.name}. جميع الحقوق محفوظة.
           </p>
-          <div className="flex gap-5">
-            <Link href="/privacy" className="transition-colors hover:text-gold-400">
+          {/* حشو رأسي يرفع هدف اللمس إلى 40px على الهاتف — نصّ بارتفاع 16px
+              لا يُلمس بثقة بإصبع */}
+          <div className="flex gap-2">
+            <Link
+              href="/privacy"
+              className="-my-1 inline-flex min-h-[40px] items-center px-3 py-2 transition-colors hover:text-gold-400"
+            >
               سياسة الخصوصية
             </Link>
-            <Link href="/terms" className="transition-colors hover:text-gold-400">
+            <Link
+              href="/terms"
+              className="-my-1 inline-flex min-h-[40px] items-center px-3 py-2 transition-colors hover:text-gold-400"
+            >
               الشروط والأحكام
             </Link>
           </div>
         </div>
 
-        <p className="mt-6 rounded-xl bg-white/5 p-4 text-[0.72rem] leading-6 text-navy-100/50">
+        <p className="mt-6 rounded-xl bg-white/5 p-4 text-[0.72rem] leading-6 text-navy-100/70">
           إخلاء مسؤولية: المحتوى المنشور على هذا الموقع — بما فيه مقالات المدونة والمكتبة القانونية —
           ذو طبيعة تعريفية عامة، ولا يُعدّ استشارة قانونية في واقعة بعينها ولا تنشأ به علاقة
           مهنية بين الزائر والمكتب. الاعتماد عليه دون استشارة مباشرة يقع على مسؤولية القارئ وحده.

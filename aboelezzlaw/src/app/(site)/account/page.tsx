@@ -366,7 +366,7 @@ export default async function AccountPage({
                   >
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-navy-900">
                       {message.subject}
-                      <time className="numeric shrink-0 text-xs font-normal text-slate-400">
+                      <time className="numeric shrink-0 text-xs font-normal text-slate-500">
                         {formatDateAr(message.created_at)}
                       </time>
                     </summary>

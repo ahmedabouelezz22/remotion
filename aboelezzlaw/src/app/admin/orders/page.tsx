@@ -129,7 +129,7 @@ export default async function AdminOrdersPage({
               <td className="px-4 py-3 text-xs text-slate-600">
                 {order.method}
                 {order.provider_ref ? (
-                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-400">
+                  <span className="mt-1 block font-mono text-[0.65rem] text-slate-500">
                     {order.provider_ref}
                   </span>
                 ) : null}

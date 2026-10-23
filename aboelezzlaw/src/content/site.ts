@@ -29,11 +29,24 @@ export const site = {
     publicEmail: 'ahmed@aboelezzlaw.com',
   },
 
-  /** الشعار وصورة المؤسس — مستضافان على CDN الحالي */
+  /**
+   * أصول الهوية — محفوظة في المستودع لا على خادم غيرنا.
+   *
+   * كانت مستضافة على CDN منصّة Hostinger، فكان الموقع يحمّلها من هناك في كل
+   * صفحة: أي أن إيقاف الاشتراك القديم — وهو سبب هذا النقل — كان يُفقد الشعار
+   * وصورة المؤسس من الموقع كلّه. وقد تحقّق ذلك فعلاً في فحص المتصفّح: الصور
+   * كانت ترجع 500 ولا تُعرض.
+   *
+   * `logo` الآن علامة مؤقّتة داخل `public/brand/`. استبدلها بشعارك الفعلي:
+   * ضع الملف في `public/brand/` وعدّل المسار هنا.
+   *
+   * `founderPhoto` اختيارية (null). ضع صورتك في `public/brand/` واكتب مسارها
+   * هنا لتظهر في صفحة «عن المكتب»؛ وبدونها تُعرض بطاقة نصّية بدلاً منها —
+   * ولا تُعرض صورة مكسورة أبداً.
+   */
   brand: {
-    logo: 'https://horizons-cdn.hostinger.com/3a2dd157-d5f5-467f-9e25-3eb199af0c1f/copilot_20251129_000720-lmM10.png',
-    founderPhoto:
-      'https://horizons-cdn.hostinger.com/3a2dd157-d5f5-467f-9e25-3eb199af0c1f/chatgpt-image-26-o-uo3uo-o---2025o-02_06_21-ou-nYKP6.png',
+    logo: '/brand/logo.svg',
+    founderPhoto: null as string | null,
   },
 
   social: {
