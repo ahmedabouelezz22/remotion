@@ -22,6 +22,7 @@ const { checkSlot, isWorkingDay, slotsForDate, MAX_BOOKING_DAYS_AHEAD, todayInOf
 const { ownerEmails, isOwnerEmail, sameOrigin } = await import('@/lib/admin');
 const { products, getProduct, SHIPPING_FLAT_RATE } = await import('@/content/products');
 const { clientWaLink } = await import('@/lib/notifications/templates');
+const { jsonLdScript } = await import('@/lib/utils');
 const { articles } = await import('@/content/blog');
 
 // ───────────────────── توقيع Paymob ─────────────────────
@@ -454,6 +455,21 @@ describe('رابط واتساب للعميل', () => {
 
   it('يرفض رقماً أقصر من أن يكون رقماً', () => {
     assert.equal(clientWaLink('123', 'أحمد'), null);
+  });
+});
+
+// ───────────────────── JSON-LD ─────────────────────
+
+describe('JSON-LD داخل وسم script', () => {
+  it('لا يُخرج `<` حرفياً فلا يُمكن إغلاق الوسم', () => {
+    const output = jsonLdScript({ name: 'نصّ فيه </script><img onerror=x>' });
+    assert.ok(!output.includes('<'), output);
+    assert.ok(output.includes('\\u003c'));
+  });
+
+  it('يبقى JSON صالحاً يُفَكّ إلى نفس القيمة', () => {
+    const data = { a: 1, b: 'نصّ <b>عربي</b>', c: [1, 2] };
+    assert.deepEqual(JSON.parse(jsonLdScript(data)), data);
   });
 });
 

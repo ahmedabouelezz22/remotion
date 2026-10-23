@@ -2,7 +2,9 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { getProduct } from '@/content/products';
+import { isDbConfigured } from '@/lib/db';
 import { verifyDownloadToken } from '@/lib/download-token';
+import { getOrder } from '@/lib/repository';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,11 +47,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, message: 'المنتج غير متاح للتحميل.' }, { status: 404 });
   }
 
-  // تخزين خارجي: نعيد التوجيه إلى الرابط الموقّع لدى المزوّد
-  if (process.env.DOWNLOAD_BASE_URL) {
-    return NextResponse.redirect(
-      `${process.env.DOWNLOAD_BASE_URL.replace(/\/$/, '')}/${product.file}`,
-    );
+  // حالة الطلب تُفحص وقت التسليم لا وقت إصدار الرمز فقط. الرمز لا يُصدر إلا
+  // بعد الدفع، لكن مدّته 72 ساعة: فلو استُرد الطلب أو أُلغي خلالها ظلّ الرمز
+  // صالحاً. الفحص هنا يُغلق تلك النافذة ويجعل الشرط قائماً عند نقطة التسليم
+  // نفسها بدلاً من الاعتماد على انتباه كل موضع يُصدر رمزاً.
+  if (isDbConfigured()) {
+    const order = await getOrder(verified.claim.reference);
+    // `null` يعني تعذّر الوصول إلى القاعدة أيضاً، فلا نحجب عميلاً دفع فعلاً
+    // بسبب عطل في القاعدة؛ نحجب فقط إذا عرفنا أن الطلب ليس مدفوعاً.
+    if (order && order.status !== 'paid') {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: 'هذا الرابط لم يعد صالحاً لأن حالة الطلب تغيّرت. تواصل معنا برقم طلبك.',
+        },
+        { status: 403 },
+      );
+    }
   }
 
   // منع الخروج من مجلد الملفات عبر أسماء ملفات ملتوية

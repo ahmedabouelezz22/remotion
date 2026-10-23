@@ -225,6 +225,14 @@ check "رمز مُلفَّق مرفوض" "$C" "403"
 C=$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/download")
 check "بلا رمز مرفوض" "$C" "400"
 
+# الرمز صالح 72 ساعة، فتغيّر حالة الطلب خلالها يجب أن يُبطل التحميل
+$PSQL "update orders set status='refunded' where id='$PREF'" >/dev/null
+C=$(curl -sk -o /dev/null -w '%{http_code}' "$DL")
+check "رابط طلب مسترد مرفوض" "$C" "403"
+$PSQL "update orders set status='paid' where id='$PREF'" >/dev/null
+C=$(curl -sk -o /dev/null -w '%{http_code}' "$DL")
+check "ويعمل مرّة أخرى بعد إعادة الحالة" "$C" "200"
+
 echo
 echo "── 8) صفحة الحساب: لا يرى عميل طلبات غيره ──"
 curl -sk -o /dev/null -H 'Content-Type: application/json' -X POST $BASE/api/account/login -d '{"email":"paid@example.com"}'

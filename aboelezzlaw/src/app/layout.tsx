@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cairo, Tajawal } from 'next/font/google';
 import { site } from '@/content/site';
+import { jsonLdScript } from '@/lib/utils';
 import './globals.css';
 
 const cairo = Cairo({
@@ -99,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-dvh flex-col antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(structuredData) }}
         />
         {children}
       </body>

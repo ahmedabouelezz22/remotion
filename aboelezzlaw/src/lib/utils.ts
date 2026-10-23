@@ -27,3 +27,14 @@ export function readingTime(text: string): number {
   const words = text.trim().split(/\s+/).length;
   return Math.max(1, Math.round(words / 180));
 }
+
+/**
+ * JSON-LD داخل وسم script.
+ *
+ * `JSON.stringify` وحده لا يكفي: قيمة تحتوي `</script>` تُغلق الوسم وتسمح
+ * بحقن عنصر جديد. المحتوى هنا ملفّاتنا لا مُدخَل زائر، لكن المحرّر بعد سنة
+ * قد يلصق نصّاً فيه هذا التسلسل — فنُهرّب `<` دائماً.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}

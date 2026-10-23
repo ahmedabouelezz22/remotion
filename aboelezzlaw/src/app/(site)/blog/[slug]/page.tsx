@@ -10,7 +10,7 @@ import { Badge, Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
 import { articles, getArticle, sortedArticles } from '@/content/blog';
 import { site } from '@/content/site';
-import { formatDateAr, readingTime } from '@/lib/utils';
+import { formatDateAr, jsonLdScript, readingTime } from '@/lib/utils';
 
 export function generateStaticParams() {
   return articles.map((article) => ({ slug: article.slug }));
@@ -67,7 +67,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
 
       <PageHeader eyebrow={article.category} title={article.title} description={article.excerpt} />

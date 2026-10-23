@@ -44,10 +44,13 @@ PYEOF
 
 echo "── 1) رموز الدخول لمرة واحدة ──"
 curl -sk -X POST $BASE/api/account/login -H 'Content-Type: application/json' \
-  -d '{"email":"client@example.com"}' -o "$WORK/r1.json" -w '' 
-sleep 1
+  -d '{"email":"client@example.com"}' -o "$WORK/r1.json" -w ''
 LINK=$(last_link client@example.com)
-if [ -n "$LINK" ]; then ok "وصل رابط الدخول بالبريد"; else bad "لم يصل رابط دخول"; fi
+if [ -n "$LINK" ]; then
+  ok "وصل رابط الدخول بالبريد"
+else
+  bad "لم يصل رابط دخول — ردّ الخادم: $(cat "$WORK/r1.json" 2>/dev/null)"
+fi
 
 C1=$(curl -sk -o /dev/null -w '%{http_code}' -c "$JAR_DIR/c1.jar" "$LINK")
 check "الاستخدام الأول للرابط يُحوِّل" "$C1" "307"

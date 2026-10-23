@@ -10,7 +10,7 @@ import { Container, Section } from '@/components/ui/container';
 import { getProduct, kindLabels, products, SHIPPING_FLAT_RATE } from '@/content/products';
 import { site, waLink } from '@/content/site';
 import { catalogueProduct } from '@/lib/catalogue';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, jsonLdScript } from '@/lib/utils';
 
 // صفحة المنتج تعرض زرّ الشراء، فحالة النشر تُقرأ في كل طلب لا وقت البناء
 export const dynamic = 'force-dynamic';
@@ -59,7 +59,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
 
       <PageHeader eyebrow={product.category} title={product.name} description={product.summary} />

@@ -127,11 +127,22 @@ PIDS+=($!)
 node "$ROOT/tests/helpers/tls-proxy.mjs" > "$WORK/tls.log" 2>&1 &
 PIDS+=($!)
 
-for _ in $(seq 1 40); do
+# الانتظار يجب أن يُشترط ردّاً حقيقياً من الخادم لا مجرّد ردّ من الوسيط:
+# الوسيط يستجيب قبل أن يرتبط next بمنفذه، فيعيد 502 وينجح curl — فيبدأ
+# الاختبار على خادم لم يعمل بعد، وأول طلب يفشل بـ ECONNREFUSED.
+READY=0
+for _ in $(seq 1 60); do
   sleep 1
-  if curl -sk -o /dev/null "$BASE/" 2>/dev/null; then break; fi
+  if [ "$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/" 2>/dev/null)" = "200" ]; then
+    READY=1
+    break
+  fi
 done
-curl -sk -o /dev/null -w '' "$BASE/" || { tail -20 "$WORK/server.log" "$WORK/tls.log"; exit 1; }
+if [ "$READY" != "1" ]; then
+  echo "لم يصبح الخادم جاهزاً" >&2
+  tail -20 "$WORK/server.log" "$WORK/tls.log"
+  exit 1
+fi
 echo "   الخادم جاهز على $BASE"
 
 # ── التشغيل ──
