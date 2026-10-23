@@ -101,6 +101,57 @@ async function migrate(sql: postgres.Sql): Promise<void> {
   await sql`CREATE INDEX IF NOT EXISTS subs_email_idx ON subscriptions (lower(email))`;
   await sql`CREATE INDEX IF NOT EXISTS subs_due_idx ON subscriptions (status, current_period_end)`;
 
+  // رموز الدخول: الرمز الموقّع وحده قابل لإعادة الاستخدام حتى انتهائه،
+  // فنُسجّل كل رمز ونستهلكه ذرّياً عند أول استخدام — فيصبح لمرة واحدة فعلاً.
+  await sql`
+    CREATE TABLE IF NOT EXISTS login_tokens (
+      jti         text PRIMARY KEY,
+      email       text NOT NULL,
+      issued_ip   text,
+      expires_at  timestamptz NOT NULL,
+      consumed_at timestamptz,
+      created_at  timestamptz NOT NULL DEFAULT now()
+    )`;
+  await sql`CREATE INDEX IF NOT EXISTS login_tokens_email_idx ON login_tokens (lower(email), created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS login_tokens_ip_idx ON login_tokens (issued_ip, created_at DESC)`;
+
+  // سجلّ تدقيق لكل إجراء إداري حسّاس — من فعل ماذا ومتى
+  await sql`
+    CREATE TABLE IF NOT EXISTS admin_audit (
+      id          bigserial PRIMARY KEY,
+      actor_email text NOT NULL,
+      action      text NOT NULL,
+      target_type text NOT NULL,
+      target_id   text,
+      detail      jsonb,
+      created_at  timestamptz NOT NULL DEFAULT now()
+    )`;
+  await sql`CREATE INDEX IF NOT EXISTS admin_audit_time_idx ON admin_audit (created_at DESC)`;
+
+  // نتيجة كل محاولة إشعار، لتظهر الأعطال في لوحة المالك بدل أن تُدفن في اللوجات
+  await sql`
+    CREATE TABLE IF NOT EXISTS notification_log (
+      id         bigserial PRIMARY KEY,
+      kind       text NOT NULL,
+      channel    text NOT NULL,
+      reference  text,
+      ok         boolean NOT NULL,
+      error      text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`;
+  await sql`CREATE INDEX IF NOT EXISTS notification_log_time_idx ON notification_log (created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS notification_log_fail_idx ON notification_log (ok, created_at DESC)`;
+
+  // نشر المنتجات أو سحبها من المتجر دون نشر إصدار جديد من الكود
+  await sql`
+    CREATE TABLE IF NOT EXISTS product_flags (
+      slug       text PRIMARY KEY,
+      published  boolean NOT NULL,
+      note       text,
+      updated_by text,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`;
+
   await sql`
     CREATE TABLE IF NOT EXISTS messages (
       id         text PRIMARY KEY,

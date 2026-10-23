@@ -15,6 +15,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'horizons-cdn.hostinger.com' },
       { protocol: 'https', hostname: 'yt3.ggpht.com' },
     ],
+    // ثغرات تنفيذ التعليمات عن بُعد في مُحسِّن الصور ارتبطت تاريخياً بـ SVG و AVIF؛
+    // نقصر الإخراج على WebP ونُبقي SVG غير مسموح (الإعداد الافتراضي)
+    formats: ['image/webp'],
+    dangerouslyAllowSVG: false,
+    contentDispositionType: 'attachment',
   },
   async headers() {
     return [
@@ -25,6 +30,11 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'X-DNS-Prefetch-Control', value: 'off' },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
         ],
       },
     ];

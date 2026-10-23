@@ -14,8 +14,8 @@
   "dependencies": {
     "clsx": "2.1.1",
     "lucide-react": "0.469.0",
-    "next": "15.5.4",
-    "nodemailer": "6.9.16",
+    "next": "15.5.28",
+    "nodemailer": "10.2.1",
     "postgres": "^3.4.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.10.5",
-    "@types/nodemailer": "6.4.17",
+    "@types/nodemailer": "7.0.4",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
     "docx": "^9.0.2",
@@ -37,5 +37,10 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "postcss": "^8.5.31",
+    "sharp": "^0.35.5",
+    "source-map-js": "^1.2.2"
   }
 }

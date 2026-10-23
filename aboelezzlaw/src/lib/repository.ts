@@ -350,3 +350,204 @@ export async function listMessagesByEmail(email: string) {
   );
   return rows ?? [];
 }
+
+// ───────────────────── رموز الدخول (استخدام واحد) ─────────────────────
+
+/**
+ * يسجّل رمز دخول قبل إرساله. الرمز الموقّع وحده لا يكفي لأنه قابل لإعادة
+ * الاستخدام حتى انتهاء صلاحيته — والسجلّ هو ما يجعله لمرة واحدة.
+ */
+export async function recordLoginToken(input: {
+  jti: string;
+  email: string;
+  ip: string;
+  expiresAt: Date;
+}): Promise<boolean> {
+  const saved = await tryDb(async (sql) => {
+    await sql`
+      INSERT INTO login_tokens (jti, email, issued_ip, expires_at)
+      VALUES (${input.jti}, ${input.email}, ${input.ip}, ${input.expiresAt})`;
+    return true;
+  });
+  return saved ?? false;
+}
+
+/**
+ * يستهلك الرمز ذرّياً. الشرط `consumed_at IS NULL` داخل الـ UPDATE نفسه،
+ * فطلبان متزامنان بنفس الرمز لا ينجح منهما إلا واحد.
+ */
+export async function consumeLoginToken(
+  jti: string,
+): Promise<{ ok: true; email: string } | { ok: false; reason: 'unknown' | 'used' | 'expired' }> {
+  const consumed = await tryDb(
+    (sql) => sql<{ email: string }[]>`
+      UPDATE login_tokens
+         SET consumed_at = now()
+       WHERE jti = ${jti}
+         AND consumed_at IS NULL
+         AND expires_at > now()
+       RETURNING email`,
+  );
+
+  if (consumed === null) return { ok: false, reason: 'unknown' };
+  if (consumed.length > 0) return { ok: true, email: consumed[0]!.email };
+
+  // فشل التحديث: نفرّق بين رمز مستهلَك ورمز منتهٍ ورمز لا وجود له
+  const existing = await tryDb(
+    (sql) => sql<{ consumed_at: Date | null; expires_at: Date }[]>`
+      SELECT consumed_at, expires_at FROM login_tokens WHERE jti = ${jti} LIMIT 1`,
+  );
+
+  const row = existing?.[0];
+  if (!row) return { ok: false, reason: 'unknown' };
+  if (row.consumed_at) return { ok: false, reason: 'used' };
+  return { ok: false, reason: 'expired' };
+}
+
+/** عدد رموز الدخول الصادرة لبريد أو عنوان خلال مدة — لكبح الإساءة */
+export async function recentLoginTokenCount(
+  by: { email?: string; ip?: string },
+  minutes: number,
+): Promise<number> {
+  const rows = await tryDb(
+    (sql) => sql<{ count: string }[]>`
+      SELECT count(*)::text AS count FROM login_tokens
+       WHERE created_at > now() - (${minutes} || ' minutes')::interval
+         AND (
+           (${by.email ?? null}::text IS NOT NULL AND lower(email) = lower(${by.email ?? null}))
+           OR (${by.ip ?? null}::text IS NOT NULL AND issued_ip = ${by.ip ?? null})
+         )`,
+  );
+  return Number(rows?.[0]?.count ?? 0);
+}
+
+/** تنظيف الرموز المنتهية — يُشغَّل مع مهمة الاشتراكات اليومية */
+export async function purgeExpiredLoginTokens(): Promise<number> {
+  const rows = await tryDb(
+    (sql) => sql<{ jti: string }[]>`
+      DELETE FROM login_tokens
+       WHERE expires_at < now() - interval '7 days'
+       RETURNING jti`,
+  );
+  return rows?.length ?? 0;
+}
+
+// ───────────────────── سجلّ التدقيق الإداري ─────────────────────
+
+export interface AuditEntry {
+  id: string;
+  actor_email: string;
+  action: string;
+  target_type: string;
+  target_id: string | null;
+  detail: Record<string, unknown> | null;
+  created_at: Date;
+}
+
+export async function writeAudit(input: {
+  actor: string;
+  action: string;
+  targetType: string;
+  targetId?: string;
+  detail?: Record<string, unknown>;
+}): Promise<void> {
+  await tryDb(
+    (sql) => sql`
+      INSERT INTO admin_audit (actor_email, action, target_type, target_id, detail)
+      VALUES (${input.actor}, ${input.action}, ${input.targetType},
+              ${input.targetId ?? null},
+              ${input.detail ? sql.json(input.detail as postgres.JSONValue) : null})`,
+  );
+}
+
+export async function listAudit(limit = 50): Promise<AuditEntry[]> {
+  const rows = await tryDb(
+    (sql) => sql<AuditEntry[]>`
+      SELECT id::text, actor_email, action, target_type, target_id, detail, created_at
+        FROM admin_audit ORDER BY created_at DESC LIMIT ${limit}`,
+  );
+  return rows ?? [];
+}
+
+// ───────────────────── سجلّ الإشعارات ─────────────────────
+
+export interface NotificationEntry {
+  id: string;
+  kind: string;
+  channel: string;
+  reference: string | null;
+  ok: boolean;
+  error: string | null;
+  created_at: Date;
+}
+
+export async function logNotifications(
+  kind: string,
+  reference: string | null,
+  channels: Record<string, { ok: boolean; error?: string }>,
+): Promise<void> {
+  const entries = Object.entries(channels);
+  if (entries.length === 0) return;
+
+  await tryDb((sql) =>
+    sql`
+      INSERT INTO notification_log ${sql(
+        entries.map(([channel, result]) => ({
+          kind,
+          channel,
+          reference,
+          ok: result.ok,
+          // الخطأ قد يحتوي ردّ المزوّد كاملاً — نقتصّه لئلا يتضخّم السجلّ
+          error: result.error ? result.error.slice(0, 500) : null,
+        })),
+        'kind',
+        'channel',
+        'reference',
+        'ok',
+        'error',
+      )}`,
+  );
+}
+
+export async function listNotifications(
+  options: { onlyFailures?: boolean; limit?: number } = {},
+): Promise<NotificationEntry[]> {
+  const limit = options.limit ?? 50;
+  const rows = await tryDb((sql) =>
+    options.onlyFailures
+      ? sql<NotificationEntry[]>`
+          SELECT id::text, kind, channel, reference, ok, error, created_at
+            FROM notification_log WHERE ok = false
+           ORDER BY created_at DESC LIMIT ${limit}`
+      : sql<NotificationEntry[]>`
+          SELECT id::text, kind, channel, reference, ok, error, created_at
+            FROM notification_log ORDER BY created_at DESC LIMIT ${limit}`,
+  );
+  return rows ?? [];
+}
+
+// ───────────────────── نشر المنتجات ─────────────────────
+
+export async function listProductFlags(): Promise<Record<string, boolean>> {
+  const rows = await tryDb(
+    (sql) => sql<{ slug: string; published: boolean }[]>`
+      SELECT slug, published FROM product_flags`,
+  );
+  return Object.fromEntries((rows ?? []).map((row) => [row.slug, row.published]));
+}
+
+export async function setProductPublished(
+  slug: string,
+  published: boolean,
+  actor: string,
+  note?: string,
+): Promise<void> {
+  await tryDb(
+    (sql) => sql`
+      INSERT INTO product_flags (slug, published, note, updated_by, updated_at)
+      VALUES (${slug}, ${published}, ${note ?? null}, ${actor}, now())
+      ON CONFLICT (slug) DO UPDATE
+        SET published = ${published}, note = ${note ?? null},
+            updated_by = ${actor}, updated_at = now()`,
+  );
+}
