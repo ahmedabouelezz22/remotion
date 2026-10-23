@@ -67,7 +67,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     <>
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- بيانات منظَّمة مولَّدة من محتوى ثابت
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 

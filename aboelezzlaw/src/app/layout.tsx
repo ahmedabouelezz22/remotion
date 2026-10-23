@@ -99,7 +99,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-dvh flex-col antialiased">
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- بيانات منظَّمة ثابتة لا تحتوي مدخلات مستخدم
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {children}

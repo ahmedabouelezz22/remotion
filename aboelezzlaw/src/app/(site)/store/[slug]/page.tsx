@@ -59,7 +59,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <>
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- بيانات منظَّمة مولَّدة من كتالوج ثابت
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
