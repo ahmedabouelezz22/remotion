@@ -22,21 +22,7 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
-  }
-
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: 'بيانات الإجراء غير صحيحة.' }, { status: 400 });
-  }
-
-  const { id, action, reason } = parsed.data;
-
-  return withOwner(request, async () => {
+  return withOwner(request, schema, async ({ id, action, reason }) => {
     const subscription = await getSubscription(id);
     if (!subscription) {
       return {

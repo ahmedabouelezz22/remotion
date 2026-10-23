@@ -3,8 +3,10 @@ import { z } from 'zod';
 import { getProduct } from '@/content/products';
 import { site } from '@/content/site';
 import { withOwner } from '@/lib/admin';
+import { fulfillOrder } from '@/lib/fulfillment';
 import { sendEmail } from '@/lib/notifications/email';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
+import { requestOrigin } from '@/lib/origin';
 import { getOrder, markOrderStatus } from '@/lib/repository';
 
 export const runtime = 'nodejs';
@@ -23,28 +25,14 @@ const schema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 
+/** تأكيد التحويل ليس هنا: مساره الإيفاء، وهو من يضبط الحالة */
 const ACTION_STATUS = {
   cancel: 'cancelled',
   refund: 'refunded',
-  'confirm-transfer': 'paid',
 } as const;
 
 export async function POST(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
-  }
-
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: 'بيانات الإجراء غير صحيحة.' }, { status: 400 });
-  }
-
-  const { reference, action, reason } = parsed.data;
-
-  return withOwner(request, async (owner) => {
+  return withOwner(request, schema, async ({ reference, action, reason }) => {
     const order = await getOrder(reference);
     if (!order) {
       return {
@@ -81,23 +69,46 @@ export async function POST(request: Request) {
       };
     }
 
-    const updated = await markOrderStatus(
-      reference,
-      ACTION_STATUS[action],
-      action === 'confirm-transfer' ? `manual:${reason}` : undefined,
-    );
+    // تأكيد التحويل يمرّ بمسار الإيفاء نفسه، وهو من يُعلّم الطلب مدفوعاً
+    // ويُصدر روابط التحميل ويفعّل الاشتراك ويُشعر المكتب. تعليم «مدفوع» قبله
+    // يُسكِت الإيفاء (فهو idempotent ويعود مبكراً إن كان الطلب مدفوعاً)
+    // فيصير الطلب مدفوعاً بلا تسليم — ولا يصحّ تكرار منطق التسليم هنا.
+    if (action === 'confirm-transfer') {
+      const result = await fulfillOrder(reference, requestOrigin(request), `manual:${reason}`);
+      if (!result.ok) {
+        return {
+          response: NextResponse.json(
+            { ok: false, message: 'تعذّر إتمام تسليم الطلب. راجع سجلّ الإشعارات.' },
+            { status: 500 },
+          ),
+        };
+      }
+
+      return {
+        response: NextResponse.json({ ok: true, status: 'paid' }),
+        audit: {
+          action: 'order.confirm-transfer',
+          targetType: 'order',
+          targetId: reference,
+          detail: {
+            from: order.status,
+            to: 'paid',
+            reason,
+            total: order.total,
+            downloads: result.downloads.length,
+          },
+        },
+      };
+    }
+
+    const updated = await markOrderStatus(reference, ACTION_STATUS[action as 'cancel' | 'refund']);
     if (!updated) {
       return {
         response: NextResponse.json({ ok: false, message: 'تعذّر تحديث الطلب.' }, { status: 500 }),
       };
     }
 
-    // تسليم المنتجات الرقمية بعد تأكيد التحويل يمرّ بنفس مسار الإيفاء
-    // (المسؤول عن الروابط الموقّتة ومنع التكرار)، لا بنسخة ثانية منه
-    if (action === 'confirm-transfer') {
-      const { fulfillOrder } = await import('@/lib/fulfillment');
-      await fulfillOrder(reference, new URL(request.url).origin, `manual:${reason}`);
-    } else {
+    {
       const names = updated.items
         .map((item) => getProduct(item.slug)?.name ?? item.name)
         .join('، ');

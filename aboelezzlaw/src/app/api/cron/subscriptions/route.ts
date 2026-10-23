@@ -5,6 +5,7 @@ import { isDbConfigured } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications/email';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
+import { requestOrigin } from '@/lib/origin';
 import { getPaypalSubscription } from '@/lib/payments/paypal';
 import {
   activateSubscription,
@@ -95,7 +96,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, message: 'DATABASE_URL غير مضبوط' }, { status: 503 });
   }
 
-  const origin = new URL(request.url).origin;
+  const origin = requestOrigin(request);
   const summary = { reminded: 0, renewed: 0, pastDue: 0, cancelled: 0, tokensPurged: 0 };
 
   // تنظيف رموز الدخول المستهلكة/المنتهية — الجدول ينمو بلا حدّ بدونه

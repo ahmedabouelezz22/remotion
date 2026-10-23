@@ -23,21 +23,7 @@ const HEADINGS = {
 } as const;
 
 export async function POST(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
-  }
-
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: 'بيانات الإجراء غير صحيحة.' }, { status: 400 });
-  }
-
-  const { id, status, note } = parsed.data;
-
-  return withOwner(request, async () => {
+  return withOwner(request, schema, async ({ id, status, note }) => {
     const booking = await getBooking(id);
     if (!booking) {
       return {

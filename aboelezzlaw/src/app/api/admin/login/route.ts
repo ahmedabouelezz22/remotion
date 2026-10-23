@@ -5,6 +5,7 @@ import { isAdminConfigured, isOwnerEmail } from '@/lib/admin';
 import { isDbConfigured } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications/email';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
+import { requestOrigin } from '@/lib/origin';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { recentLoginTokenCount, recordLoginToken, writeAudit } from '@/lib/repository';
 import { LOGIN_LINK_TTL_MINUTES, createAdminLoginToken, isAuthConfigured } from '@/lib/session';
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const link = `${new URL(request.url).origin}/api/admin/verify?token=${encodeURIComponent(
+  const link = `${requestOrigin(request)}/api/admin/verify?token=${encodeURIComponent(
     login.token,
   )}`;
 

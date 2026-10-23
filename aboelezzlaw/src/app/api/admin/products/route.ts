@@ -21,25 +21,16 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
-  }
+  return withOwner(request, schema, async ({ slug, published, note }, owner) => {
+    if (!products.some((product) => product.slug === slug)) {
+      return {
+        response: NextResponse.json(
+          { ok: false, message: 'لا يوجد منتج بهذا المعرّف.' },
+          { status: 404 },
+        ),
+      };
+    }
 
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: 'بيانات الإجراء غير صحيحة.' }, { status: 400 });
-  }
-
-  const { slug, published, note } = parsed.data;
-
-  if (!products.some((product) => product.slug === slug)) {
-    return NextResponse.json({ ok: false, message: 'لا يوجد منتج بهذا المعرّف.' }, { status: 404 });
-  }
-
-  return withOwner(request, async (owner) => {
     await setProductPublished(slug, published, owner.email, note);
     return {
       response: NextResponse.json({ ok: true, slug, published }),

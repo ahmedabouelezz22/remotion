@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getProduct, SHIPPING_FLAT_RATE } from '@/content/products';
 import { site } from '@/content/site';
 import { catalogue } from '@/lib/catalogue';
+import { requestOrigin } from '@/lib/origin';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { generateOrderReference, getProvider, type OrderDraft, type OrderItem } from '@/lib/payments';
 import { createPaypalSubscription, planIdFor } from '@/lib/payments/paypal';
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
     requiresShipping,
   };
 
-  const origin = new URL(request.url).origin;
+  const origin = requestOrigin(request);
 
   // ── مسار الاشتراك المتكرّر (تجديد تلقائي حقيقي عبر PayPal) ──
   const subscriptionItem = subscriptionItems[0];

@@ -4,6 +4,7 @@ import { site } from '@/content/site';
 import { isDbConfigured } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications/email';
 import { buildClientConfirmation } from '@/lib/notifications/templates';
+import { requestOrigin } from '@/lib/origin';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { recentLoginTokenCount, recordLoginToken } from '@/lib/repository';
 import { LOGIN_LINK_TTL_MINUTES, createLoginToken, isAuthConfigured } from '@/lib/session';
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const link = `${new URL(request.url).origin}/api/account/verify?token=${encodeURIComponent(
+  const link = `${requestOrigin(request)}/api/account/verify?token=${encodeURIComponent(
     login.token,
   )}`;
 
