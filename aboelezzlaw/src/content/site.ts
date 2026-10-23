@@ -10,6 +10,8 @@ export const site = {
   tagline: 'خدمات قانونية متخصصة عن بُعد في جميع أنحاء العالم',
   description:
     'مكتب أبو العز للمحاماة — خدمات قانونية متخصصة عن بُعد: صياغة ومراجعة العقود، التقاضي والنزاعات، خدمات الشركات والشركات الناشئة، قانون العمل، الامتثال الرقمي، والاستشارات القانونية.',
+  descriptionEn:
+    'Abo Elezz Law Firm — specialist legal services delivered remotely: contract drafting and review, litigation and disputes, corporate and start-up services, employment law, digital compliance, and legal consultancy.',
   url: 'https://aboelezzlaw.com',
   locale: 'ar_EG',
   lang: 'ar',
@@ -25,6 +27,7 @@ export const site = {
     /** البريد الذي تصل إليه إشعارات النماذج */
     email: 'aboelezzlawfirm@gmail.com',
     address: 'خدمات قانونية عن بُعد — في جميع أنحاء العالم العربي',
+    addressEn: 'Remote legal services — across the Arab world',
     /** البريد المعروض للزوار على الموقع */
     publicEmail: 'ahmed@aboelezzlaw.com',
   },
@@ -78,14 +81,20 @@ export const waLink = (message?: string) =>
     message ? `?text=${encodeURIComponent(message)}` : ''
   }`;
 
+/**
+ * التنقّل الرئيسي. التسميات مفاتيح في القاموس لا نصوصاً، فيُترجَم الشريط
+ * مع بقيّة الواجهة ولا يبقى عربياً في صفحة إنجليزية.
+ */
 export const navigation = [
-  { href: '/', label: 'الرئيسية' },
-  { href: '/about', label: 'من نحن' },
-  { href: '/services', label: 'الخدمات' },
-  { href: '/store', label: 'المتجر' },
-  { href: '/blog', label: 'المدونة' },
-  { href: '/library', label: 'المكتبة القانونية' },
-  { href: '/videos', label: 'الفيديوهات' },
-  { href: '/booking', label: 'حجز استشارة' },
-  { href: '/contact', label: 'اتصل بنا' },
+  { href: '/', key: 'home' },
+  { href: '/about', key: 'about' },
+  { href: '/services', key: 'services' },
+  { href: '/store', key: 'store' },
+  { href: '/blog', key: 'blog' },
+  { href: '/library', key: 'library' },
+  { href: '/videos', key: 'videos' },
+  { href: '/booking', key: 'booking' },
+  { href: '/contact', key: 'contact' },
 ] as const;
+
+export type NavKey = (typeof navigation)[number]['key'];

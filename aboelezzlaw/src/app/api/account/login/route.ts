@@ -8,41 +8,47 @@ import { requestOrigin } from '@/lib/origin';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { recentLoginTokenCount, recordLoginToken } from '@/lib/repository';
 import { LOGIN_LINK_TTL_MINUTES, createLoginToken, isAuthConfigured } from '@/lib/session';
+import { localeFrom } from '@/lib/validation';
+import { dict, type Locale } from '@/content/i18n';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const schema = z.object({ email: z.string().trim().email('البريد الإلكتروني غير صحيح') });
+const schema = (locale: Locale) =>
+  z.object({
+    email: z.string().trim().email(dict(locale).validation.emailInvalid),
+    locale: z.enum(['ar', 'en']).optional(),
+  });
 
 export async function POST(request: Request) {
-  if (!isAuthConfigured() || !isDbConfigured()) {
+  let payload: unknown;
+  try {
+    payload = await request.json();
+  } catch {
     return NextResponse.json(
-      { ok: false, message: 'خدمة الحساب غير مهيّأة على هذا الموقع بعد.' },
-      { status: 503 },
+      { ok: false, message: dict('ar').api.badRequest },
+      { status: 400 },
     );
+  }
+
+  const locale = localeFrom(payload);
+  const t = dict(locale).api;
+
+  if (!isAuthConfigured() || !isDbConfigured()) {
+    return NextResponse.json({ ok: false, message: t.accountNotConfigured }, { status: 503 });
   }
 
   const ip = clientIp(request);
 
   const limit = rateLimit(`login:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
   if (!limit.allowed) {
-    return NextResponse.json(
-      { ok: false, message: 'طلبات كثيرة. حاول بعد قليل.' },
-      { status: 429 },
-    );
+    return NextResponse.json({ ok: false, message: t.accountTooMany }, { status: 429 });
   }
 
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
-  }
-
-  const parsed = schema.safeParse(payload);
+  const parsed = schema(locale).safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, message: parsed.error.issues[0]?.message ?? 'البريد غير صحيح.' },
+      { ok: false, message: parsed.error.issues[0]?.message ?? t.checkInputs },
       { status: 400 },
     );
   }
@@ -53,10 +59,7 @@ export async function POST(request: Request) {
   // أيضاً من القاعدة: عدد الرموز الصادرة فعلاً لهذا البريد أو العنوان.
   const recent = await recentLoginTokenCount({ email, ip }, 15);
   if (recent >= 5) {
-    return NextResponse.json(
-      { ok: false, message: 'طلبات كثيرة لرابط الدخول. حاول بعد ربع ساعة.' },
-      { status: 429 },
-    );
+    return NextResponse.json({ ok: false, message: t.accountTooMany }, { status: 429 });
   }
 
   const login = createLoginToken(email);
@@ -70,25 +73,23 @@ export async function POST(request: Request) {
   });
   if (!recorded) {
     console.error('[account-login] تعذّر تسجيل رمز الدخول — لن يُرسل الرابط');
-    return NextResponse.json(
-      { ok: false, message: 'خدمة الحساب غير متاحة حالياً. حاول لاحقاً.' },
-      { status: 503 },
-    );
+    return NextResponse.json({ ok: false, message: t.accountNotConfigured }, { status: 503 });
   }
 
   const link = `${requestOrigin(request)}/api/account/verify?token=${encodeURIComponent(
     login.token,
   )}`;
 
+  const loginEmail = dict(locale).loginEmail;
   const message = buildClientConfirmation({
     name: email.split('@')[0] ?? '',
-    heading: 'رابط الدخول إلى حسابك',
-    body: `اضغط الرابط التالي لفتح حسابك ومتابعة طلباتك ومواعيدك:\n\n${link}\n\nالرابط صالح ${LOGIN_LINK_TTL_MINUTES} دقيقة ويُستخدم مرّة واحدة فقط.\n\nإن لم تطلب هذا الرابط فتجاهل الرسالة — لن يحدث شيء، ولا يستطيع أحد الدخول إلى حسابك دون فتح هذا الرابط من بريدك.`,
+    heading: loginEmail.heading,
+    body: loginEmail.body(link, LOGIN_LINK_TTL_MINUTES),
   });
 
   const result = await sendEmail({
     to: email,
-    subject: `${site.shortName} — رابط الدخول إلى حسابك`,
+    subject: `${dict(locale).common.firmShort} — ${loginEmail.heading}`,
     html: message.html,
     text: message.text,
     replyTo: site.contact.email,
@@ -96,15 +97,9 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     console.error('[account-login] تعذّر إرسال رابط الدخول', result.error);
-    return NextResponse.json(
-      { ok: false, message: 'تعذّر إرسال رابط الدخول حالياً. حاول لاحقاً أو راسلنا.' },
-      { status: 502 },
-    );
+    return NextResponse.json({ ok: false, message: t.accountLinkFailed }, { status: 502 });
   }
 
   // لا نكشف إن كان للبريد حساب أم لا — الرسالة واحدة في الحالتين
-  return NextResponse.json({
-    ok: true,
-    message: `إن كان لديك طلبات مسجّلة بهذا البريد فسيصلك رابط الدخول خلال دقائق. الرابط صالح ${LOGIN_LINK_TTL_MINUTES} دقيقة.`,
-  });
+  return NextResponse.json({ ok: true, message: t.accountLinkSent(LOGIN_LINK_TTL_MINUTES) });
 }

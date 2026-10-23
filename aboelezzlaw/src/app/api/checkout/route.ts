@@ -8,31 +8,35 @@ import { generateOrderReference, getProvider, type OrderDraft, type OrderItem } 
 import { createPaypalSubscription, planIdFor } from '@/lib/payments/paypal';
 import { createSubscription, saveOrder } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
-import { checkoutSchema, fieldErrors } from '@/lib/validation';
+import { checkoutSchema, fieldErrors, localeFrom } from '@/lib/validation';
+import { dict } from '@/content/i18n';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const limit = rateLimit(`checkout:${clientIp(request)}`, { limit: 10, windowMs: 10 * 60 * 1000 });
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { ok: false, message: 'محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.' },
-      { status: 429 },
-    );
-  }
-
   let payload: unknown;
   try {
     payload = await request.json();
   } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, message: dict('ar').api.badRequest },
+      { status: 400 },
+    );
   }
 
-  const parsed = checkoutSchema.safeParse(payload);
+  const locale = localeFrom(payload);
+  const t = dict(locale).api;
+
+  const limit = rateLimit(`checkout:${clientIp(request)}`, { limit: 10, windowMs: 10 * 60 * 1000 });
+  if (!limit.allowed) {
+    return NextResponse.json({ ok: false, message: t.tooManyCheckout }, { status: 429 });
+  }
+
+  const parsed = checkoutSchema(locale).safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, message: 'راجع بيانات الطلب.', errors: fieldErrors(parsed.error) },
+      { ok: false, message: t.checkOrderData, errors: fieldErrors(parsed.error) },
       { status: 400 },
     );
   }
@@ -43,7 +47,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       kind: 'instructions',
-      instructions: 'تم استلام الطلب.',
+      instructions: t.orderReceived,
       reference: 'PENDING',
     });
   }
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
     const product = available.find((item) => item.slug === line.slug);
     if (!product) {
       return NextResponse.json(
-        { ok: false, message: 'أحد المنتجات في سلتك لم يعد متاحاً. حدّث الصفحة وأعد المحاولة.' },
+        { ok: false, message: t.productGone },
         { status: 400 },
       );
     }
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          message: `«${product.name}» لم يُطرح للبيع بعد. احذفه من السلة وسنُشعرك فور توفّره.`,
+          message: t.productComingSoon(product.name),
         },
         { status: 400 },
       );
@@ -87,8 +91,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        message:
-          'الاشتراك الشهري يُشترى في طلب مستقل. أتمم اشتراكك أولاً ثم اطلب بقية المنتجات في طلب منفصل.',
+        message: t.subscriptionMix,
       },
       { status: 400 },
     );
@@ -99,10 +102,10 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        message: 'سلتك تحتوي منتجاً يُشحن — من فضلك أدخل عنوان الشحن والمدينة.',
+        message: t.shippingRequired,
         errors: {
-          address: !input.address?.trim() ? 'عنوان الشحن مطلوب' : '',
-          city: !input.city?.trim() ? 'المدينة مطلوبة' : '',
+          address: !input.address?.trim() ? t.addressField : '',
+          city: !input.city?.trim() ? t.cityField : '',
         },
       },
       { status: 400 },
@@ -186,7 +189,7 @@ export async function POST(request: Request) {
   const provider = getProvider(input.method);
   if (!provider) {
     return NextResponse.json(
-      { ok: false, message: 'وسيلة الدفع المختارة غير متاحة حالياً. اختر وسيلة أخرى.' },
+      { ok: false, message: t.methodUnavailable },
       { status: 400 },
     );
   }

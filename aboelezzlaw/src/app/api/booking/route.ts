@@ -4,13 +4,14 @@ import { notifyOffice } from '@/lib/notifications/notify';
 import { createBooking, deleteBooking } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { checkSlot } from '@/lib/slots';
-import { bookingSchema, fieldErrors } from '@/lib/validation';
+import { bookingSchema, fieldErrors, localeFrom } from '@/lib/validation';
+import { dict, htmlLang, type Locale } from '@/content/i18n';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function formatArabicDate(date: string): string {
-  return new Intl.DateTimeFormat('ar-EG', {
+function formatDate(date: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(htmlLang(locale), {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -19,30 +20,31 @@ function formatArabicDate(date: string): string {
 }
 
 export async function POST(request: Request) {
-  const limit = rateLimit(`booking:${clientIp(request)}`, { limit: 4, windowMs: 15 * 60 * 1000 });
-  if (!limit.allowed) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: `أرسلت طلبات حجز متعدّدة. حاول بعد ${Math.ceil(
-          limit.retryAfterSeconds / 60,
-        )} دقيقة أو راسلنا على واتساب.`,
-      },
-      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
-    );
-  }
-
   let payload: unknown;
   try {
     payload = await request.json();
   } catch {
-    return NextResponse.json({ ok: false, message: 'صيغة الطلب غير صحيحة.' }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, message: dict('ar').api.badRequest },
+      { status: 400 },
+    );
   }
 
-  const parsed = bookingSchema.safeParse(payload);
+  const locale = localeFrom(payload);
+  const t = dict(locale).api;
+
+  const limit = rateLimit(`booking:${clientIp(request)}`, { limit: 4, windowMs: 15 * 60 * 1000 });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { ok: false, message: t.tooManyBooking(Math.ceil(limit.retryAfterSeconds / 60)) },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+    );
+  }
+
+  const parsed = bookingSchema(locale).safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, message: 'راجع البيانات المدخلة.', errors: fieldErrors(parsed.error) },
+      { ok: false, message: t.checkInputs, errors: fieldErrors(parsed.error) },
       { status: 400 },
     );
   }
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
   const { name, email, phone, type, channel, date, time, details, company } = parsed.data;
 
   if (company) {
-    return NextResponse.json({ ok: true, message: 'تم استلام طلبك.' });
+    return NextResponse.json({ ok: true, message: t.bookingReceived });
   }
 
   // أيام العمل والمواعيد تُفحص هنا أيضاً لا في المُنتقي وحده: مُنتقي الصفحة
@@ -63,7 +65,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const readableDate = formatArabicDate(date);
+  // تاريخان: أحدهما للعميل بلغته والآخر للمكتب بالعربية دائماً
+  const readableDate = formatDate(date, locale);
+  const officeDate = formatDate(date, 'ar');
 
   // القيد الفريد في القاعدة هو ما يمنع الحجز المزدوج فعلياً،
   // لأن فحصاً في الكود وحده يمكن أن يتجاوزه طلبان متزامنان
@@ -73,8 +77,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        message: `الموعد ${readableDate} الساعة ${time} حُجز للتوّ. اختر موعداً آخر من المتاح.`,
-        errors: { time: 'هذا الموعد لم يعد متاحاً' },
+        message: t.slotTaken(readableDate, time),
+        errors: { time: dict(locale).booking.slotTaken },
       },
       { status: 409 },
     );
@@ -92,7 +96,7 @@ export async function POST(request: Request) {
       { label: 'رقم الهاتف', value: phone },
       { label: 'نوع الاستشارة', value: type },
       { label: 'وسيلة التواصل', value: channel },
-      { label: 'الموعد المطلوب', value: `${readableDate} — الساعة ${time}` },
+      { label: 'الموعد المطلوب', value: `${officeDate} — الساعة ${time}` },
       { label: 'ملخّص الموضوع', value: details },
       {
         label: 'وقت الطلب',
@@ -103,8 +107,12 @@ export async function POST(request: Request) {
       name,
       email,
       phone,
-      confirmationHeading: 'استلمنا طلب حجز الاستشارة',
-      confirmationBody: `الموعد المطلوب: ${readableDate} الساعة ${time} (بتوقيت القاهرة).\n\nهذا الطلب قيد التأكيد ولا يُعدّ حجزاً نهائياً بعد. سنتواصل معك لتثبيت الموعد أو اقتراح بديل قريب منه إن كان محجوزاً.\n\nنوع الاستشارة: ${type}\nوسيلة التواصل: ${channel}\n\nلتسريع الجلسة يمكنك إرسال المستندات ذات الصلة مسبقاً على البريد ${site.contact.email}.`,
+      confirmationHeading: dict(locale).clientEmail.bookingHeading,
+      confirmationBody: dict(locale).clientEmail.bookingBody(
+        `${readableDate} — ${time}`,
+        type,
+        channel,
+      ),
     },
   });
 
@@ -114,17 +122,10 @@ export async function POST(request: Request) {
     if (booking.result === 'created') await deleteBooking(booking.id);
 
     return NextResponse.json(
-      {
-        ok: false,
-        message:
-          'تعذّر تسجيل طلبك حالياً لعطل تقني مؤقّت. من فضلك راسلنا على واتساب لتثبيت الموعد.',
-      },
+      { ok: false, message: t.bookingFailed },
       { status: 502 },
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    message: `استلمنا طلبك للموعد ${readableDate} الساعة ${time}. سنؤكّده معك خلال يوم عمل واحد.`,
-  });
+  return NextResponse.json({ ok: true, message: t.bookingThanks });
 }

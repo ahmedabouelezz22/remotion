@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
+import { dict, type Locale } from '@/content/i18n';
 import { site, waLink } from '@/content/site';
 
 /** زر واتساب عائم — يظهر بعد تمرير قصير حتى لا يزاحم القسم الأول */
-export function WhatsAppFab() {
+export function WhatsAppFab({ locale }: { locale: Locale }) {
+  const t = dict(locale);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -17,11 +19,15 @@ export function WhatsAppFab() {
 
   return (
     <a
-      href={waLink(`السلام عليكم، تواصلت معكم عبر موقع ${site.url}`)}
+      href={waLink(
+        locale === 'ar'
+          ? `السلام عليكم، تواصلت معكم عبر موقع ${site.url}`
+          : `Hello, I am contacting you through ${site.url}`,
+      )}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="مراسلتنا عبر واتساب"
-      className={`fixed bottom-6 left-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-[#1eb955] ${
+      aria-label={t.common.whatsappUs}
+      className={`fixed bottom-6 z-40 ltr:right-6 rtl:left-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-[#1eb955] ${
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
       }`}
     >

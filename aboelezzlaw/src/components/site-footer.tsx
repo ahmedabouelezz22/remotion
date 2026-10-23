@@ -1,12 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail, MapPin, Phone, Youtube } from 'lucide-react';
-import { navigation, site, waLink } from '@/content/site';
-import { services } from '@/content/services';
 import { Container } from '@/components/ui/container';
+import { dict, path, type Locale } from '@/content/i18n';
+import { serviceText, services } from '@/content/services';
+import { navigation, site, waLink } from '@/content/site';
 
-export function SiteFooter() {
+export function SiteFooter({ locale }: { locale: Locale }) {
   const year = new Date().getFullYear();
+  const t = dict(locale);
+  const isArabic = locale === 'ar';
 
   return (
     <footer className="mt-auto bg-navy-900 text-navy-100">
@@ -22,10 +25,12 @@ export function SiteFooter() {
                 className="h-11 w-11 shrink-0 object-contain"
               />
               <span className="font-display text-lg font-extrabold text-white">
-                مكتب أبو العز للمحاماة
+                {isArabic ? site.name : site.nameEn}
               </span>
             </div>
-            <p className="text-sm leading-8 text-navy-100/75">{site.description}</p>
+            <p className="text-sm leading-8 text-navy-100/75">
+              {isArabic ? site.description : site.descriptionEn}
+            </p>
             {site.social.youtube ? (
               <a
                 href={site.social.youtube}
@@ -34,45 +39,49 @@ export function SiteFooter() {
                 className="mt-5 inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:border-gold-500 hover:text-gold-400"
               >
                 <Youtube className="h-4 w-4" />
-                قناة اليوتيوب
+                {t.footer.youtubeChannel}
               </a>
             ) : null}
           </div>
 
-          <nav aria-label="روابط الموقع">
-            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">الموقع</h3>
+          <nav aria-label={t.footer.siteLinks}>
+            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">
+              {t.footer.siteLinks}
+            </h3>
             <ul className="space-y-2.5 text-sm">
               {navigation.map((item) => (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={path(locale, item.href)}
                     className="text-navy-100/75 transition-colors hover:text-gold-400"
                   >
-                    {item.label}
+                    {t.nav[item.key]}
                   </Link>
                 </li>
               ))}
               <li>
                 <Link
-                  href="/account"
+                  href={path(locale, '/account')}
                   className="text-navy-100/75 transition-colors hover:text-gold-400"
                 >
-                  حسابي
+                  {t.nav.account}
                 </Link>
               </li>
             </ul>
           </nav>
 
-          <nav aria-label="الخدمات">
-            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">الخدمات</h3>
+          <nav aria-label={t.nav.services}>
+            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">
+              {t.nav.services}
+            </h3>
             <ul className="space-y-2.5 text-sm">
               {services.map((service) => (
                 <li key={service.slug}>
                   <Link
-                    href={`/services/${service.slug}`}
+                    href={path(locale, `/services/${service.slug}`)}
                     className="text-navy-100/75 transition-colors hover:text-gold-400"
                   >
-                    {service.title}
+                    {serviceText(service, locale).title}
                   </Link>
                 </li>
               ))}
@@ -80,7 +89,9 @@ export function SiteFooter() {
           </nav>
 
           <div>
-            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">التواصل</h3>
+            <h3 className="mb-4 text-sm font-bold tracking-widest text-gold-400">
+              {t.footer.contactUs}
+            </h3>
             <ul className="space-y-3.5 text-sm">
               <li>
                 <a
@@ -88,7 +99,9 @@ export function SiteFooter() {
                   className="flex items-center gap-2.5 text-navy-100/75 transition-colors hover:text-gold-400"
                 >
                   <Phone className="h-4 w-4 shrink-0" />
-                  <span className="numeric" dir="ltr">{site.contact.phoneLocal}</span>
+                  <span className="numeric" dir="ltr">
+                    {site.contact.phoneLocal}
+                  </span>
                 </a>
               </li>
               <li>
@@ -102,46 +115,48 @@ export function SiteFooter() {
               </li>
               <li className="flex items-center gap-2.5 text-navy-100/75">
                 <MapPin className="h-4 w-4 shrink-0" />
-                {site.contact.address}
+                {isArabic ? site.contact.address : site.contact.addressEn}
               </li>
             </ul>
             <a
-              href={waLink('السلام عليكم، أود الاستفسار عن خدماتكم القانونية.')}
+              href={waLink(
+                isArabic
+                  ? 'السلام عليكم، أود الاستفسار عن خدماتكم القانونية.'
+                  : 'Hello, I would like to enquire about your legal services.',
+              )}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#128C7E] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#0f7a6d]"
+              className="mt-5 inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-[#128C7E] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#0f7a6d]"
             >
-              مراسلة عبر واتساب
+              {t.common.whatsappUs}
             </a>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-xs text-navy-100/70 sm:flex-row">
           <p className="numeric">
-            © {year} {site.name}. جميع الحقوق محفوظة.
+            © {year} {isArabic ? site.name : site.nameEn}. {t.footer.rights}
           </p>
           {/* حشو رأسي يرفع هدف اللمس إلى 40px على الهاتف — نصّ بارتفاع 16px
               لا يُلمس بثقة بإصبع */}
           <div className="flex gap-2">
             <Link
-              href="/privacy"
+              href={path(locale, '/privacy')}
               className="-my-1 inline-flex min-h-[40px] items-center px-3 py-2 transition-colors hover:text-gold-400"
             >
-              سياسة الخصوصية
+              {t.footer.privacy}
             </Link>
             <Link
-              href="/terms"
+              href={path(locale, '/terms')}
               className="-my-1 inline-flex min-h-[40px] items-center px-3 py-2 transition-colors hover:text-gold-400"
             >
-              الشروط والأحكام
+              {t.footer.terms}
             </Link>
           </div>
         </div>
 
         <p className="mt-6 rounded-xl bg-white/5 p-4 text-[0.72rem] leading-6 text-navy-100/70">
-          إخلاء مسؤولية: المحتوى المنشور على هذا الموقع — بما فيه مقالات المدونة والمكتبة القانونية —
-          ذو طبيعة تعريفية عامة، ولا يُعدّ استشارة قانونية في واقعة بعينها ولا تنشأ به علاقة
-          مهنية بين الزائر والمكتب. الاعتماد عليه دون استشارة مباشرة يقع على مسؤولية القارئ وحده.
+          {t.footer.disclaimer}
         </p>
       </Container>
     </footer>
