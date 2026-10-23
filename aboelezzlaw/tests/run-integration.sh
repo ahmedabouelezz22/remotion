@@ -135,6 +135,11 @@ bash "$ROOT/tests/admin.sh" || FAILED=1
 step "المجموعة 2: إجراءات اللوحة ودورة حياة الطلب"
 bash "$ROOT/tests/actions.sh" || FAILED=1
 
+step "المجموعة 3: مسارات العميل — الأعطال الأصلية"
+psql "$DATABASE_URL" -c "TRUNCATE orders, bookings, subscriptions, messages, login_tokens, admin_audit, notification_log, product_flags" >/dev/null 2>&1 || true
+: > "$MAILBOX"
+(cd "$ROOT" && bash "$ROOT/tests/customer.sh") || FAILED=1
+
 rm -f "$ROOT/.env.production.local"
 
 if [ "$FAILED" = "0" ]; then

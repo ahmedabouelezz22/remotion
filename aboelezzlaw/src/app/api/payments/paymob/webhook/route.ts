@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fulfillOrder } from '@/lib/fulfillment';
 import { notifyOffice } from '@/lib/notifications/notify';
+import { requestOrigin } from '@/lib/origin';
 import { verifyPaymobHmac } from '@/lib/payments/paymob';
 import { markOrderStatus } from '@/lib/repository';
 
@@ -14,6 +15,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request) {
   const url = new URL(request.url);
+  // كل رابط يراه العميل (التحميل، العودة من البوّابة) يُبنى على العنوان
+  // العام لا على عنوان الطلب الداخلي خلف وسيط TLS
+  const origin = requestOrigin(request);
   const receivedHmac = url.searchParams.get('hmac') ?? '';
 
   let body: { type?: string; obj?: Record<string, unknown> };
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
   if (success) {
     // fulfillOrder يتولّى: تعليم الطلب مدفوعاً، وروابط التحميل،
     // وتفعيل الاشتراك، وإشعار المكتب — وهو آمن عند التكرار
-    await fulfillOrder(reference, url.origin, providerRef);
+    await fulfillOrder(reference, origin, providerRef);
   } else {
     await markOrderStatus(reference, 'failed', providerRef);
     await notifyOffice({

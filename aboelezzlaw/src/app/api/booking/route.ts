@@ -3,6 +3,7 @@ import { site } from '@/content/site';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { createBooking, deleteBooking } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import { checkSlot } from '@/lib/slots';
 import { bookingSchema, fieldErrors } from '@/lib/validation';
 
 export const runtime = 'nodejs';
@@ -50,6 +51,16 @@ export async function POST(request: Request) {
 
   if (company) {
     return NextResponse.json({ ok: true, message: 'تم استلام طلبك.' });
+  }
+
+  // أيام العمل والمواعيد تُفحص هنا أيضاً لا في المُنتقي وحده: مُنتقي الصفحة
+  // راحة للزائر، والخادم هو ما يمنع حجز يوم إجازة أو ساعة لا نعمل فيها
+  const slot = checkSlot(date, time);
+  if (!slot.ok) {
+    return NextResponse.json(
+      { ok: false, message: slot.message, errors: { [slot.field]: slot.message } },
+      { status: 400 },
+    );
   }
 
   const readableDate = formatArabicDate(date);

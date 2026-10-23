@@ -17,6 +17,8 @@ const { verifyPaymobHmac } = await import('@/lib/payments/paymob');
 const { createDownloadToken, verifyDownloadToken } = await import('@/lib/download-token');
 const { dueReminder, nextPeriodEnd, REMINDER_DAYS } = await import('@/lib/subscriptions');
 const { requestOrigin } = await import('@/lib/origin');
+const { checkSlot, isWorkingDay, slotsForDate, MAX_BOOKING_DAYS_AHEAD, todayInOfficeTimezone } =
+  await import('@/lib/slots');
 const { ownerEmails, isOwnerEmail, sameOrigin } = await import('@/lib/admin');
 const { products, getProduct, SHIPPING_FLAT_RATE } = await import('@/content/products');
 const { clientWaLink } = await import('@/lib/notifications/templates');
@@ -243,6 +245,88 @@ describe('العنوان العام', () => {
       requestOrigin(make({ host: 'x.com', 'x-forwarded-proto': 'https, http' })),
       'https://x.com',
     );
+  });
+});
+
+// ───────────────────── مواعيد العمل ─────────────────────
+
+/** تاريخ أول يوم يوافق يوم الأسبوع المطلوب بعد عدد أيام */
+function dateOfWeekday(weekday: number, minDaysAhead = 7): string {
+  const date = new Date(`${todayInOfficeTimezone()}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + minDaysAhead);
+  while (date.getUTCDay() !== weekday) date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+describe('مواعيد العمل', () => {
+  it('الأحد إلى الخميس أيام عمل', () => {
+    for (const day of [0, 1, 2, 3, 4]) {
+      assert.equal(isWorkingDay(dateOfWeekday(day)), true, `يوم ${day} يجب أن يكون يوم عمل`);
+    }
+  });
+
+  it('الجمعة والسبت ليسا يومي عمل', () => {
+    for (const day of [5, 6]) {
+      assert.equal(isWorkingDay(dateOfWeekday(day)), false, `يوم ${day} ليس يوم عمل`);
+    }
+  });
+
+  it('المواعيد من 10:00 إلى 17:00 بفواصل ساعة', () => {
+    const slots = slotsForDate(dateOfWeekday(1));
+    assert.deepEqual(slots, [
+      '10:00',
+      '11:00',
+      '12:00',
+      '13:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
+    ]);
+  });
+
+  it('لا مواعيد في يوم غير عمل', () => {
+    assert.deepEqual(slotsForDate(dateOfWeekday(5)), []);
+  });
+
+  it('يقبل موعداً صالحاً في يوم عمل', () => {
+    assert.deepEqual(checkSlot(dateOfWeekday(2), '12:00'), { ok: true });
+  });
+
+  it('يرفض يوم إجازة', () => {
+    const result = checkSlot(dateOfWeekday(5), '12:00');
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.field, 'date');
+  });
+
+  it('يرفض ساعة خارج المواعيد', () => {
+    // 03:00 ليس من المواعيد المعروضة — والمنع على الخادم لا في المُنتقي وحده
+    const result = checkSlot(dateOfWeekday(2), '03:00');
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.field, 'time');
+  });
+
+  it('يرفض ساعة في منتصف الفاصل', () => {
+    const result = checkSlot(dateOfWeekday(2), '12:30');
+    assert.equal(result.ok, false);
+  });
+
+  it('يرفض تاريخاً في الماضي', () => {
+    const result = checkSlot('2020-01-06', '12:00');
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.field, 'date');
+  });
+
+  it('يرفض تاريخاً أبعد من المدى المسموح', () => {
+    const far = new Date(`${todayInOfficeTimezone()}T00:00:00Z`);
+    far.setUTCDate(far.getUTCDate() + MAX_BOOKING_DAYS_AHEAD + 30);
+    const result = checkSlot(far.toISOString().slice(0, 10), '12:00');
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.field, 'date');
+  });
+
+  it('تاريخ اليوم بتوقيت المكتب بصيغة YYYY-MM-DD', () => {
+    assert.match(todayInOfficeTimezone(), /^\d{4}-\d{2}-\d{2}$/);
   });
 });
 

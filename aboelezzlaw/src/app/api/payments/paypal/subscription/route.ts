@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getProduct } from '@/content/products';
 import { notifyOffice } from '@/lib/notifications/notify';
+import { requestOrigin } from '@/lib/origin';
 import { getPaypalSubscription } from '@/lib/payments/paypal';
 import { activateSubscription, markOrderStatus } from '@/lib/repository';
 import { nextPeriodEnd } from '@/lib/subscriptions';
@@ -17,11 +18,14 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  // كل رابط يراه العميل (التحميل، العودة من البوّابة) يُبنى على العنوان
+  // العام لا على عنوان الطلب الداخلي خلف وسيط TLS
+  const origin = requestOrigin(request);
   const subscriptionId = url.searchParams.get('subscription_id');
   const reference = url.searchParams.get('ref') ?? '';
 
   if (!subscriptionId) {
-    return NextResponse.redirect(new URL('/checkout?error=missing_subscription', url.origin));
+    return NextResponse.redirect(new URL('/checkout?error=missing_subscription', origin));
   }
 
   const remote = await getPaypalSubscription(subscriptionId);
@@ -40,7 +44,7 @@ export async function GET(request: Request) {
       ],
     });
     return NextResponse.redirect(
-      new URL(`/checkout?error=subscription_not_active&ref=${encodeURIComponent(reference)}`, url.origin),
+      new URL(`/checkout?error=subscription_not_active&ref=${encodeURIComponent(reference)}`, origin),
     );
   }
 
@@ -87,6 +91,6 @@ export async function GET(request: Request) {
   });
 
   return NextResponse.redirect(
-    new URL(`/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`, url.origin),
+    new URL(`/checkout/success?ref=${encodeURIComponent(reference)}&provider=paypal`, origin),
   );
 }

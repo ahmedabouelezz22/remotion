@@ -5,6 +5,7 @@ import { CalendarCheck, CheckCircle2, Loader2, TriangleAlert } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Field, Honeypot, controlClass } from '@/components/ui/field';
 import { site, waLink } from '@/content/site';
+import { MAX_BOOKING_DAYS_AHEAD, slotsForDate, todayInOfficeTimezone } from '@/lib/slots';
 import { consultationChannels, consultationTypes } from '@/lib/validation';
 import { cn } from '@/lib/utils';
 
@@ -22,30 +23,15 @@ const initialValues = {
   company: '',
 };
 
-/** المواعيد المتاحة داخل يوم عمل واحد وفق ساعات العمل المعلنة */
-function slotsForDate(dateValue: string): string[] {
-  if (!dateValue) return [];
-  const date = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return [];
-  if (!site.workingHours.days.includes(date.getDay())) return [];
-
-  const slots: string[] = [];
-  const { startHour, endHour, slotMinutes } = site.workingHours;
-  for (let minutes = startHour * 60; minutes + slotMinutes <= endHour * 60; minutes += slotMinutes) {
-    const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
-    const minute = String(minutes % 60).padStart(2, '0');
-    slots.push(`${hour}:${minute}`);
-  }
-  return slots;
-}
-
+// الحدّان يطابقان ما يفرضه الخادم في `checkSlot`، فلا يعرض المُنتقي
+// تاريخاً سيُرفض عند الإرسال
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return todayInOfficeTimezone();
 }
 
 function maxDateIso(): string {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 3);
+  const date = new Date(`${todayInOfficeTimezone()}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + MAX_BOOKING_DAYS_AHEAD);
   return date.toISOString().slice(0, 10);
 }
 

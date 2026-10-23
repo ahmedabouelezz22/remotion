@@ -92,7 +92,14 @@ check "طلب من مصدر أجنبي مرفوض" "$C" "403"
 
 echo
 echo "── 5) المواعيد ──"
-SLOTD=$(date -d '+14 days' +%F)
+# أول يوم عمل (أحد–خميس) بعد أسبوعين — الخادم يرفض أيام الإجازة
+SLOTD=$(python3 -I -c "
+import datetime
+d = datetime.date.today() + datetime.timedelta(days=14)
+while d.weekday() in (4, 5):
+    d += datetime.timedelta(days=1)
+print(d.isoformat())
+")
 B=$(curl -sk -H 'Content-Type: application/json' -X POST $BASE/api/booking -d "{
  \"name\":\"حاجز اختبار\",\"email\":\"booker@example.com\",\"phone\":\"01098765432\",
  \"type\":\"استشارة قانونية عامة\",\"channel\":\"مكالمة هاتفية\",\"date\":\"$SLOTD\",\"time\":\"11:00\",\"details\":\"موضوع اختباري لمراجعة عقد توريد مع مورد خارجي\"}")
