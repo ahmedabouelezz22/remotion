@@ -294,7 +294,7 @@ export default async function AccountPage({
                           {orderStatusLabels[order.status]}
                         </Badge>
                         <span className="numeric font-display text-lg font-black text-navy-900">
-                          {formatPrice(Number(order.total), order.currency)}
+                          {formatPrice(Number(order.total))}
                         </span>
                       </div>
                     </div>

@@ -5,21 +5,34 @@ import { useRouter } from 'next/navigation';
 import { Check, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/components/cart-provider';
-import type { Product } from '@/content/products';
+import { dict, path, type Locale } from '@/content/i18n';
+import { productText, type Product } from '@/content/products';
 
-export function AddToCart({ product, size = 'md' }: { product: Product; size?: 'sm' | 'md' | 'lg' }) {
+export function AddToCart({
+  product,
+  locale,
+  size = 'md',
+}: {
+  product: Product;
+  locale: Locale;
+  size?: 'sm' | 'md' | 'lg';
+}) {
   const { add, lines } = useCart();
   const router = useRouter();
   const [justAdded, setJustAdded] = useState(false);
+  const t = dict(locale);
+  const text = productText(product, locale);
 
   // منتج لم يُرفع ملفه بعد: نعرض مساراً للتواصل بدل زر شراء لا يُنتج تسليماً
   if (product.comingSoon) {
     return (
       <a
-        href={`/contact?subject=${encodeURIComponent(`الإشعار عند توفّر: ${product.name}`)}`}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-navy-900 px-6 py-3 text-[0.95rem] font-semibold text-navy-900 transition-colors hover:bg-navy-900 hover:text-white"
+        href={`${path(locale, '/contact')}?subject=${encodeURIComponent(
+          t.storeExtra.notifySubject(text.name),
+        )}`}
+        className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border-2 border-navy-900 px-6 py-3 text-[0.95rem] font-semibold text-navy-900 transition-colors hover:bg-navy-900 hover:text-white"
       >
-        أبلغني عند التوفّر
+        {t.common.notifyMe}
       </a>
     );
   }
@@ -46,14 +59,14 @@ export function AddToCart({ product, size = 'md' }: { product: Product; size?: '
         {justAdded ? (
           <>
             <Check className="h-4 w-4" />
-            أُضيف إلى السلة
+            {t.storeExtra.addedToCart}
           </>
         ) : locked ? (
-          'هذا الاشتراك في سلتك'
+          t.storeExtra.subscriptionInCart
         ) : (
           <>
             <ShoppingBag className="h-4 w-4" />
-            أضف إلى السلة
+            {t.store.addToCart}
           </>
         )}
       </Button>
@@ -64,10 +77,10 @@ export function AddToCart({ product, size = 'md' }: { product: Product; size?: '
         className="flex-1"
         onClick={() => {
           if (!alreadyInCart) add(product.slug);
-          router.push('/checkout');
+          router.push(path(locale, '/checkout'));
         }}
       >
-        اشترِ الآن
+        {t.store.buyNow}
       </Button>
     </div>
   );

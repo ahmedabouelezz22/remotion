@@ -39,6 +39,46 @@ export interface Product {
    * السلة، ويرفضه الخادم عند الدفع — فلا يدفع أحد ثمن ملف غير موجود.
    */
   comingSoon?: boolean;
+  /**
+   * الترجمة الإنجليزية — إلزامية فلا يُعرض منتج للبيع بنصف ترجمة.
+   * `description` اختيارية لأن بعض المنتجات لا وصف مطوّل لها في الأصل.
+   */
+  en: {
+    name: string;
+    summary: string;
+    description?: string;
+    highlights: string[];
+  };
+}
+
+/** تسميات التصنيفات بالإنجليزية — القيم تبقى عربية فلا ينقسم التصنيف */
+export const categoryLabelsEn: Record<string, string> = {
+  'الاستشارات': 'Consultations',
+  'الخدمات القانونية': 'Legal services',
+  'الامتثال الرقمي': 'Digital compliance',
+  'نماذج ووثائق': 'Templates and documents',
+  'كتب وأبحاث': 'Books and research',
+  'باقات الشركات': 'Corporate retainers',
+};
+
+/** نصّ المنتج بلغة الصفحة */
+export function productText(product: Product, locale: 'ar' | 'en') {
+  if (locale === 'ar') {
+    return {
+      name: product.name,
+      summary: product.summary,
+      description: product.description,
+      highlights: product.highlights,
+      category: product.category,
+    };
+  }
+  return {
+    name: product.en.name,
+    summary: product.en.summary,
+    description: product.en.description ?? product.description,
+    highlights: product.en.highlights,
+    category: categoryLabelsEn[product.category] ?? product.category,
+  };
 }
 
 /** أجرة الشحن الثابتة داخل مصر */
@@ -61,6 +101,16 @@ export const products: Product[] = [
     summary: 'استشارة سريعة لسؤال محدّد أو رأي عاجل في مسألة واحدة.',
     description: `جلسة قصيرة مخصّصة لسؤال واحد محدّد لا يحتاج دراسة مستندات مطوّلة. ${CONSULTATION_NOTE}`,
     highlights: ['جلسة 15 دقيقة', 'سؤال واحد محدّد', 'رأي مباشر', 'حجز الموعد من صفحة الحجز'],
+    en: {
+      name: 'Legal consultation — 15 minutes',
+      summary: 'A short consultation for one specific question or an urgent view on a single point.',
+      highlights: [
+        '15-minute session',
+        'One specific question',
+        'A direct opinion',
+        'Book the slot on the booking page',
+      ],
+    },
   },
   {
     slug: 'consultation-30',
@@ -74,6 +124,15 @@ export const products: Product[] = [
     summary: 'استشارة متوسطة تكفي لمناقشة مسألة مع مراجعة مستند مختصر.',
     description: `جلسة تتّسع لمناقشة المسألة ومراجعة مستند مختصر مرسَل مسبقاً. ${CONSULTATION_NOTE}`,
     highlights: ['جلسة 30 دقيقة', 'مراجعة مستند مختصر', 'ملخّص مكتوب بالرأي'],
+    en: {
+      name: 'Legal consultation — 30 minutes',
+      summary: 'A mid-length consultation, enough to discuss a matter and review a short document.',
+      highlights: [
+        '30-minute session',
+        'Review of a short document',
+        'A written summary of the opinion',
+      ],
+    },
   },
   {
     slug: 'consultation-45',
@@ -87,6 +146,16 @@ export const products: Product[] = [
     summary: 'استشارة مفصّلة لمسألة متشعّبة أو أكثر من سؤال مترابط.',
     description: `جلسة تتّسع لمسألة متشعّبة أو عدّة أسئلة مترابطة مع مراجعة المستندات. ${CONSULTATION_NOTE}`,
     highlights: ['جلسة 45 دقيقة', 'مراجعة المستندات', 'مناقشة البدائل وأثر كلٍّ منها', 'ملخّص مكتوب'],
+    en: {
+      name: 'Legal consultation — 45 minutes',
+      summary: 'A detailed consultation for a branching matter or several connected questions.',
+      highlights: [
+        '45-minute session',
+        'Document review',
+        'Discussion of the alternatives and the effect of each',
+        'A written summary',
+      ],
+    },
   },
   {
     slug: 'consultation-60',
@@ -107,6 +176,16 @@ export const products: Product[] = [
       'مناقشة الخيارات وأثرها القانوني والمالي',
       'خطة خطوات تالية مكتوبة',
     ],
+    en: {
+      name: 'Legal consultation — 60 minutes',
+      summary: 'A full consultation with document study and a written plan of action.',
+      highlights: [
+        '60-minute session',
+        'Full study of the documents before the session',
+        'Discussion of the options and their legal and financial effect',
+        'A written plan of next steps',
+      ],
+    },
   },
 
   // ───────────────── الخدمات القانونية ─────────────────
@@ -127,6 +206,18 @@ export const products: Product[] = [
       'التسليم خلال 3–5 أيام عمل',
     ],
     featured: true,
+    en: {
+      name: 'Contract drafting',
+      summary: 'A contract drafted from scratch for the nature of the relationship and the applicable law.',
+      description:
+        'The contract is drafted in full once the parties, the subject matter and the mutual obligations are settled. It covers the liability, termination, force majeure and dispute-resolution clauses, and includes one round of amendments after delivery. The published price is for ordinary contracts; complex contracts are re-quoted after review.',
+      highlights: [
+        'A contract drafted from scratch',
+        'The critical clauses settled (liability / termination / force majeure / disputes)',
+        'One round of amendments after delivery',
+        'Delivery within 3–5 business days',
+      ],
+    },
   },
   {
     slug: 'contract-review',
@@ -144,6 +235,18 @@ export const products: Product[] = [
       'صياغة بديلة للبنود الحرجة',
       'التسليم خلال 3 أيام عمل',
     ],
+    en: {
+      name: 'Contract review',
+      summary: 'A structured review before signature, with a graded risk report.',
+      description:
+        'A review that identifies legal risks, ambiguities and dispute triggers, measures the balance of obligations and rights between the parties, examines the clarity, enforceability and internal consistency of the clauses, and sets out the missing protections, with proposed alternative wording for the critical clauses.',
+      highlights: [
+        'A graded risk report (high / medium / low)',
+        'An annotated copy with proposed amendments',
+        'Alternative drafting for the critical clauses',
+        'Delivery within 3 business days',
+      ],
+    },
   },
   {
     slug: 'legal-memo',
@@ -161,6 +264,18 @@ export const products: Product[] = [
       'رأي مسبَّب مع بيان درجة اليقين',
       'إحالات إلى المصادر النظامية',
     ],
+    en: {
+      name: 'Legal memorandum',
+      summary: 'A reasoned memorandum on a specific question, supported by the texts and precedents.',
+      description:
+        'A legal memorandum setting out the facts and the question at issue, analysing the applicable texts, and concluding with a reasoned opinion that states the degree of certainty and the risks. Suitable for internal use or for submission to an administrative or judicial body.',
+      highlights: [
+        'The facts and the question at issue set out',
+        'Analysis of the applicable texts',
+        'A reasoned opinion stating the degree of certainty',
+        'References to the official sources',
+      ],
+    },
   },
   {
     slug: 'complaint-drafting',
@@ -178,6 +293,18 @@ export const products: Product[] = [
       'صياغة دقيقة للطلبات الختامية',
       'قائمة المستندات المؤيّدة',
     ],
+    en: {
+      name: 'Drafting a complaint or statement of claim',
+      summary: 'A complaint or statement of claim drafted with its grounds and its prayers.',
+      description:
+        'The complaint or statement of claim is prepared after studying the facts and documents: a statement of the facts, the legal basis for the prayers, and precise drafting of the final prayers, with a schedule of supporting documents.',
+      highlights: [
+        'Study of the facts and documents',
+        'A statement of the legal basis for the prayers',
+        'Precise drafting of the final prayers',
+        'A schedule of supporting documents',
+      ],
+    },
   },
   {
     slug: 'corporate-bylaws',
@@ -195,6 +322,18 @@ export const products: Product[] = [
       'مطابقة للقانون الواجب التطبيق',
       'قابلة للاعتماد لدى الجهة المختصة',
     ],
+    en: {
+      name: 'Internal company regulations',
+      summary: 'Internal regulations and disciplinary rules fit for approval by the competent authorities.',
+      description:
+        'Preparation of the establishment’s internal regulations and disciplinary rules in conformity with the applicable law: working hours, leave, discipline and the graduation of penalties, drafted so as to be capable of approval before the competent authority and of being relied on before the courts.',
+      highlights: [
+        'Complete internal regulations',
+        'Graduated disciplinary rules',
+        'Conformity with the applicable law',
+        'Fit for approval by the competent authority',
+      ],
+    },
   },
   {
     slug: 'nda',
@@ -212,6 +351,18 @@ export const products: Product[] = [
       'مدة الالتزام والجزاء عند الإخلال',
       'أحادية أو متبادلة',
     ],
+    en: {
+      name: 'Non-disclosure agreement (NDA)',
+      summary: 'A one-way or mutual confidentiality agreement with a defined scope and term.',
+      description:
+        'A non-disclosure agreement drafted to define precisely the confidential information, the scope of its use, the term of the obligation, the exceptions and the consequence of breach — one-way or mutual according to the nature of the relationship.',
+      highlights: [
+        'Precise definition of the confidential information',
+        'Scope of use and exceptions',
+        'Term of the obligation and the consequence of breach',
+        'One-way or mutual',
+      ],
+    },
   },
   {
     slug: 'privacy-policy',
@@ -229,6 +380,18 @@ export const products: Product[] = [
       'مدد الاحتفاظ وحقوق أصحاب البيانات',
       'نسخة عربية وإنجليزية عند الطلب',
     ],
+    en: {
+      name: 'Privacy policy',
+      summary: 'A privacy policy that meets personal data protection requirements.',
+      description:
+        'A privacy policy describing the actual processing of user data: the categories of data, the purposes of processing and their legal basis, retention periods, recipients and the rights of data subjects — not a copied boilerplate, but a policy built on how your business actually operates.',
+      highlights: [
+        'Built on how your data is actually processed',
+        'The legal basis stated for each purpose',
+        'Retention periods and data subject rights',
+        'Arabic and English versions on request',
+      ],
+    },
   },
   {
     slug: 'terms-of-service',
@@ -246,6 +409,18 @@ export const products: Product[] = [
       'الملكية الفكرية',
       'تسوية المنازعات والقانون الواجب التطبيق',
     ],
+    en: {
+      name: 'Terms of use',
+      summary: 'Terms of use for digital platforms and online stores.',
+      description:
+        'Terms of use drafted for a website, application or online store: the scope of the service, the user’s obligations, limits of liability, the refund policy, intellectual property, and the dispute-resolution mechanism and governing law.',
+      highlights: [
+        'Scope of the service and the user’s obligations',
+        'Limits of liability and the refund policy',
+        'Intellectual property',
+        'Dispute resolution and governing law',
+      ],
+    },
   },
 
   // ───────────────── منتجات رقمية ─────────────────
@@ -270,6 +445,18 @@ export const products: Product[] = [
       'تنبيهات على المخاطر الشائعة',
       'رابط تحميل فوري بعد الدفع',
     ],
+    en: {
+      name: 'Commercial contract template pack',
+      summary: 'Twelve editable contract templates with a guide explaining the critical clauses in each.',
+      description:
+        'A pack of templates prepared for practical use: supply contract, services contract, non-disclosure agreement, employment contract, commercial agency contract, commercial lease, settlement agreement, consultancy contract, partnership agreement, distribution contract, acknowledgement of debt, and handover record. Each template comes with an explanation of the clauses that need adapting to the case and warnings on the clauses that must not be deleted.',
+      highlights: [
+        'Twelve editable templates in Word format',
+        'A usage guide explaining the critical clauses',
+        'Warnings on the common risks',
+        'An instant download link after payment',
+      ],
+    },
   },
   {
     slug: 'zakat-guide-ebook',
@@ -291,6 +478,18 @@ export const products: Product[] = [
       'نماذج مذكّرات اعتراض',
       'إحالات إلى النصوص النظامية',
     ],
+    en: {
+      name: 'Guide to assessing the Zakat base — electronic edition',
+      summary: 'An applied study of the bases for assessing the Zakat base and objecting to a deemed assessment.',
+      description:
+        'A study combining theoretical grounding with practical application: the concept of the Zakat base and its elements, the bases of assessment, the difference between actual and deemed assessment, and the objection and appeal procedures and their deadlines, with worked examples and model objection memoranda.',
+      highlights: [
+        'An indexed PDF',
+        'Worked examples, step by step',
+        'Model objection memoranda',
+        'References to the official texts',
+      ],
+    },
   },
   {
     slug: 'zakat-guide-print',
@@ -310,6 +509,16 @@ export const products: Product[] = [
       'الشحن داخل مصر خلال 3–7 أيام عمل',
       `أجرة شحن ثابتة ${SHIPPING_FLAT_RATE} ج.م داخل مصر`,
     ],
+    en: {
+      name: 'Guide to assessing the Zakat base — print edition',
+      summary: 'The printed edition of the guide, shipped within the Arab Republic of Egypt.',
+      description:
+        'The printed edition, hardback with clear interior printing. Shipped within 3–7 business days inside Egypt. For shipping outside Egypt, contact us to agree the carriage.',
+      highlights: [
+        'Hardback with clear printing',
+        'Shipping inside Egypt within 3–7 business days',
+      ],
+    },
   },
 
   // ───────────────── الباقات الشهرية ─────────────────
@@ -330,6 +539,18 @@ export const products: Product[] = [
       'دعم عبر البريد الإلكتروني',
       'رأي قانوني مختصر عند الحاجة',
     ],
+    en: {
+      name: 'Essential retainer',
+      summary: 'Suited to small businesses that need a regular legal point of reference.',
+      description:
+        'A monthly retainer giving the business regular access to legal advice without negotiating a fee for each matter separately.',
+      highlights: [
+        'A monthly consultation (60 minutes)',
+        'Review of one contract a month',
+        'Support by email',
+        'A short legal opinion when needed',
+      ],
+    },
   },
   {
     slug: 'package-business',
@@ -351,6 +572,19 @@ export const products: Product[] = [
       'أولوية في الرد',
       'مذكّرة قانونية شهرية',
     ],
+    en: {
+      name: 'Business retainer',
+      summary: 'For mid-sized businesses with continuous contractual activity.',
+      description:
+        'Broader cover suited to businesses that sign contracts regularly and need priority in response.',
+      highlights: [
+        'Two consultations a month (60 minutes each)',
+        'Review of three contracts a month',
+        'One contract drafted a month',
+        'Priority in response',
+        'A monthly legal memorandum',
+      ],
+    },
   },
   {
     slug: 'package-premium',
@@ -372,6 +606,20 @@ export const products: Product[] = [
       'أتعاب مخفّضة على التمثيل القانوني',
       'مدير حساب مخصّص',
     ],
+    en: {
+      name: 'Premium retainer',
+      summary: 'In-house legal counsel for the business at a fixed monthly fee.',
+      description:
+        'The fullest cover: continuous legal support for the business with a dedicated account manager and top priority in response.',
+      highlights: [
+        'Unlimited consultations',
+        'Unlimited contract review',
+        'Three contracts drafted a month',
+        'Top priority in response',
+        'Reduced fees on legal representation',
+        'A dedicated account manager',
+      ],
+    },
   },
 ];
 
@@ -381,6 +629,13 @@ export const getProduct = (slug: string) => products.find((product) => product.s
 
 /** المنتجات القابلة للشراء فعلاً — تُستثنى منها المعلنة بـ «قريباً» */
 export const purchasableProducts = products.filter((product) => !product.comingSoon);
+
+export const kindLabelsEn: Record<ProductKind, string> = {
+  digital: 'Digital product',
+  service: 'Legal service',
+  subscription: 'Monthly retainer',
+  physical: 'Printed edition',
+};
 
 export const kindLabels: Record<ProductKind, string> = {
   digital: 'منتج رقمي — تحميل فوري',

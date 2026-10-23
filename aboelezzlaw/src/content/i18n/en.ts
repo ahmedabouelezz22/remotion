@@ -416,6 +416,106 @@ export const en: Dictionary = {
     workingHoursLabel: 'Sunday to Thursday, 10:00 – 18:00',
   },
 
+  libraryPage: {
+    eyebrow: 'Legal library',
+    title: 'Open-access legal references',
+    description:
+      'Official and institutional sources, freely and lawfully available. We link straight to the original source and never republish copyright-protected works.',
+    metaDescription:
+      'Open-access legal references: the Egyptian and Saudi legislation portals, UNCITRAL texts, the UNIDROIT Principles, and intellectual property and comparative law databases.',
+    criteriaTitle: 'How we choose what goes here',
+    criteriaBody:
+      'Nothing enters this library unless it is freely available from an official body or a recognised international institution. That secures two things: the reference is authoritative enough to be relied on, and access to it is lawful and infringes nobody’s rights. When building on a legislative text in a specific matter, always return to the operative version published in the official gazette or the competent official portal.',
+    openSource: 'Open the source',
+  },
+
+  videosPage: {
+    eyebrow: 'Videos',
+    title: 'Legal content on video',
+    description:
+      'This list is pulled directly from the YouTube channel and updates automatically — every new video you publish appears here with no change to the site.',
+    metaDescription:
+      'Legal video content from Ahmed Abo Elezz’s YouTube channel — explanations and legal guidance on contracts, companies and litigation.',
+    latestCount: (count: number) => `Latest ${count} video${count === 1 ? '' : 's'} from the channel`,
+    none: 'No videos are listed at the moment',
+    fetchFailedTitle: 'The videos could not be fetched right now',
+    fetchFailedBody:
+      'Setting the YOUTUBE_CHANNEL_ID environment variable to the channel ID makes fetching faster and more reliable. Until then you can visit the channel directly.',
+    openChannel: 'Open the channel on YouTube',
+    fallbackNote: 'A fallback list is shown — the YouTube feed could not be reached at this moment.',
+    youtube: 'YouTube',
+  },
+
+  storeExtra: {
+    notifySubject: (name: string) => `Notify me when available: ${name}`,
+    addedToCart: 'Added to cart',
+    subscriptionInCart: 'This subscription is in your cart',
+    billingPer: (period: string) => `/ ${period}`,
+    assurances: [
+      {
+        title: 'A price known in advance',
+        body: 'Each service’s scope and price are shown before purchase — no opening negotiation on fees.',
+      },
+      {
+        title: 'Secure payment',
+        body: 'Payment happens on the gateway’s own page; your card details are never stored on this site.',
+      },
+      {
+        title: 'Several methods',
+        body: 'Bank transfer, InstaPay, mobile wallets and PayPal, with cards through Paymob once enabled.',
+      },
+      {
+        title: 'Clear delivery',
+        body: 'Digital products download immediately, services begin within one business day, and printed items ship within 3–7 days.',
+      },
+    ],
+    pageTitle: 'Legal services at published prices',
+    pageDescription:
+      'Choose the service that fits and see its scope, deliverables and price before buying. Payment is online, and work begins as soon as payment is confirmed.',
+    billingPeriods: { 'شهري': 'monthly', 'سنوي': 'yearly' } as Record<string, string>,
+  },
+
+  productPage: {
+    notFound: 'Product not found',
+    detailsHeading: 'About this service',
+    includesHeading: 'What it includes',
+    digitalTitle: 'How you receive it',
+    digitalBody:
+      'Once payment is confirmed, a secured download link valid for 72 hours arrives in your inbox. Digital files are not refundable once downloaded, by their nature.',
+    shippingTitle: 'Shipping',
+    shippingBody: (fee: string) =>
+      `A flat shipping charge of ${fee} applies within Egypt, and the order arrives within 3–7 business days. For shipping outside Egypt, contact us to agree the carriage before ordering.`,
+    bookingTitle: 'Scheduling the session',
+    bookingBody:
+      'After completing payment, book the session on the booking page. You may also book the slot first and pay once it is confirmed.',
+    goToBooking: 'Go to the booking page',
+    sessionLength: 'Session length',
+    minutes: (count: number) => `${count} minutes`,
+    pageCount: 'Pages',
+    category: 'Category',
+    paymentNote: 'Payment happens on the gateway’s page — your card details are not stored here.',
+    questionTitle: 'A question before you buy?',
+    questionBody:
+      'If you are not sure this service fits your situation, message us and explain the matter — we will point you to the right option, even if it is a cheaper one.',
+    enquiryMessage: (name: string) => `Hello, I have a question about: ${name}`,
+    sameCategory: 'From the same category',
+  },
+
+  cartPage: {
+    eyebrow: 'Cart',
+    title: 'Review your order',
+    description: 'Check the items and quantities before continuing to payment.',
+    loading: 'Loading your cart…',
+    emptyBody:
+      'Browse the store and pick the service that fits — every service has its scope and price shown in advance.',
+    decrease: (name: string) => `Decrease quantity of ${name}`,
+    increase: (name: string) => `Increase quantity of ${name}`,
+    removeItem: (name: string) => `Remove ${name} from the cart`,
+    subtotalLabel: 'Subtotal',
+    noShipping: 'None',
+    proceed: 'Continue to payment',
+  },
+
   orderStatus: {
     pending: 'Awaiting payment',
     paid: 'Paid',

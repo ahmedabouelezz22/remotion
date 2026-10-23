@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { Download, FileSignature, Package, RefreshCw } from 'lucide-react';
 import { Badge, Card } from '@/components/ui/card';
 import { AddToCart } from '@/components/add-to-cart';
-import { productCategories, type Product, type ProductKind } from '@/content/products';
-import { formatPrice } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { dict, path, type Locale } from '@/content/i18n';
+import {
+  categoryLabelsEn,
+  productCategories,
+  productText,
+  type Product,
+  type ProductKind,
+} from '@/content/products';
+import { cn, formatPrice } from '@/lib/utils';
 
 const kindIcon: Record<ProductKind, typeof Download> = {
   digital: Download,
@@ -16,21 +22,23 @@ const kindIcon: Record<ProductKind, typeof Download> = {
   physical: Package,
 };
 
-const kindShort: Record<ProductKind, string> = {
-  digital: 'تحميل فوري',
-  service: 'خدمة',
-  subscription: 'اشتراك',
-  physical: 'يُشحن',
-};
-
-const ALL = 'الكل';
+const ALL = '__all__';
 
 /**
  * الكتالوج يأتي من الخادم لا من ملف المحتوى: حالة النشر قد يكون المالك
  * غيّرها من اللوحة، والعميل لا يعرفها.
  */
-export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
+export function StoreGrid({ catalogue, locale }: { catalogue: Product[]; locale: Locale }) {
   const [category, setCategory] = useState<string>(ALL);
+  const t = dict(locale);
+  const isArabic = locale === 'ar';
+
+  const kindShort: Record<ProductKind, string> = {
+    digital: t.store.instantDownload,
+    service: t.store.service,
+    subscription: t.store.subscription,
+    physical: t.store.shipped,
+  };
 
   const visible = useMemo(
     () => (category === ALL ? catalogue : catalogue.filter((p) => p.category === category)),
@@ -39,7 +47,7 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
 
   return (
     <>
-      <div className="mb-10 flex flex-wrap gap-2" role="tablist" aria-label="تصنيفات المتجر">
+      <div className="mb-10 flex flex-wrap gap-2" role="tablist" aria-label={t.store.title}>
         {[ALL, ...productCategories].map((item) => (
           <button
             key={item}
@@ -54,7 +62,11 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
                 : 'border-sand-200 bg-white text-slate-600 hover:border-gold-500 hover:text-navy-900',
             )}
           >
-            {item}
+            {item === ALL
+              ? t.store.allCategories
+              : isArabic
+                ? item
+                : (categoryLabelsEn[item] ?? item)}
           </button>
         ))}
       </div>
@@ -62,6 +74,7 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {visible.map((product) => {
           const Icon = kindIcon[product.kind];
+          const text = productText(product, locale);
           return (
             <Card key={product.slug} hover className="flex flex-col">
               <div className="mb-4 flex items-start justify-between gap-3">
@@ -69,39 +82,45 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
                   <Icon className="h-3.5 w-3.5" />
                   {kindShort[product.kind]}
                 </span>
-                {product.badge ? <Badge tone="gold">{product.badge}</Badge> : null}
+                {product.badge ? (
+                  <Badge tone="gold">
+                    {product.comingSoon ? t.common.comingSoon : product.badge}
+                  </Badge>
+                ) : null}
               </div>
 
-              <Link href={`/store/${product.slug}`} className="group">
+              <Link href={path(locale, `/store/${product.slug}`)} className="group">
                 <h2 className="mb-2.5 text-lg leading-8 text-navy-900 transition-colors group-hover:text-gold-600">
-                  {product.name}
+                  {text.name}
                 </h2>
               </Link>
-              <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{product.summary}</p>
+              <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{text.summary}</p>
 
               <div className="mb-5 flex items-baseline gap-2.5">
                 <span className="numeric font-display text-2xl font-black text-navy-900">
-                  {formatPrice(product.price, product.currency)}
+                  {formatPrice(product.price, locale)}
                 </span>
                 {product.compareAtPrice ? (
                   <span className="numeric text-sm text-slate-500 line-through">
-                    {formatPrice(product.compareAtPrice, product.currency)}
+                    {formatPrice(product.compareAtPrice, locale)}
                   </span>
                 ) : null}
                 {product.billingPeriod ? (
                   <span className="text-xs font-semibold text-slate-500">
-                    / {product.billingPeriod}
+                    {t.storeExtra.billingPer(
+                      t.storeExtra.billingPeriods[product.billingPeriod] ?? product.billingPeriod,
+                    )}
                   </span>
                 ) : null}
               </div>
 
-              <AddToCart product={product} size="sm" />
+              <AddToCart product={product} locale={locale} size="sm" />
 
               <Link
-                href={`/store/${product.slug}`}
+                href={path(locale, `/store/${product.slug}`)}
                 className="mt-3 inline-flex min-h-[40px] items-center justify-center text-center text-xs font-bold text-slate-500 transition-colors hover:text-navy-900"
               >
-                عرض التفاصيل الكاملة
+                {t.store.viewDetails}
               </Link>
             </Card>
           );
@@ -109,7 +128,7 @@ export function StoreGrid({ catalogue }: { catalogue: Product[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <p className="py-16 text-center text-slate-500">لا توجد منتجات في هذا التصنيف.</p>
+        <p className="py-16 text-center text-slate-500">{t.store.emptyCategory}</p>
       ) : null}
     </>
   );

@@ -290,7 +290,7 @@ export function CheckoutForm({ providers }: { providers: ProviderOption[] }) {
                 {quantity > 1 ? <span className="numeric text-slate-500"> × {quantity}</span> : null}
               </span>
               <span className="numeric shrink-0 font-bold text-navy-900">
-                {formatPrice(product.price * quantity, product.currency)}
+                {formatPrice(product.price * quantity)}
               </span>
             </li>
           ))}

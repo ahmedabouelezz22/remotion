@@ -1,63 +1,72 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { Play, Youtube } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
+import { dict, isLocale, type Locale } from '@/content/i18n';
 import { site } from '@/content/site';
+import { formatDate } from '@/lib/utils';
 import { getChannelVideos } from '@/lib/youtube';
-import { formatDateAr } from '@/lib/utils';
 
-export const metadata: Metadata = {
-  title: 'الفيديوهات',
-  description:
-    'محتوى قانوني مرئي من قناة أحمد أبو العز على يوتيوب — شروح وتوعية قانونية في العقود والشركات والتقاضي.',
-  alternates: { canonical: '/videos' },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) return {};
+  const t = dict(raw as Locale);
+  return {
+    title: t.videosPage.eyebrow,
+    description: t.videosPage.metaDescription,
+    alternates: { canonical: `/${raw}/videos` },
+  };
+}
 
 // تُعاد التوليد كل ساعة حتى تظهر الفيديوهات الجديدة تلقائياً
 export const revalidate = 3600;
 
-export default async function VideosPage() {
+export default async function VideosPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const t = dict(locale);
+
   const { videos, source } = await getChannelVideos();
 
   return (
     <>
       <PageHeader
-        eyebrow="الفيديوهات"
-        title="محتوى قانوني مرئي"
-        description="تُجلب هذه القائمة مباشرةً من قناة اليوتيوب وتُحدَّث تلقائياً — كل فيديو جديد تنشره يظهر هنا دون أي تعديل في الموقع."
+        eyebrow={t.videosPage.eyebrow}
+        title={t.videosPage.title}
+        description={t.videosPage.description}
       />
 
       <Section>
         <Container size="wide">
           <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-slate-600">
-              {videos.length > 0
-                ? `أحدث ${videos.length} فيديو من القناة`
-                : 'لا توجد فيديوهات معروضة حالياً'}
+              {videos.length > 0 ? t.videosPage.latestCount(videos.length) : t.videosPage.none}
             </p>
             <ButtonLink href={site.social.youtube} external variant="outline" size="sm">
               <Youtube className="h-4 w-4" />
-              زيارة القناة
+              {t.videos.visitChannel}
             </ButtonLink>
           </div>
 
           {videos.length === 0 ? (
-            <Card className="border-gold-400/50 bg-gold-500/8 text-center">
+            <Card className="border-gold-400/50 bg-gold-50 text-center">
               <Youtube className="mx-auto mb-4 h-12 w-12 text-gold-600" />
-              <h2 className="mb-2.5 text-lg text-navy-900">تعذّر جلب الفيديوهات حالياً</h2>
+              <h2 className="mb-2.5 text-lg text-navy-900">{t.videosPage.fetchFailedTitle}</h2>
               <p className="mx-auto mb-6 max-w-lg text-sm leading-8 text-slate-600">
-                يمكن تسريع الجلب وضمان استقراره بضبط متغيّر البيئة{' '}
-                <code className="rounded bg-white px-1.5 py-0.5 font-mono text-xs">
-                  YOUTUBE_CHANNEL_ID
-                </code>{' '}
-                بمعرّف القناة. حتى ذلك الحين يمكنك زيارة القناة مباشرةً.
+                {t.videosPage.fetchFailedBody}
               </p>
               <ButtonLink href={site.social.youtube} external>
                 <Youtube className="h-4 w-4" />
-                فتح القناة على يوتيوب
+                {t.videosPage.openChannel}
               </ButtonLink>
             </Card>
           ) : (
@@ -100,14 +109,14 @@ export default async function VideosPage() {
                       <div className="flex items-center justify-between text-xs text-slate-500">
                         {video.publishedAt ? (
                           <time className="numeric" dateTime={video.publishedAt}>
-                            {formatDateAr(video.publishedAt)}
+                            {formatDate(video.publishedAt, locale)}
                           </time>
                         ) : (
                           <span />
                         )}
                         <span className="inline-flex items-center gap-1 font-bold text-gold-600">
                           <Youtube className="h-3.5 w-3.5" />
-                          يوتيوب
+                          {t.videosPage.youtube}
                         </span>
                       </div>
                     </div>
@@ -118,9 +127,7 @@ export default async function VideosPage() {
           )}
 
           {source === 'fallback' && videos.length > 0 ? (
-            <p className="mt-8 text-center text-xs text-slate-500">
-              تُعرض قائمة احتياطية — تعذّر الاتصال بتغذية اليوتيوب في هذه اللحظة.
-            </p>
+            <p className="mt-8 text-center text-xs text-slate-500">{t.videosPage.fallbackNote}</p>
           ) : null}
         </Container>
       </Section>

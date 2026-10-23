@@ -220,7 +220,7 @@ export default function HomePage() {
                 <p className="mb-6 flex-1 text-sm leading-8 text-slate-600">{product.summary}</p>
                 <div className="mb-5 flex items-baseline gap-2">
                   <span className="numeric font-display text-2xl font-black text-navy-900">
-                    {formatPrice(product.price, product.currency)}
+                    {formatPrice(product.price)}
                   </span>
                   {product.billingPeriod ? (
                     <span className="text-xs font-semibold text-slate-500">

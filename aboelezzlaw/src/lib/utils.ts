@@ -5,22 +5,39 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(amount: number, currency = 'EGP'): string {
-  return new Intl.NumberFormat('ar-EG', {
+/**
+ * سعر بلغة الصفحة. العملة واحدة (الجنيه المصري) في اللغتين — فالتسعير واحد
+ * ولا يجوز أن يبدو للقارئ الإنجليزي أنه بعملة أخرى.
+ */
+export function formatPrice(
+  amount: number,
+  locale: 'ar' | 'en' = 'ar',
+  currency = 'EGP',
+): string {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-GB', {
     style: 'currency',
     currency,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-export function formatDateAr(value: string | Date): string {
+/**
+ * تاريخ بلغة الصفحة.
+ *
+ * العربية تُعرض بالأرقام الهندية والشهور العربية، والإنجليزية بصيغتها —
+ * فلا يرى قارئ الإنجليزية «١٨ أغسطس ٢٠٢٦».
+ */
+export function formatDate(value: string | Date, locale: 'ar' | 'en' = 'ar'): string {
   const date = typeof value === 'string' ? new Date(value) : value;
-  return new Intl.DateTimeFormat('ar-EG', {
+  return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   }).format(date);
 }
+
+/** اسم قديم محفوظ لتوافق النداءات العربية */
+export const formatDateAr = (value: string | Date) => formatDate(value, 'ar');
 
 export function readingTime(text: string): number {
   // متوسط قراءة العربية ~180 كلمة/دقيقة
