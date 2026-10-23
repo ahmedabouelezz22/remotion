@@ -14,6 +14,9 @@ export const manual: PaymentProvider = {
   label: 'تحويل بنكي / إنستاباي / Wise',
   description:
     'أرسل قيمة الطلب بالوسيلة المناسبة لك، ثم أرسل صورة الإيصال على واتساب ليُفعَّل طلبك خلال ساعات العمل.',
+  labelEn: 'Bank transfer / InstaPay / Wise',
+  descriptionEn:
+    'Send the order amount by whichever route suits you, then send the receipt on WhatsApp and your order is activated during working hours.',
 
   isConfigured() {
     // متاح دائماً — لا يحتاج مفاتيح

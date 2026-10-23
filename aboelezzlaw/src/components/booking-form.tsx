@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CalendarCheck, CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Honeypot, controlClass } from '@/components/ui/field';
+import { dict, type Locale } from '@/content/i18n';
 import { site, waLink } from '@/content/site';
 import { MAX_BOOKING_DAYS_AHEAD, slotsForDate, todayInOfficeTimezone } from '@/lib/slots';
 import { consultationChannels, consultationTypes } from '@/lib/validation';
@@ -35,7 +36,15 @@ function maxDateIso(): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function BookingForm() {
+export function BookingForm({ locale }: { locale: Locale }) {
+  const t = dict(locale);
+  const isArabic = locale === 'ar';
+  // التسمية تُترجَم والقيمة تبقى عربية — فما يُحفظ في القاعدة واحد
+  const typeLabel = (value: string) =>
+    isArabic ? value : (t.bookingForm.consultationTypes[value] ?? value);
+  const channelLabel = (value: string) =>
+    isArabic ? value : (t.bookingForm.consultationChannels[value] ?? value);
+
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>('idle');
@@ -97,7 +106,7 @@ export function BookingForm() {
       const response = await fetch('/api/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, locale }),
       });
       const data = (await response.json()) as {
         ok: boolean;
@@ -117,7 +126,7 @@ export function BookingForm() {
       setValues(initialValues);
     } catch {
       setStatus('error');
-      setFeedback('تعذّر الاتصال بالخادم. راسلنا على واتساب لتثبيت الموعد.');
+      setFeedback(t.bookingForm.serverError);
     }
   }
 
@@ -125,22 +134,24 @@ export function BookingForm() {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
         <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-600" />
-        <h3 className="mb-2 text-xl font-extrabold text-emerald-900">استلمنا طلب الحجز</h3>
+        <h3 className="mb-2 text-xl font-extrabold text-emerald-900">
+          {t.bookingForm.receivedTitle}
+        </h3>
         <p className="mb-2 leading-8 text-emerald-800">{feedback}</p>
         <p className="mb-6 text-sm text-emerald-700">
-          وصلتك رسالة تأكيد على بريدك. الموعد يصبح نهائياً بعد تأكيده من المكتب.
+          {t.bookingForm.receivedBody}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button variant="outline" size="sm" onClick={() => setStatus('idle')}>
-            حجز موعد آخر
+            {t.booking.bookAnother}
           </Button>
           <a
-            href={waLink('السلام عليكم، حجزت موعد استشارة عبر الموقع وأود تأكيده.')}
+            href={waLink(t.bookingForm.confirmMessage)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center rounded-xl bg-[#128C7E] px-4 py-2 text-sm font-bold text-white"
           >
-            تأكيد سريع على واتساب
+            {t.bookingForm.quickConfirm}
           </a>
         </div>
       </div>
@@ -154,19 +165,19 @@ export function BookingForm() {
       <Honeypot value={values.company} onChange={update('company')} />
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="الاسم" htmlFor="b-name" required error={errors.name}>
+        <Field label={t.booking.name} htmlFor="b-name" required error={errors.name}>
           <input
             id="b-name"
             autoComplete="name"
             className={controlClass(errors.name)}
-            placeholder="الاسم الكامل"
+            placeholder={t.forms.namePlaceholder}
             value={values.name}
             onChange={(event) => update('name')(event.target.value)}
             disabled={busy}
           />
         </Field>
 
-        <Field label="رقم الهاتف" htmlFor="b-phone" required error={errors.phone}>
+        <Field label={t.booking.phone} htmlFor="b-phone" required error={errors.phone}>
           <input
             id="b-phone"
             type="tel"
@@ -181,7 +192,7 @@ export function BookingForm() {
         </Field>
       </div>
 
-      <Field label="البريد الإلكتروني" htmlFor="b-email" required error={errors.email}>
+      <Field label={t.booking.email} htmlFor="b-email" required error={errors.email}>
         <input
           id="b-email"
           type="email"
@@ -196,7 +207,7 @@ export function BookingForm() {
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="نوع الاستشارة" htmlFor="b-type" required error={errors.type}>
+        <Field label={t.booking.type} htmlFor="b-type" required error={errors.type}>
           <select
             id="b-type"
             className={controlClass(errors.type)}
@@ -206,13 +217,13 @@ export function BookingForm() {
           >
             {consultationTypes.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {typeLabel(item)}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="وسيلة التواصل المفضّلة" htmlFor="b-channel" required error={errors.channel}>
+        <Field label={t.booking.channel} htmlFor="b-channel" required error={errors.channel}>
           <select
             id="b-channel"
             className={controlClass(errors.channel)}
@@ -222,7 +233,7 @@ export function BookingForm() {
           >
             {consultationChannels.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {channelLabel(item)}
               </option>
             ))}
           </select>
@@ -230,7 +241,7 @@ export function BookingForm() {
       </div>
 
       <Field
-        label="التاريخ المطلوب"
+        label={t.bookingForm.dateLabel}
         htmlFor="b-date"
         required
         error={errors.date}
@@ -251,24 +262,24 @@ export function BookingForm() {
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold text-navy-900">
-          الموعد <span className="text-red-600">*</span>
+          {t.booking.time} <span className="text-red-600">*</span>
         </span>
 
         {!values.date ? (
           <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-500">
-            اختر التاريخ أولاً لعرض المواعيد المتاحة.
+            {t.bookingForm.pickDateFirst}
           </p>
         ) : dayIsClosed ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
-            هذا اليوم خارج أيام العمل. {site.workingHours.label}
+            {t.bookingForm.dayClosedWithHours(t.contactPage.workingHoursLabel)}
           </p>
         ) : loadingSlots ? (
           <p className="rounded-xl border border-dashed border-sand-200 bg-sand-100 p-4 text-sm text-slate-500">
-            جارٍ التحقّق من المواعيد المتاحة…
+            {t.bookingForm.checkingSlots}
           </p>
         ) : availableCount === 0 ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
-            كل مواعيد هذا اليوم محجوزة. اختر يوماً آخر أو راسلنا على واتساب لموعد استثنائي.
+            {t.bookingForm.allTaken}
           </p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -281,7 +292,7 @@ export function BookingForm() {
                   onClick={() => update('time')(slot)}
                   disabled={busy || isTaken}
                   aria-pressed={values.time === slot}
-                  title={isTaken ? 'هذا الموعد محجوز' : undefined}
+                  title={isTaken ? t.bookingForm.slotTakenTitle : undefined}
                   className={cn(
                     'numeric rounded-xl border px-3 py-2.5 text-sm font-bold transition-all',
                     isTaken
@@ -304,22 +315,22 @@ export function BookingForm() {
           </p>
         ) : null}
         <p className="text-xs text-slate-500">
-          المواعيد بتوقيت القاهرة. الحجز طلب مبدئي يُثبَّت بعد تأكيد المكتب.
+          {t.bookingForm.timezoneNote}
         </p>
       </div>
 
       <Field
-        label="ملخّص الموضوع"
+        label={t.booking.details}
         htmlFor="b-details"
         required
         error={errors.details}
-        hint="اذكر جوهر المسألة والمستندات المتاحة لديك — هذا يوفّر وقت الجلسة."
+        hint={t.bookingForm.detailsHint}
       >
         <textarea
           id="b-details"
           rows={5}
           className={`${controlClass(errors.details)} resize-y`}
-          placeholder="مثال: لديّ عقد توريد سنوي مع مورّد أجنبي وأرغب في مراجعة بنود الإنهاء والمسؤولية قبل التوقيع."
+          placeholder={t.bookingForm.detailsPlaceholder}
           value={values.details}
           onChange={(event) => update('details')(event.target.value)}
           disabled={busy}
@@ -340,7 +351,7 @@ export function BookingForm() {
               rel="noopener noreferrer"
               className="mt-1 inline-block font-bold underline"
             >
-              الحجز مباشرة عبر واتساب {site.contact.phoneLocal}
+              {t.bookingForm.bookOnWhatsapp(site.contact.phoneLocal)}
             </a>
           </div>
         </div>
@@ -350,12 +361,12 @@ export function BookingForm() {
         {busy ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            جارٍ إرسال الطلب...
+            {t.bookingForm.submitting}
           </>
         ) : (
           <>
             <CalendarCheck className="h-4 w-4" />
-            تأكيد طلب الحجز
+            {t.bookingForm.submit}
           </>
         )}
       </Button>

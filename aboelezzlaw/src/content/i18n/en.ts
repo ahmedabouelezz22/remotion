@@ -516,6 +516,138 @@ export const en: Dictionary = {
     proceed: 'Continue to payment',
   },
 
+  checkoutExtra: {
+    buyerDetails: 'Your details',
+    emailHint: 'Your order confirmation and digital download links go to this address.',
+    shippingAddress: 'Delivery address',
+    notesOptional: 'Notes (optional)',
+    cardNote:
+      'Card payment takes place on the payment gateway’s own page. This site never receives or stores your card details at any stage.',
+    processing: 'Processing…',
+    confirmAndPay: 'Confirm order and pay',
+    agreePrefix: 'By confirming you agree to the',
+    agreeAnd: 'and the',
+    registeredTitle: 'Your order is registered',
+    registeredBody:
+      'We have your order and a confirmation has been emailed to you. Complete the transfer using the details below and the order will be activated.',
+    copyDetails: 'Copy details',
+    sendReceipt: 'Send the receipt on WhatsApp',
+    receiptMessage: (reference: string) =>
+      `Hello, here is the transfer receipt for order ${reference}`,
+    emptyBody: 'Add a service or product before continuing to payment.',
+    orderFailed: 'The order could not be completed.',
+    completeOnWhatsapp: (phone: string) => `Complete the order on WhatsApp ${phone}`,
+    pageTitle: 'Checkout',
+    pageDescription: 'Review your order, enter your details, and choose a payment method.',
+  },
+
+  checkoutPage: {
+    eyebrow: 'Checkout',
+    title: 'Order details and payment',
+    description:
+      'One step from completing your order. Your details are used only to carry it out and to contact you about it.',
+    noProvidersTitle: 'Payment methods are not configured yet',
+    noProvidersBody:
+      'No payment provider has been configured in the environment variables. See the README to set up at least the bank transfer details — an option that works immediately with no gateway account.',
+  },
+
+  successPage: {
+    metaTitle: 'Order received',
+    eyebrow: 'Done',
+    title: 'We have your order',
+    description:
+      'The payment notification has arrived and work begins right away. The order details have been emailed to you.',
+    thanks: 'Thank you for your trust',
+    yourReference: 'Your order reference:',
+    keepReference: 'Keep this reference to quote in any correspondence.',
+    whatHappens: 'What happens now:',
+    steps: [
+      'A confirmation email with the order details arrives.',
+      'Digital products: a download link valid for 72 hours arrives.',
+      'Services: we contact you within one business day to begin.',
+      'Consultations: book your slot on the booking page.',
+      'Printed items: shipped within 3–7 business days.',
+    ],
+    bookSlot: 'Book a consultation slot',
+    followUp: 'Follow up on WhatsApp',
+    followUpMessage: (reference: string) => `Hello, regarding my order ${reference}`,
+  },
+
+  bookingForm: {
+    receivedTitle: 'We have your booking request',
+    receivedBody:
+      'A confirmation has been emailed to you. The appointment becomes final once the firm confirms it.',
+    quickConfirm: 'Quick confirmation on WhatsApp',
+    confirmMessage: 'Hello, I booked a consultation slot through the website and would like to confirm it.',
+    dateLabel: 'Preferred date',
+    pickDateFirst: 'Choose a date first to see the available slots.',
+    dayClosedWithHours: (hours: string) => `This day falls outside our working days. ${hours}`,
+    checkingSlots: 'Checking the available slots…',
+    allTaken:
+      'Every slot on this day is taken. Choose another day, or message us on WhatsApp for an exceptional time.',
+    slotTakenTitle: 'This slot is taken',
+    timezoneNote:
+      'Times are Cairo time. A booking is a provisional request, fixed once the firm confirms it.',
+    detailsHint:
+      'Set out the substance of the matter and the documents you have — it saves time in the session.',
+    detailsPlaceholder:
+      'For example: I have an annual supply contract with a foreign supplier and want the termination and liability clauses reviewed before signing.',
+    bookOnWhatsapp: (phone: string) => `Book directly on WhatsApp ${phone}`,
+    submitting: 'Sending your request…',
+    submit: 'Confirm booking request',
+    serverError: 'Could not reach the server. Message us on WhatsApp to fix the appointment.',
+    consultationTypes: {
+      'استشارة قانونية عامة': 'General legal consultation',
+      'مراجعة أو صياغة عقد': 'Contract review or drafting',
+      'استشارات الشركات والحوكمة': 'Corporate and governance advice',
+      'الزكاة والضرائب': 'Zakat and tax',
+      'منازعات وتحكيم': 'Disputes and arbitration',
+      'عقود ولوائح العمل': 'Employment contracts and policies',
+      'الملكية الفكرية': 'Intellectual property',
+      'أخرى': 'Other',
+    } as Record<string, string>,
+    consultationChannels: {
+      'مكالمة هاتفية': 'Phone call',
+      'واتساب': 'WhatsApp',
+      'اجتماع مرئي (Zoom / Meet)': 'Video meeting (Zoom / Meet)',
+      'حضور بالمكتب': 'In person at the office',
+    } as Record<string, string>,
+  },
+
+  bookingPage: {
+    eyebrow: 'Booking',
+    title: 'Book a legal consultation',
+    description: (hours: string) => `Fill in your details and choose a time that suits you. ${hours}`,
+    metaDescription:
+      'Book a legal consultation with Abo Elezz Law Firm — choose the date, time and channel, and receive confirmation within one business day.',
+    howItWorks: 'How a consultation runs',
+    notesTitle: 'Important notes',
+    notes: [
+      'A booking is a provisional request and becomes final only once the firm confirms it.',
+      'The times shown are Cairo time.',
+      'To cancel or move an appointment, contact us at least 24 hours beforehand.',
+      'Do not send confidential documents before agreeing a secure channel.',
+    ],
+    formTitle: 'Booking details',
+    formNote:
+      'The request reaches the firm immediately by email and WhatsApp, and the appointment is fixed once confirmed.',
+    steps: [
+      {
+        title: 'Choose a time',
+        body: 'Pick a date and hour from the slots available within working days.',
+      },
+      {
+        title: 'Send the documents',
+        body: 'Send whatever documents you have before the session so they can be studied in advance.',
+      },
+      {
+        title: 'The session',
+        body: 'A discussion focused on the opinion and the options, not on gathering information.',
+      },
+      { title: 'The summary', body: 'You receive a written summary of the opinion and next steps.' },
+    ],
+  },
+
   orderStatus: {
     pending: 'Awaiting payment',
     paid: 'Paid',

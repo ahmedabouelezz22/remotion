@@ -36,6 +36,8 @@ export const paymob: PaymentProvider = {
   id: 'paymob',
   label: 'بطاقة بنكية أو محفظة إلكترونية',
   description: 'فيزا / ماستركارد / ميزة ومحافظ الهاتف — عبر بوابة Paymob الآمنة.',
+  labelEn: 'Bank card or mobile wallet',
+  descriptionEn: 'Visa / Mastercard / Meeza and mobile wallets — through the secure Paymob gateway.',
 
   isConfigured() {
     return Boolean(

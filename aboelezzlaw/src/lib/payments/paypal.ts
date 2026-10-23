@@ -61,6 +61,9 @@ export const paypal: PaymentProvider = {
   id: 'paypal',
   label: 'PayPal',
   description: 'ادفع بحسابك على PayPal أو ببطاقة دولية — مناسب للعملاء خارج مصر.',
+  labelEn: 'PayPal',
+  descriptionEn:
+    'Pay with your PayPal account or an international card — suited to clients outside Egypt.',
 
   isConfigured() {
     return Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);

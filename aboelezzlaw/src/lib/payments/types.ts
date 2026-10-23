@@ -34,6 +34,9 @@ export interface PaymentProvider {
   id: 'paymob' | 'paypal' | 'manual';
   label: string;
   description: string;
+  /** التسمية الإنجليزية — تظهر للعميل في النسخة الإنجليزية */
+  labelEn: string;
+  descriptionEn: string;
   /** هل ضُبطت مفاتيح هذا المزوّد في متغيّرات البيئة؟ */
   isConfigured(): boolean;
   createPayment(order: OrderDraft, origin: string): Promise<PaymentInitResult>;

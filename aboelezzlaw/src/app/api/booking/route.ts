@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { site } from '@/content/site';
 import { notifyOffice } from '@/lib/notifications/notify';
 import { createBooking, deleteBooking } from '@/lib/repository';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
