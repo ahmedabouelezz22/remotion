@@ -49,7 +49,12 @@ free_port() {
   (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null || return 0
   exec 3<&- 2>/dev/null || true
   echo "   المنفذ $port مشغول — إيقاف ما يستخدمه"
-  fuser -k -n tcp "$port" >/dev/null 2>&1 || true
+  # fuser (psmisc) ليس مثبّتاً في كل بيئة، و lsof بديل شائع
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -k -n tcp "$port" >/dev/null 2>&1 || true
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -ti "tcp:$port" | xargs -r kill 2>/dev/null || true
+  fi
   sleep 2
   if (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; then
     exec 3<&- 2>/dev/null || true
@@ -84,6 +89,10 @@ fi
 echo "   القاعدة: ${DATABASE_URL%%\?*}"
 
 # ── مصيدة البريد ──
+for tool in curl openssl python3 psql; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "الأداة المطلوبة غير موجودة: $tool" >&2; exit 1; }
+done
+
 step "تشغيل مصيدة SMTP"
 python3 -I "$ROOT/tests/helpers/fake-smtp.py" 1025 > "$WORK/smtp.log" 2>&1 &
 PIDS+=($!)
