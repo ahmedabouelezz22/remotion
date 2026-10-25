@@ -1,0 +1,141 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { getProduct } from '@/content/products';
+import { site } from '@/content/site';
+import { withOwner } from '@/lib/admin';
+import { fulfillOrder } from '@/lib/fulfillment';
+import { sendEmail } from '@/lib/notifications/email';
+import { buildClientConfirmation } from '@/lib/notifications/templates';
+import { requestOrigin } from '@/lib/origin';
+import { getOrder, markOrderStatus } from '@/lib/repository';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+/**
+ * إجراءات الطلبات من لوحة المالك.
+ *
+ * ما لا يفعله هذا المسار بقصد: لا يُعلِّم طلباً «مدفوعاً». تعليم الدفع يأتي
+ * من بوّابة الدفع (webhook موقَّع) أو من `confirm-transfer` بعد تأكيد المالك
+ * لتحويل بنكي فعليّ — ولا يُؤلَّف تأكيد دفع من اللوحة.
+ */
+const schema = z.object({
+  reference: z.string().trim().min(3),
+  action: z.enum(['cancel', 'refund', 'confirm-transfer']),
+  reason: z.string().trim().max(500).optional(),
+});
+
+/** تأكيد التحويل ليس هنا: مساره الإيفاء، وهو من يضبط الحالة */
+const ACTION_STATUS = {
+  cancel: 'cancelled',
+  refund: 'refunded',
+} as const;
+
+export async function POST(request: Request) {
+  return withOwner(request, schema, async ({ reference, action, reason }) => {
+    const order = await getOrder(reference);
+    if (!order) {
+      return {
+        response: NextResponse.json({ ok: false, message: 'لا يوجد طلب بهذا المرجع.' }, { status: 404 }),
+      };
+    }
+
+    // قيود الانتقال: لا نسترد ما لم يُدفع، ولا نؤكّد تحويلاً لطلب غير معلّق،
+    // ولا نلغي طلباً مدفوعاً (الاسترداد هو طريقه الصحيح)
+    const invalid =
+      (action === 'refund' && order.status !== 'paid') ||
+      (action === 'cancel' && order.status !== 'pending') ||
+      (action === 'confirm-transfer' && order.status !== 'pending');
+
+    if (invalid) {
+      return {
+        response: NextResponse.json(
+          {
+            ok: false,
+            message: `لا يصحّ هذا الإجراء وحالة الطلب «${order.status}».`,
+          },
+          { status: 409 },
+        ),
+      };
+    }
+
+    // تأكيد التحويل يلزمه سبب يُثبت ما رآه المالك (رقم العملية مثلاً)
+    if (action === 'confirm-transfer' && !reason) {
+      return {
+        response: NextResponse.json(
+          { ok: false, message: 'أدخل مرجع التحويل أو رقم العملية قبل التأكيد.' },
+          { status: 400 },
+        ),
+      };
+    }
+
+    // تأكيد التحويل يمرّ بمسار الإيفاء نفسه، وهو من يُعلّم الطلب مدفوعاً
+    // ويُصدر روابط التحميل ويفعّل الاشتراك ويُشعر المكتب. تعليم «مدفوع» قبله
+    // يُسكِت الإيفاء (فهو idempotent ويعود مبكراً إن كان الطلب مدفوعاً)
+    // فيصير الطلب مدفوعاً بلا تسليم — ولا يصحّ تكرار منطق التسليم هنا.
+    if (action === 'confirm-transfer') {
+      const result = await fulfillOrder(reference, requestOrigin(request), `manual:${reason}`);
+      if (!result.ok) {
+        return {
+          response: NextResponse.json(
+            { ok: false, message: 'تعذّر إتمام تسليم الطلب. راجع سجلّ الإشعارات.' },
+            { status: 500 },
+          ),
+        };
+      }
+
+      return {
+        response: NextResponse.json({ ok: true, status: 'paid' }),
+        audit: {
+          action: 'order.confirm-transfer',
+          targetType: 'order',
+          targetId: reference,
+          detail: {
+            from: order.status,
+            to: 'paid',
+            reason,
+            total: order.total,
+            downloads: result.downloads.length,
+          },
+        },
+      };
+    }
+
+    const updated = await markOrderStatus(reference, ACTION_STATUS[action as 'cancel' | 'refund']);
+    if (!updated) {
+      return {
+        response: NextResponse.json({ ok: false, message: 'تعذّر تحديث الطلب.' }, { status: 500 }),
+      };
+    }
+
+    {
+      const names = updated.items
+        .map((item) => getProduct(item.slug)?.name ?? item.name)
+        .join('، ');
+      const heading = action === 'refund' ? 'تم استرداد قيمة طلبك' : 'تم إلغاء طلبك';
+      const body =
+        action === 'refund'
+          ? `استرددنا قيمة طلبك ${reference} (${names}).${reason ? `\n\nالسبب: ${reason}` : ''}\n\nقد يستغرق وصول المبلغ إلى حسابك عدّة أيام عمل حسب وسيلة الدفع.\n\nلأي استفسار راسلنا على واتساب ${site.contact.phoneLocal}.`
+          : `أُلغي طلبك ${reference} (${names}).${reason ? `\n\nالسبب: ${reason}` : ''}\n\nلم يُحصَّل منك أي مبلغ. لإعادة الطلب تفضّل بزيارة المتجر أو راسلنا على واتساب ${site.contact.phoneLocal}.`;
+
+      const message = buildClientConfirmation({ name: updated.name, heading, body });
+      await sendEmail({
+        to: updated.email,
+        subject: `${site.shortName} — ${heading}`,
+        html: message.html,
+        text: message.text,
+        replyTo: site.contact.email,
+      });
+    }
+
+    return {
+      response: NextResponse.json({ ok: true, status: updated.status }),
+      audit: {
+        action: `order.${action}`,
+        targetType: 'order',
+        targetId: reference,
+        detail: { from: order.status, to: updated.status, reason: reason ?? null, total: order.total },
+      },
+    };
+  });
+}
