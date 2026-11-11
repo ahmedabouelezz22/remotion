@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { articles } from '@/content/blog';
 import { locales, type Locale } from '@/content/i18n';
 import { products } from '@/content/products';
+import { sectors } from '@/content/sectors';
 import { services } from '@/content/services';
 import { site } from '@/content/site';
 
@@ -12,6 +13,9 @@ const staticPaths: { to: string; changeFrequency: Freq; priority: number }[] = [
   { to: '', changeFrequency: 'weekly', priority: 1 },
   { to: '/about', changeFrequency: 'monthly', priority: 0.8 },
   { to: '/services', changeFrequency: 'monthly', priority: 0.9 },
+  { to: '/sectors', changeFrequency: 'monthly', priority: 0.9 },
+  { to: '/practice-areas', changeFrequency: 'monthly', priority: 0.8 },
+  { to: '/memberships', changeFrequency: 'monthly', priority: 0.8 },
   { to: '/store', changeFrequency: 'weekly', priority: 0.9 },
   { to: '/blog', changeFrequency: 'weekly', priority: 0.8 },
   { to: '/library', changeFrequency: 'monthly', priority: 0.7 },
@@ -60,6 +64,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...services.flatMap((service) =>
       entries(`/services/${service.slug}`, 'monthly', 0.7, now),
     ),
+    ...sectors.flatMap((sector) => entries(`/sectors/${sector.slug}`, 'monthly', 0.7, now)),
     ...products.flatMap((product) => entries(`/store/${product.slug}`, 'weekly', 0.7, now)),
     ...articles.flatMap((article) =>
       entries(

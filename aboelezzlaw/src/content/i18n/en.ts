@@ -986,7 +986,7 @@ export const en: Dictionary = {
     mostChosen: 'Best fit for most clients',
     termsTitle: 'What you should know',
     terms: [
-      'A membership grants defined allowances and discounts, not unlimited services. Anything beyond the plan’s allowance is quoted separately in writing.',
+      'Each plan grants the allowances and discounts listed in it. Anything beyond the plan’s allowance is quoted separately in writing before work begins.',
       'Monthly allowances do not roll over to the next month unless stated otherwise.',
       'You can stop renewal at any time from your account, and the membership remains in force until the end of the paid period.',
       'A membership does not in itself create an engagement in a particular case; representation is agreed in writing for each matter.',

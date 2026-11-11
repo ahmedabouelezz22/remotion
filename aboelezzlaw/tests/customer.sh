@@ -154,7 +154,7 @@ R=$(curl -sk -H 'Content-Type: application/json' -X POST $BASE/api/checkout -d '
  "items":[{"slug":"consultation-60","quantity":1,"price":1,"unitPrice":1}]}')
 REF=$(echo "$R" | python3 -I -c "import json,sys;print(json.load(sys.stdin).get('reference',''))")
 if [ -n "$REF" ]; then ok "أُنشئ الطلب $REF"; else bad "لم يُنشأ طلب: $R"; fi
-check "الإجمالي من الكتالوج لا من الطلب" "$($PSQL "select total::int from orders where id='$REF'")" "1500"
+check "الإجمالي من الكتالوج لا من الطلب" "$($PSQL "select total::int from orders where id='$REF'")" "15000"
 
 echo
 echo "── 6) webhook الدفع: التوقيع وعدم التكرار ──"
@@ -166,7 +166,7 @@ PREF=$(echo "$PAY" | python3 -I -c "import json,sys;print(json.load(sys.stdin).g
 hook_body(){ python3 -I - "$PREF" <<'PYEOF'
 import json, sys
 print(json.dumps({'type': 'TRANSACTION', 'obj': {
-  'amount_cents': 120000, 'created_at': '2026-10-23T12:00:00Z', 'currency': 'EGP',
+  'amount_cents': 1200000, 'created_at': '2026-10-23T12:00:00Z', 'currency': 'EGP',
   'error_occured': False, 'has_parent_transaction': False, 'id': 555001,
   'integration_id': 4242, 'is_3d_secure': True, 'is_auth': False, 'is_capture': False,
   'is_refunded': False, 'is_standalone_payment': True, 'is_voided': False,

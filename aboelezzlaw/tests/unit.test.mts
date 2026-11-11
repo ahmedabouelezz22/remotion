@@ -20,7 +20,21 @@ const { requestOrigin } = await import('@/lib/origin');
 const { checkSlot, isWorkingDay, slotsForDate, MAX_BOOKING_DAYS_AHEAD, todayInOfficeTimezone } =
   await import('@/lib/slots');
 const { ownerEmails, isOwnerEmail, sameOrigin } = await import('@/lib/admin');
-const { products, getProduct, SHIPPING_FLAT_RATE } = await import('@/content/products');
+const {
+  products,
+  getProduct,
+  SHIPPING_FLAT_RATE,
+  contractTemplates,
+  templateFileName,
+  SINGLE_TEMPLATE_PRICE,
+  categoryKeys,
+} = await import('@/content/products');
+const { sectors, featuredSectors, sectorText } = await import('@/content/sectors');
+const { practiceGroups, professionalServices, practiceAreaCount } = await import(
+  '@/content/practice-areas'
+);
+const { memberships } = await import('@/content/memberships');
+const { existsSync, readFileSync } = await import('node:fs');
 const { clientWaLink } = await import('@/lib/notifications/templates');
 const { jsonLdScript } = await import('@/lib/utils');
 const { articles } = await import('@/content/blog');
@@ -441,7 +455,7 @@ describe('كتالوج المنتجات', () => {
   });
 
   it('getProduct يجد ويُرجع undefined لما لا وجود له', () => {
-    assert.equal(getProduct('contract-templates-pack')?.price, 1200);
+    assert.equal(getProduct('contract-templates-pack')?.price, 12000);
     assert.equal(getProduct('nope'), undefined);
   });
 
@@ -800,5 +814,185 @@ describe('خريطة الموقع', () => {
   it('لا عنوان مكرّر', () => {
     const urls = entries.map((entry) => entry.url);
     assert.equal(new Set(urls).size, urls.length);
+  });
+});
+
+// ───────────────────── نماذج العقود ─────────────────────
+
+describe('نماذج العقود', () => {
+  const singles = products.filter((product) => product.slug.startsWith('template-'));
+
+  it('اثنا عشر نموذجاً، ولكل نموذج ملف مصدر', () => {
+    assert.equal(contractTemplates.length, 12);
+    for (const template of contractTemplates) {
+      assert.ok(
+        existsSync(`content/templates/${template.source}.md`),
+        `لا ملف مصدر للنموذج ${template.key}`,
+      );
+    }
+  });
+
+  it('سكربت البناء يعرف نفس المفاتيح وبنفس الترتيب', () => {
+    const script = readFileSync('scripts/build-downloads.mjs', 'utf8');
+    const block = /const TEMPLATE_KEYS = \[([^\]]+)\]/.exec(script)?.[1] ?? '';
+    const keys = [...block.matchAll(/'([^']+)'/g)].map((match) => match[1]);
+    assert.deepEqual(
+      keys,
+      contractTemplates.map((template) => template.key),
+    );
+  });
+
+  it('كل نموذج يُباع منفرداً بملفه وبالسعر المنفرد', () => {
+    assert.equal(singles.length, contractTemplates.length);
+    contractTemplates.forEach((template, index) => {
+      const product = getProduct(`template-${template.key}`);
+      assert.ok(product, `لا منتج للنموذج ${template.key}`);
+      assert.equal(product.kind, 'digital');
+      assert.equal(product.file, templateFileName(index, template.key));
+      assert.equal(product.price, SINGLE_TEMPLATE_PRICE);
+      assert.ok(!product.comingSoon, `${template.key}: نموذج فوري لا يصحّ أن يكون «قريباً»`);
+    });
+  });
+
+  it('الحزمة أرخص من شراء نماذجها منفردة', () => {
+    const pack = getProduct('contract-templates-pack');
+    assert.ok(pack);
+    assert.ok(pack.price < SINGLE_TEMPLATE_PRICE * contractTemplates.length);
+  });
+
+  it('الحزمة تسمّي نماذجها الاثني عشر', () => {
+    const pack = getProduct('contract-templates-pack');
+    assert.ok(pack);
+    for (const template of contractTemplates) {
+      assert.ok(
+        pack.highlights.some((line) => line.includes(template.ar)),
+        `الحزمة لا تذكر ${template.ar}`,
+      );
+    }
+  });
+
+  it('مفاتيح فئات المتجر تشير إلى فئات موجودة', () => {
+    const categories = new Set(products.map((product) => product.category));
+    for (const [key, category] of Object.entries(categoryKeys)) {
+      assert.ok(categories.has(category), `الفئة ${key} لا منتجات فيها (${category})`);
+    }
+  });
+});
+
+// ───────────────────── القطاعات ومجالات الممارسة ─────────────────────
+
+describe('القطاعات ومجالات الممارسة', () => {
+  it('سبعة وعشرون قطاعاً بمعرّفات فريدة', () => {
+    assert.equal(sectors.length, 27);
+    const slugs = sectors.map((sector) => sector.slug);
+    assert.equal(new Set(slugs).size, slugs.length);
+    for (const slug of slugs) assert.match(slug, /^[a-z][a-z0-9-]+$/);
+  });
+
+  it('كل قطاع له نصّ عربي وإنجليزي بعدد الخدمات نفسه', () => {
+    for (const sector of sectors) {
+      const arabic = sectorText(sector, 'ar');
+      const english = sectorText(sector, 'en');
+      assert.ok(arabic.name && arabic.summary, `${sector.slug}: نصّ عربي ناقص`);
+      assert.ok(english.name && english.summary, `${sector.slug}: نصّ إنجليزي ناقص`);
+      assert.ok(arabic.services.length >= 5, `${sector.slug}: أقلّ من خمس خدمات`);
+      assert.equal(
+        english.services.length,
+        arabic.services.length,
+        `${sector.slug}: عدد الخدمات يختلف بين اللغتين`,
+      );
+      for (const value of [english.name, english.summary, ...english.services]) {
+        assert.ok(!ARABIC_LETTER.test(value), `${sector.slug}: عربي في الإنجليزية (${value})`);
+      }
+    }
+  });
+
+  it('القطاعات الأبرز جزء من القائمة', () => {
+    assert.ok(featuredSectors.length >= 6);
+    for (const sector of featuredSectors) assert.ok(sectors.includes(sector));
+  });
+
+  it('لا وعد بخدمة غير محدودة في نصوص القطاعات', () => {
+    for (const sector of sectors) {
+      for (const value of [sector.summary, ...sector.services]) {
+        assert.ok(!/غير محدود/.test(value), `${sector.slug}: ${value}`);
+      }
+      for (const value of [sector.en.summary, ...sector.en.services]) {
+        assert.ok(!/unlimited/i.test(value), `${sector.slug}: ${value}`);
+      }
+    }
+  });
+
+  it('مجالات الممارسة والخدمات المهنية بلغتين', () => {
+    assert.equal(
+      practiceAreaCount,
+      practiceGroups.reduce((sum, group) => sum + group.items.length, 0),
+    );
+    const all = [
+      ...practiceGroups.map((group) => group.title),
+      ...practiceGroups.flatMap((group) => group.items),
+      ...professionalServices,
+    ];
+    for (const item of all) {
+      assert.ok(item.ar.length > 2, `نصّ عربي ناقص: ${item.en}`);
+      assert.ok(item.en.length > 2 && !ARABIC_LETTER.test(item.en), `إنجليزي ناقص: ${item.ar}`);
+    }
+    const keys = practiceGroups.map((group) => group.key);
+    assert.equal(new Set(keys).size, keys.length);
+  });
+});
+
+// ───────────────────── العضويات ─────────────────────
+
+describe('العضويات', () => {
+  it('خمس فئات: الأفراد والشركات والمحامون ومكاتب المحاماة والفريق', () => {
+    assert.deepEqual(
+      memberships.map((audience) => audience.key),
+      ['individuals', 'companies', 'lawyers', 'law-firms', 'team'],
+    );
+  });
+
+  it('كل فئة مفتوحة للتسجيل تبدأ بباقة مجانية ولها أكثر من باقة', () => {
+    for (const audience of memberships) {
+      if (audience.key === 'team') continue;
+      assert.ok(audience.tiers.length > 1, `${audience.key}: باقة واحدة`);
+      assert.equal(audience.tiers[0]?.price, 0, `${audience.key}: الأولى ليست مجانية`);
+    }
+  });
+
+  it('عضوية الفريق واحدة وبلا مقابل', () => {
+    const team = memberships.find((audience) => audience.key === 'team');
+    assert.ok(team);
+    assert.equal(team.tiers.length, 1);
+    assert.equal(team.tiers[0]?.price, 0);
+  });
+
+  it('الباقة المرتبطة بمنتج تشير إلى اشتراك موجود في المتجر', () => {
+    for (const audience of memberships) {
+      for (const tier of audience.tiers) {
+        if (!tier.productSlug) continue;
+        const product = getProduct(tier.productSlug);
+        assert.ok(product, `${audience.key}/${tier.key}: لا منتج ${tier.productSlug}`);
+        assert.equal(product.kind, 'subscription');
+      }
+    }
+  });
+
+  it('لا باقة تَعِد بخدمة غير محدودة، والنصوص بلغتين', () => {
+    for (const audience of memberships) {
+      for (const text of [audience.name, audience.tagline, ...(audience.note ? [audience.note] : [])]) {
+        assert.ok(text.ar && text.en, `${audience.key}: نصّ ناقص`);
+      }
+      for (const tier of audience.tiers) {
+        assert.ok(tier.name.ar && tier.name.en, `${audience.key}/${tier.key}: اسم ناقص`);
+        if (!tier.productSlug) {
+          assert.ok(tier.features.length > 0, `${audience.key}/${tier.key}: بلا مزايا`);
+        }
+        for (const feature of tier.features) {
+          assert.ok(!/غير محدود/.test(feature.ar), `${audience.key}/${tier.key}: ${feature.ar}`);
+          assert.ok(!/unlimited/i.test(feature.en), `${audience.key}/${tier.key}: ${feature.en}`);
+        }
+      }
+    }
   });
 });
