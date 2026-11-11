@@ -157,7 +157,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </span>
 
               <h1 className="abz-rise abz-rise-1 text-[2.1rem] leading-[1.3] sm:text-5xl sm:leading-[1.25] lg:text-[3.4rem]">
-                {t.home.heroTitle1}
+                {t.home.heroTitle1}{' '}
                 <span className="block text-gold-400">{t.home.heroTitle2}</span>
               </h1>
 
