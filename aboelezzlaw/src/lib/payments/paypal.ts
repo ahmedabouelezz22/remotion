@@ -98,7 +98,7 @@ export const paypal: PaymentProvider = {
           payment_source: {
             paypal: {
               experience_context: {
-                brand_name: 'Aboelezz Law Firm',
+                brand_name: 'Law Firm Abo Elezz',
                 locale: order.locale === 'ar' ? 'ar-EG' : 'en-US',
                 user_action: 'PAY_NOW',
                 return_url: `${origin}/api/payments/paypal/capture?ref=${encodeURIComponent(
@@ -219,7 +219,7 @@ export async function createPaypalSubscription(
           email_address: input.customer.email,
         },
         application_context: {
-          brand_name: 'Abo Elezz Law Firm',
+          brand_name: 'Law Firm Abo Elezz',
           locale: input.locale === 'ar' ? 'ar-EG' : 'en-US',
           user_action: 'SUBSCRIBE_NOW',
           shipping_preference: 'NO_SHIPPING',

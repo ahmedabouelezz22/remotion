@@ -31,6 +31,17 @@
   --color-whatsapp-600: #107f72;
   --color-whatsapp-700: #0c6358;
 
+  /*
+   * الأخضر العميق: لون مكمّل للكحلي والذهبي. يكسر رتابة لونين فقط، ويُستعمل
+   * لعلامات «تمّ» والتأكيد ولقسم أو قسمين داكنين. كلّه محسوب التباين:
+   * forest-600 على الأبيض 6.2:1، والأبيض على forest-800/900 فوق 9:1.
+   */
+  --color-forest-50: #eef6f2;
+  --color-forest-100: #d5e8df;
+  --color-forest-600: #1c6b57;
+  --color-forest-800: #124a3c;
+  --color-forest-900: #0d3b30;
+
   --color-sand-50: #faf9f6;
   --color-sand-100: #f4f2ec;
   --color-sand-200: #e8e4d9;
@@ -161,4 +172,48 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+/*
+ * الحركة. كلّها داخل `prefers-reduced-motion: no-preference`: من يطلب تقليل
+ * الحركة يرى الصفحة ساكنة كاملة — فلا شيء مخفيّ ينتظر حركةً لن تأتي.
+ */
+@keyframes abz-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes abz-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes abz-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.1); }
+}
+@keyframes abz-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes abz-marquee-ltr {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes abz-marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .abz-rise { animation: abz-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .abz-rise-1 { animation-delay: 0.08s; }
+  .abz-rise-2 { animation-delay: 0.16s; }
+  .abz-rise-3 { animation-delay: 0.24s; }
+  .abz-float { animation: abz-float 7s ease-in-out infinite; }
+  .abz-float-slow { animation: abz-float 9s ease-in-out -3s infinite; }
+  .abz-drift { animation: abz-drift 16s ease-in-out infinite; }
+  .abz-pulse { animation: abz-pulse 3.2s ease-in-out infinite; }
+  .abz-marquee { animation: abz-marquee-ltr 48s linear infinite; }
+  [dir='rtl'] .abz-marquee { animation-name: abz-marquee-rtl; }
+  .abz-marquee-wrap:hover .abz-marquee { animation-play-state: paused; }
 }

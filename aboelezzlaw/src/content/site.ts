@@ -6,12 +6,12 @@
 export const site = {
   name: 'مكتب أبو العز للمحاماة',
   shortName: 'أبو العز للمحاماة',
-  nameEn: 'Abo Elezz Law Firm',
+  nameEn: 'Law Firm Abo Elezz',
   tagline: 'خدمات قانونية متخصصة عن بُعد في جميع أنحاء العالم',
   description:
     'مكتب أبو العز للمحاماة — خدمات قانونية متخصصة عن بُعد: صياغة ومراجعة العقود، التقاضي والنزاعات، خدمات الشركات والشركات الناشئة، قانون العمل، الامتثال الرقمي، والاستشارات القانونية.',
   descriptionEn:
-    'Abo Elezz Law Firm — specialist legal services delivered remotely: contract drafting and review, litigation and disputes, corporate and start-up services, employment law, digital compliance, and legal consultancy.',
+    'Law Firm Abo Elezz — specialist legal services delivered remotely: contract drafting and review, litigation and disputes, corporate and start-up services, employment law, digital compliance, and legal consultancy.',
   url: 'https://aboelezzlaw.com',
   locale: 'ar_EG',
   lang: 'ar',
@@ -26,8 +26,8 @@ export const site = {
     whatsapp: '201157844664',
     /** البريد الذي تصل إليه إشعارات النماذج */
     email: 'aboelezzlawfirm@gmail.com',
-    address: 'خدمات قانونية عن بُعد — في جميع أنحاء العالم العربي',
-    addressEn: 'Remote legal services — across the Arab world',
+    address: 'خدمات قانونية عن بُعد — في جميع أنحاء العالم',
+    addressEn: 'Remote legal services — worldwide',
     /** البريد المعروض للزوار على الموقع */
     publicEmail: 'ahmed@aboelezzlaw.com',
   },
@@ -89,7 +89,10 @@ export const navigation = [
   { href: '/', key: 'home' },
   { href: '/about', key: 'about' },
   { href: '/services', key: 'services' },
+  { href: '/sectors', key: 'sectors' },
+  { href: '/practice-areas', key: 'practiceAreas' },
   { href: '/store', key: 'store' },
+  { href: '/memberships', key: 'memberships' },
   { href: '/blog', key: 'blog' },
   { href: '/library', key: 'library' },
   { href: '/videos', key: 'videos' },

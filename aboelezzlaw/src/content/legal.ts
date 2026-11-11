@@ -143,7 +143,7 @@ const privacyEn: LegalDoc = {
     'A policy written to describe what actually happens on this website, not a copied boilerplate.',
   metaTitle: 'Privacy policy',
   metaDescription:
-    'How Abo Elezz Law Firm collects, uses and protects your personal data.',
+    'How Law Firm Abo Elezz collects, uses and protects your personal data.',
   updatedLabel: 'Last updated',
   sections: [
     {
@@ -363,7 +363,7 @@ const termsEn: LegalDoc = {
   description: 'Please read these terms before using the website or buying any service from it.',
   metaTitle: 'Terms and conditions',
   metaDescription:
-    'The terms for using the Abo Elezz Law Firm website and for purchasing its services and products.',
+    'The terms for using the Law Firm Abo Elezz website and for purchasing its services and products.',
   updatedLabel: 'Last updated',
   sections: [
     {

@@ -70,6 +70,20 @@ export const badgeLabelsEn: Record<string, string> = {
   'الأشمل': 'Most comprehensive',
 };
 
+/**
+ * مفتاح لاتيني لكل تصنيف — يُستعمل في عنوان الصفحة (`/store?category=templates`)
+ * حتى تقود روابط القائمة المنسدلة إلى التصنيف مباشرةً. القيمة العربية تبقى
+ * هي المرجع في البيانات؛ المفتاح للعنوان فقط.
+ */
+export const categoryKeys: Record<string, string> = {
+  consultations: 'الاستشارات',
+  'legal-services': 'الخدمات القانونية',
+  'digital-compliance': 'الامتثال الرقمي',
+  templates: 'نماذج ووثائق',
+  books: 'كتب وأبحاث',
+  retainers: 'باقات الشركات',
+};
+
 /** نصّ المنتج بلغة الصفحة */
 export function productText(product: Product, locale: 'ar' | 'en') {
   if (locale === 'ar') {
@@ -98,6 +112,100 @@ export const SHIPPING_FLAT_RATE = 80;
 const CONSULTATION_NOTE =
   'تُرسل مستنداتك قبل الجلسة لدراستها، ثم تُعقد الجلسة عبر الهاتف أو اجتماع مرئي، وتُختتم بملخّص مكتوب يتضمّن الرأي والخطوات التالية.';
 
+/**
+ * نماذج العقود الاثنا عشر. مصدر كلٍّ منها ملف Markdown في `content/templates/`
+ * يُحوَّل إلى Word عند البناء (`scripts/build-downloads.mjs`) — مرّةً ضمن
+ * الحزمة ومرّةً ملفاً مستقلاً يُباع وحده بتحميل فوري.
+ *
+ * `source` هو اسم ملف المصدر بلا امتداد، و`file` اسم الملف الناتج. الاسم
+ * الناتج لاتيني بقصد: يظهر في ترويسة التحميل ولا يصحّ أن يتعثّر في متصفّح.
+ */
+export const contractTemplates = [
+  { key: 'supply', source: '01-عقد-توريد', ar: 'عقد توريد', en: 'Supply contract',
+    arSummary: 'توريد دوري بأوامر توريد: التسليم والفحص، الثمن وتعديله، الضمان، والقوة القاهرة.',
+    enSummary: 'Recurring supply under purchase orders: delivery and inspection, price and its adjustment, warranty and force majeure.' },
+  { key: 'services', source: '02-عقد-خدمات', ar: 'عقد تقديم خدمات', en: 'Services contract',
+    arSummary: 'نطاق الخدمة وقبولها، تغيير النطاق، الملكية الفكرية، وحدود المسؤولية.',
+    enSummary: 'Scope and acceptance of the service, change of scope, intellectual property and limits of liability.' },
+  { key: 'nda', source: '03-اتفاقية-عدم-إفشاء', ar: 'اتفاقية عدم إفشاء (NDA)', en: 'Non-disclosure agreement (NDA)',
+    arSummary: 'اتفاقية متبادلة تُحوَّل إلى أحادية: تعريف المعلومات السرّية واستثناءاتها ومدتها وأثر الإخلال.',
+    enSummary: 'A mutual agreement convertible to one-way: the definition of confidential information, its exceptions, term and the effect of breach.' },
+  { key: 'employment', source: '04-عقد-عمل', ar: 'عقد عمل', en: 'Employment contract',
+    arSummary: 'الوظيفة والأجر وفترة الاختبار، السرّية والملكية الفكرية، وعدم المنافسة والإنهاء.',
+    enSummary: 'Role, pay and probation, confidentiality and intellectual property, non-competition and termination.' },
+  { key: 'agency', source: '05-عقد-وكالة-تجارية', ar: 'عقد وكالة تجارية', en: 'Commercial agency contract',
+    arSummary: 'محل الوكالة وطبيعتها، العمولة، العلامة التجارية، والإنهاء والتعويض.',
+    enSummary: 'Subject and nature of the agency, commission, the trade mark, and termination and compensation.' },
+  { key: 'lease', source: '06-عقد-إيجار-تجاري', ar: 'عقد إيجار وحدة لغرض تجاري', en: 'Commercial lease',
+    arSummary: 'العين والغرض والمدة والأجرة، التعديلات والتأجير من الباطن، والإخلاء والفسخ.',
+    enSummary: 'Premises, purpose, term and rent, alterations and subletting, vacating and rescission.' },
+  { key: 'settlement', source: '07-اتفاقية-تسوية', ar: 'اتفاقية تسوية ودّية', en: 'Amicable settlement agreement',
+    arSummary: 'محل التسوية والتزاماتها، أثر التأخير، التنازل المتبادل، وعدم الإقرار بالمسؤولية.',
+    enSummary: 'Subject and obligations of the settlement, effect of delay, mutual waiver and no admission of liability.' },
+  { key: 'consultancy', source: '08-عقد-استشارات', ar: 'عقد استشارات مهنية', en: 'Professional consultancy contract',
+    arSummary: 'نطاق الاستشارة وأتعابها، حدود الرأي، تعارض المصالح، والمسؤولية.',
+    enSummary: 'Scope and fees of the engagement, limits of the opinion, conflicts of interest and liability.' },
+  { key: 'partnership', source: '09-اتفاقية-شراكة', ar: 'اتفاقية شراكة', en: 'Partnership agreement',
+    arSummary: 'الحصص ورأس المال، توزيع الأرباح، الإدارة، خروج شريك أو وفاته، والتصفية.',
+    enSummary: 'Shares and capital, profit distribution, management, the exit or death of a partner, and liquidation.' },
+  { key: 'distribution', source: '10-عقد-توزيع', ar: 'عقد توزيع', en: 'Distribution contract',
+    arSummary: 'حق التوزيع، الأسعار والحد الأدنى للمشتريات، الضمان، وآثار الإنهاء.',
+    enSummary: 'The distribution right, prices and minimum purchases, warranty and the effects of termination.' },
+  { key: 'debt', source: '11-إقرار-مديونية', ar: 'إقرار بمديونية والتزام بالسداد', en: 'Acknowledgement of debt and undertaking to pay',
+    arSummary: 'الإقرار وجدول السداد، سقوط الأجل، الضمانات، والاختصاص.',
+    enSummary: 'The acknowledgement and payment schedule, acceleration, security and jurisdiction.' },
+  { key: 'handover', source: '12-محضر-تسليم-واستلام', ar: 'محضر تسليم واستلام', en: 'Handover and receipt record',
+    arSummary: 'بيان المسلَّم ومستنداته، الفحص والتحفّظات، العيوب الخفية، والتوثيق بالصور.',
+    enSummary: 'What is handed over and its documents, inspection and reservations, latent defects and photographic record.' },
+] as const;
+
+/** اسم ملف Word الناتج لنموذج مستقل — يستعمله سكربت البناء وكتالوج المتجر معاً */
+export const templateFileName = (index: number, key: string) =>
+  `template-${String(index + 1).padStart(2, '0')}-${key}.docx`;
+
+/**
+ * سعر النموذج الواحد. مُشتقّ من سعر الحزمة قبل الخصم (18,000 ÷ 12) لا من
+ * تقدير: «السعر قبل الخصم» معناه سعر النماذج لو اشتُريت منفردة.
+ * ⚠️ للمالك: عدّله هنا إن أردت سعراً آخر للنموذج المنفرد.
+ */
+export const SINGLE_TEMPLATE_PRICE = 1500;
+
+const singleTemplateProducts: Product[] = contractTemplates.map((template, index) => ({
+  slug: `template-${template.key}`,
+  name: `نموذج ${template.ar}`,
+  kind: 'digital',
+  category: 'نماذج ووثائق',
+  price: SINGLE_TEMPLATE_PRICE,
+  currency: 'EGP',
+  file: templateFileName(index, template.key),
+  badge: 'تحميل فوري',
+  summary: template.arSummary,
+  description:
+    `نموذج «${template.ar}» بصيغة Word قابلة للتحرير، يصلك رابط تحميله فور إتمام الدفع. ` +
+    'يتضمّن النموذج تنبيهات داخل النص على البنود التي تحتاج تعديلاً بحسب حالتك والبنود التي لا يصحّ حذفها. ' +
+    'النموذج استرشادي: راجِعه على وقائعك قبل التوقيع، أو اطلب خدمة المراجعة من المتجر.',
+  highlights: [
+    'ملف Word قابل للتحرير',
+    'تنبيهات داخل النص على البنود الحرجة',
+    'رابط تحميل فوري بعد الدفع',
+    'متاح أيضاً ضمن حزمة النماذج الاثني عشر بسعر أقل',
+  ],
+  en: {
+    name: `Template: ${template.en}`,
+    summary: template.enSummary,
+    description:
+      `The “${template.en}” template in editable Word format (Arabic text); the download link arrives as soon as payment completes. ` +
+      'The template carries in-text warnings on the clauses that need adapting to your case and those that must not be deleted. ' +
+      'It is a guide: review it against your facts before signing, or order the review service from the store.',
+    highlights: [
+      'An editable Word file',
+      'In-text warnings on the critical clauses',
+      'An instant download link after payment',
+      'Also available in the twelve-template pack at a lower price',
+    ],
+  },
+}));
+
 export const products: Product[] = [
   // ───────────────── الاستشارات ─────────────────
   {
@@ -105,7 +213,7 @@ export const products: Product[] = [
     name: 'استشارة قانونية — 15 دقيقة',
     kind: 'service',
     category: 'الاستشارات',
-    price: 500,
+    price: 5000,
     currency: 'EGP',
     durationMinutes: 15,
     requiresBooking: true,
@@ -128,7 +236,7 @@ export const products: Product[] = [
     name: 'استشارة قانونية — 30 دقيقة',
     kind: 'service',
     category: 'الاستشارات',
-    price: 900,
+    price: 9000,
     currency: 'EGP',
     durationMinutes: 30,
     requiresBooking: true,
@@ -150,7 +258,7 @@ export const products: Product[] = [
     name: 'استشارة قانونية — 45 دقيقة',
     kind: 'service',
     category: 'الاستشارات',
-    price: 1200,
+    price: 12000,
     currency: 'EGP',
     durationMinutes: 45,
     requiresBooking: true,
@@ -173,7 +281,7 @@ export const products: Product[] = [
     name: 'استشارة قانونية — 60 دقيقة',
     kind: 'service',
     category: 'الاستشارات',
-    price: 1500,
+    price: 15000,
     currency: 'EGP',
     durationMinutes: 60,
     requiresBooking: true,
@@ -205,7 +313,7 @@ export const products: Product[] = [
     name: 'صياغة عقد',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 2500,
+    price: 25000,
     currency: 'EGP',
     summary: 'صياغة عقد من الصفر وفق طبيعة العلاقة والقانون الواجب التطبيق.',
     description:
@@ -235,7 +343,7 @@ export const products: Product[] = [
     name: 'مراجعة عقد',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 800,
+    price: 8000,
     currency: 'EGP',
     summary: 'مراجعة منهجية للعقد قبل التوقيع مع تقرير مخاطر مصنَّف.',
     description:
@@ -264,7 +372,7 @@ export const products: Product[] = [
     name: 'مذكّرة قانونية',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 1000,
+    price: 10000,
     currency: 'EGP',
     summary: 'مذكّرة مسبَّبة في مسألة محدّدة، مدعّمة بالنصوص والسوابق.',
     description:
@@ -293,7 +401,7 @@ export const products: Product[] = [
     name: 'صياغة شكوى أو صحيفة دعوى',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 1200,
+    price: 12000,
     currency: 'EGP',
     summary: 'صياغة الشكوى أو صحيفة الدعوى بأسانيدها وطلباتها.',
     description:
@@ -322,7 +430,7 @@ export const products: Product[] = [
     name: 'اللوائح الداخلية للشركات',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 2000,
+    price: 20000,
     currency: 'EGP',
     summary: 'لائحة داخلية ولائحة جزاءات قابلة للاعتماد لدى الجهات المختصة.',
     description:
@@ -351,7 +459,7 @@ export const products: Product[] = [
     name: 'اتفاقية عدم إفشاء (NDA)',
     kind: 'service',
     category: 'الخدمات القانونية',
-    price: 600,
+    price: 6000,
     currency: 'EGP',
     summary: 'اتفاقية سرّية أحادية أو متبادلة بنطاق ومدة محدّدين.',
     description:
@@ -380,7 +488,7 @@ export const products: Product[] = [
     name: 'سياسة الخصوصية',
     kind: 'service',
     category: 'الامتثال الرقمي',
-    price: 800,
+    price: 8000,
     currency: 'EGP',
     summary: 'سياسة خصوصية مطابقة لمتطلبات حماية البيانات الشخصية.',
     description:
@@ -409,7 +517,7 @@ export const products: Product[] = [
     name: 'شروط الاستخدام',
     kind: 'service',
     category: 'الامتثال الرقمي',
-    price: 800,
+    price: 8000,
     currency: 'EGP',
     summary: 'شروط استخدام للمنصات الرقمية والمتاجر الإلكترونية.',
     description:
@@ -440,20 +548,19 @@ export const products: Product[] = [
     name: 'حزمة نماذج العقود التجارية',
     kind: 'digital',
     category: 'نماذج ووثائق',
-    price: 1200,
-    compareAtPrice: 1800,
+    price: 12000,
+    compareAtPrice: 18000,
     currency: 'EGP',
     file: 'contract-templates-pack.zip',
-    pages: 140,
     featured: true,
     badge: 'تحميل فوري',
     summary: '12 نموذج عقد قابلاً للتحرير مع دليل يشرح البنود الحرجة في كل نموذج.',
     description:
       'حزمة نماذج أُعدّت للاستخدام العملي: عقد توريد، عقد خدمات، اتفاقية عدم إفشاء، عقد عمل، عقد وكالة تجارية، عقد إيجار تجاري، اتفاقية تسوية، عقد استشارات، اتفاقية شراكة، عقد توزيع، إقرار مديونية، ومحضر تسليم. كل نموذج مرفق بشرح للبنود التي تحتاج تعديلاً حسب الحالة وتنبيهات على البنود التي لا يجوز حذفها.',
     highlights: [
-      '12 نموذجاً بصيغة Word قابلة للتحرير',
-      'دليل استخدام يشرح البنود الحرجة',
-      'تنبيهات على المخاطر الشائعة',
+      ...contractTemplates.map((template, index) => `${index + 1}. ${template.ar}`),
+      'دليل استخدام يشرح البنود الحرجة في كل نموذج',
+      'كل النماذج بصيغة Word قابلة للتحرير',
       'رابط تحميل فوري بعد الدفع',
     ],
     en: {
@@ -462,19 +569,21 @@ export const products: Product[] = [
       description:
         'A pack of templates prepared for practical use: supply contract, services contract, non-disclosure agreement, employment contract, commercial agency contract, commercial lease, settlement agreement, consultancy contract, partnership agreement, distribution contract, acknowledgement of debt, and handover record. Each template comes with an explanation of the clauses that need adapting to the case and warnings on the clauses that must not be deleted.',
       highlights: [
-        'Twelve editable templates in Word format',
-        'A usage guide explaining the critical clauses',
-        'Warnings on the common risks',
+        ...contractTemplates.map((template, index) => `${index + 1}. ${template.en}`),
+        'A usage guide explaining the critical clauses in each template',
+        'Every template in editable Word format',
         'An instant download link after payment',
       ],
     },
   },
+  ...singleTemplateProducts,
+
   {
     slug: 'zakat-guide-ebook',
     name: 'دليل تقدير الوعاء الزكوي — نسخة إلكترونية',
     kind: 'digital',
     category: 'كتب وأبحاث',
-    price: 450,
+    price: 4500,
     currency: 'EGP',
     file: 'zakat-guide.pdf',
     pages: 210,
@@ -507,7 +616,7 @@ export const products: Product[] = [
     name: 'دليل تقدير الوعاء الزكوي — نسخة مطبوعة',
     kind: 'physical',
     category: 'كتب وأبحاث',
-    price: 750,
+    price: 7500,
     currency: 'EGP',
     pages: 210,
     comingSoon: true,
@@ -538,7 +647,7 @@ export const products: Product[] = [
     name: 'الباقة الأساسية',
     kind: 'subscription',
     category: 'باقات الشركات',
-    price: 3000,
+    price: 30000,
     currency: 'EGP',
     billingPeriod: 'شهري',
     summary: 'مناسبة للمنشآت الصغيرة التي تحتاج مرجعاً قانونياً منتظماً.',
@@ -568,7 +677,7 @@ export const products: Product[] = [
     name: 'باقة الأعمال',
     kind: 'subscription',
     category: 'باقات الشركات',
-    price: 6000,
+    price: 60000,
     currency: 'EGP',
     billingPeriod: 'شهري',
     featured: true,
@@ -602,7 +711,7 @@ export const products: Product[] = [
     name: 'الباقة المميزة',
     kind: 'subscription',
     category: 'باقات الشركات',
-    price: 10000,
+    price: 100000,
     currency: 'EGP',
     billingPeriod: 'شهري',
     badge: 'الأشمل',

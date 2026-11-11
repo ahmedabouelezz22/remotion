@@ -23,6 +23,22 @@ export const en: Dictionary = {
     videos: 'Videos',
     booking: 'Book a consultation',
     contact: 'Contact',
+    sectors: 'Sectors',
+    practiceAreas: 'Practice areas',
+    memberships: 'Memberships',
+    knowledge: 'Knowledge',
+    coreServices: 'Core services',
+    allServices: 'All services',
+    allSectors: 'All sectors',
+    professionalServices: 'Professional & consulting services',
+    allProducts: 'All products and services',
+    judgments: 'Judicial decisions database',
+    legislation: 'Legislation database',
+    academy: 'Academy',
+    soon: 'Soon',
+    mainNavLabel: 'Main navigation',
+    mobileNavLabel: 'Mobile menu',
+    bookCta: 'Book a consultation',
     account: 'My account',
     cart: 'Cart',
     menu: 'Menu',
@@ -33,14 +49,15 @@ export const en: Dictionary = {
   },
 
   common: {
-    firmName: 'Abo Elezz Law Firm',
-    firmShort: 'Abo Elezz Law',
+    firmName: 'Law Firm Abo Elezz',
+    firmShort: 'Law Firm Abo Elezz',
     tagline: 'Specialist legal services, delivered remotely',
     whatsapp: 'WhatsApp',
     whatsappUs: 'Message us on WhatsApp',
     email: 'Email',
     phone: 'Phone',
     workingHours: 'Working hours',
+    workingHoursValue: 'Sun – Thu, 10:00 – 18:00 (Cairo)',
     required: 'required',
     optional: 'optional',
     send: 'Send',
@@ -61,7 +78,7 @@ export const en: Dictionary = {
   },
 
   home: {
-    heroBadge: 'Remote legal services across the Arab world',
+    heroBadge: 'Remote legal services worldwide',
     heroTitle1: 'Specialised legal services',
     heroTitle2: 'remote, with the precision of being there',
     heroBody:
@@ -71,7 +88,7 @@ export const en: Dictionary = {
     heroWhatsappMessage: 'Hello, I would like to ask about your legal services.',
     stats: [
       { value: '1000+', label: 'legal services delivered' },
-      { value: '2', label: 'jurisdictions' },
+      { value: '27', label: 'sectors served' },
       { value: '24h', label: 'usual response time' },
     ],
     howTitle: 'How we work',
@@ -477,7 +494,7 @@ export const en: Dictionary = {
     description:
       'Every message sent through this form goes straight to the firm’s mailbox and to the responsible lawyer’s WhatsApp. A reply follows within one business day under normal circumstances.',
     metaDescription:
-      'Contact Abo Elezz Law Firm — by form, phone, WhatsApp or email. A reply within one business day.',
+      'Contact Law Firm Abo Elezz — by form, phone, WhatsApp or email. A reply within one business day.',
     formTitle: 'Contact form',
     requiredNote: 'Fields marked * are required.',
     phoneNote: 'During working hours',
@@ -690,7 +707,7 @@ export const en: Dictionary = {
     title: 'Book a legal consultation',
     description: (hours: string) => `Fill in your details and choose a time that suits you. ${hours}`,
     metaDescription:
-      'Book a legal consultation with Abo Elezz Law Firm — choose the date, time and channel, and receive confirmation within one business day.',
+      'Book a legal consultation with Law Firm Abo Elezz — choose the date, time and channel, and receive confirmation within one business day.',
     howItWorks: 'How a consultation runs',
     notesTitle: 'Important notes',
     notes: [
@@ -807,7 +824,7 @@ export const en: Dictionary = {
     founderName: 'Ahmed Aboelezz',
     introHeading: 'A specialised legal consultant',
     introBody:
-      'The firm provides specialised legal services remotely to clients in Egypt, the Kingdom of Saudi Arabia and the wider region, sparing the client the burden of attending in person without any loss of precision or confidentiality.',
+      'The firm provides specialised legal services remotely to clients in Egypt, the Kingdom of Saudi Arabia and around the world, sparing the client the burden of attending in person without any loss of precision or confidentiality.',
     approachHeading: 'The idea the work rests on',
     approachBody1:
       'Much legal advice is delivered as an answer to one question alone: what does the law say? Yet the decision-maker — a company or an individual — needs an answer to two questions at once: what is the legal position, and what does each available option cost in light of it?',
@@ -882,6 +899,99 @@ export const en: Dictionary = {
     ctaSecondary: 'Store',
   },
 
+  homeX: {
+    chips: ['A written quote before we start', 'A reply within one business day', 'Committed confidentiality'],
+    marqueeLabel: 'Sectors we serve',
+    needEyebrow: 'Where to start',
+    needTitle: 'Choose what fits your need',
+    needDescription: 'Five ways into the firm — each takes you straight to what you are looking for.',
+    need: {
+      sectorsTitle: 'Solutions for your sector',
+      sectorsBody: (count: number) =>
+        `Services shaped around your business in ${count} sectors — from automotive and construction to energy and marketing.`,
+      sectorsCta: 'Browse sectors',
+      bookingTitle: 'A consultation by appointment',
+      bookingBody: 'Choose the time and the channel; the session ends with a written opinion.',
+      bookingCta: 'Book now',
+      templatesTitle: 'Instant contract templates',
+      templatesBody: 'Twelve templates in Word format; the download link arrives on payment.',
+      templatesCta: 'View templates',
+      membershipsTitle: 'Memberships',
+      membershipsBody: 'For individuals, companies, lawyers and law firms — starting with a free plan.',
+      membershipsCta: 'Compare plans',
+      knowledgeTitle: 'Articles and library',
+      knowledgeBody: 'Analysis documented from its sources, and open references.',
+      knowledgeCta: 'Read',
+    },
+    sectorsEyebrow: 'Sectors',
+    sectorsTitle: 'We understand your business before we read your contract',
+    sectorsDescription:
+      'A contract in automotive is not a contract in construction. So we organise our services by sector first, then by practice area.',
+    servicesCount: (count: number) => `${count} services`,
+    membershipsEyebrow: 'Memberships',
+    membershipsTitle: 'A membership for each kind of client',
+    membershipsDescription: 'Each group has its own plans and benefits, and all of them start with a free plan.',
+    tiersCount: (count: number) => (count === 1 ? 'By invitation from the firm' : `${count} plans`),
+    membershipsCta: 'All memberships and benefits',
+  },
+
+  sectorsPage: {
+    eyebrow: 'Sectors',
+    title: 'Legal and professional solutions for every sector',
+    metaDescription:
+      'Legal and professional services organised by sector: automotive, construction and FIDIC contracts, oil and energy, healthcare, real estate, banking, technology and cybersecurity, marketing and influencers, and more.',
+    description: (count: number) =>
+      `${count} sectors, each served with services shaped around the nature of the business. Choose your sector to see what we work on in it.`,
+    whatWeDo: 'What we work on in this sector',
+    deliveryNote:
+      'Work is carried out by the firm’s team and in cooperation with specialists licensed in each jurisdiction where required, and the scope and fees are agreed in writing before work begins.',
+    requestTitle: 'Need a service in this sector?',
+    requestBody: 'Describe the matter and you will receive an estimate of scope, price and timing before any commitment.',
+    requestCta: 'Request a quote',
+    requestSubject: (sector: string) => `Service request — ${sector} sector`,
+    otherSectors: 'Other sectors',
+    backToSectors: 'All sectors',
+    notFound: 'Sector not found',
+  },
+
+  practicePage: {
+    eyebrow: 'Practice areas',
+    title: 'Specialisms that serve more than one sector',
+    metaDescription:
+      'The firm’s legal practice areas and professional services: corporate and contracts, litigation and arbitration, white-collar and cybercrime, tax and Zakat, intellectual property, employment, and more.',
+    description: (count: number) =>
+      `${count} practice areas that cut across sectors: arbitration serves construction, energy and sports alike, and data protection serves hospitals, automotive and technology.`,
+    professionalTitle: 'Professional and consulting services',
+    professionalBody:
+      'An institutional client does not need a lawyer alone, but a system that helps manage risk, operations and compliance.',
+    ctaTitle: 'Cannot find your area in the list?',
+    ctaBody: 'The list keeps growing. Tell us what you need and we will say whether it is something we provide.',
+  },
+
+  membershipsPage: {
+    eyebrow: 'Memberships',
+    title: 'Memberships for individuals, companies and lawyers',
+    metaDescription:
+      'Law Firm Abo Elezz memberships: for individuals, companies, lawyers and law firms. Each group starts with a free plan and steps up in benefits, discounts and allowances.',
+    description:
+      'Five groups, each with its own plans. All start free, then step up in discounts, allowances and priority.',
+    free: 'Free',
+    perMonth: '/ month',
+    soonPrice: 'Price to be announced',
+    startFree: 'Start free',
+    subscribe: 'Subscribe',
+    registerInterest: 'Register your interest',
+    interestSubject: (audience: string, tier: string) => `Interest in the ${audience} membership — ${tier} plan`,
+    byInvitation: 'By invitation from the firm',
+    mostChosen: 'Best fit for most clients',
+    termsTitle: 'What you should know',
+    terms: [
+      'A membership grants defined allowances and discounts, not unlimited services. Anything beyond the plan’s allowance is quoted separately in writing.',
+      'Monthly allowances do not roll over to the next month unless stated otherwise.',
+      'You can stop renewal at any time from your account, and the membership remains in force until the end of the paid period.',
+      'A membership does not in itself create an engagement in a particular case; representation is agreed in writing for each matter.',
+    ],
+  },
   orderStatus: {
     pending: 'Awaiting payment',
     paid: 'Paid',

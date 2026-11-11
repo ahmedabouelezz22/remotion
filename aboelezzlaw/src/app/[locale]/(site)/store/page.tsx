@@ -6,6 +6,7 @@ import { StoreGrid } from '@/components/store-grid';
 import { Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/container';
 import { dict, isLocale, type Locale } from '@/content/i18n';
+import { categoryKeys } from '@/content/products';
 import { catalogue } from '@/lib/catalogue';
 
 export async function generateMetadata({
@@ -28,11 +29,21 @@ export const dynamic = 'force-dynamic';
 
 const icons = [Receipt, Lock, CreditCard, Truck];
 
-export default async function StorePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function StorePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ category?: string }>;
+}) {
   const { locale: raw } = await params;
   if (!isLocale(raw)) notFound();
   const locale = raw as Locale;
   const t = dict(locale);
+
+  // التصنيف المطلوب في العنوان (من القائمة المنسدلة) — مفتاح غير معروف يُهمَل
+  const { category: categoryKey } = await searchParams;
+  const initialCategory = categoryKey ? categoryKeys[categoryKey] : undefined;
 
   const items = await catalogue();
 
@@ -59,7 +70,7 @@ export default async function StorePage({ params }: { params: Promise<{ locale: 
             })}
           </div>
 
-          <StoreGrid catalogue={items} locale={locale} />
+          <StoreGrid catalogue={items} locale={locale} initialCategory={initialCategory} />
         </Container>
       </Section>
     </>

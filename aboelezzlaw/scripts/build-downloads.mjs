@@ -2,6 +2,7 @@
  * يبني ملفات المنتجات الرقمية من مصادرها النصّية.
  *
  *   content/templates/*.md  ──►  private/downloads/contract-templates-pack.zip
+ *                           ──►  private/downloads/template-NN-<key>.docx  (لكل نموذج)
  *
  * لماذا التوليد بدل رفع ملفات جاهزة؟
  *   • النماذج تبقى نصّاً قابلاً للتحرير والمقارنة في Git بدل ملفات ثنائية.
@@ -34,6 +35,29 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TEMPLATES_DIR = path.join(root, 'content', 'templates');
 const OUTPUT_DIR = path.join(root, 'private', 'downloads');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'contract-templates-pack.zip');
+
+/**
+ * مفاتيح النماذج المنفردة بترتيب ملفّاتها (01 … 12). يجب أن تطابق
+ * `contractTemplates` في `src/content/products.ts` — اختبار الوحدات يقارن
+ * القائمتين، فلا يُباع نموذج بلا ملف ولا يُبنى ملف بلا منتج.
+ */
+const TEMPLATE_KEYS = [
+  'supply',
+  'services',
+  'nda',
+  'employment',
+  'agency',
+  'lease',
+  'settlement',
+  'consultancy',
+  'partnership',
+  'distribution',
+  'debt',
+  'handover',
+];
+
+const singleFileName = (index, key) =>
+  `template-${String(index + 1).padStart(2, '0')}-${key}.docx`;
 
 const FONT = 'Arial';
 const NAVY = '1A3A52';
@@ -304,6 +328,8 @@ async function main() {
   }
 
   const zip = new JSZip();
+  /** النماذج المنفردة: [اسم الملف الناتج، محتواه] — الدليل (00) لا يُباع منفرداً */
+  const singles = [];
 
   for (const file of files) {
     const markdown = await readFile(path.join(TEMPLATES_DIR, file), 'utf8');
@@ -328,6 +354,13 @@ async function main() {
 
     const buffer = await Packer.toBuffer(document);
     zip.file(file.replace(/\.md$/, '.docx'), buffer);
+
+    const order = Number(file.slice(0, 2));
+    if (order >= 1) {
+      const key = TEMPLATE_KEYS[order - 1];
+      if (!key) throw new Error(`لا مفتاح للنموذج ${file} — أضِفه إلى TEMPLATE_KEYS`);
+      singles.push([singleFileName(order - 1, key), buffer]);
+    }
     console.log(`  ✓ ${file.replace(/\.md$/, '.docx')} (${(buffer.length / 1024).toFixed(1)} KB)`);
   }
 
@@ -339,8 +372,15 @@ async function main() {
   });
   await writeFile(OUTPUT_FILE, archive);
 
+  if (singles.length !== TEMPLATE_KEYS.length) {
+    throw new Error(`عدد النماذج المنفردة ${singles.length} ≠ ${TEMPLATE_KEYS.length}`);
+  }
+  for (const [name, buffer] of singles) {
+    await writeFile(path.join(OUTPUT_DIR, name), buffer);
+  }
+
   console.log(
-    `\n✅ ${files.length} نموذجاً → ${path.relative(root, OUTPUT_FILE)} (${(archive.length / 1024).toFixed(1)} KB)`,
+    `\n✅ ${files.length} ملفاً → ${path.relative(root, OUTPUT_FILE)} (${(archive.length / 1024).toFixed(1)} KB) + ${singles.length} نموذجاً منفرداً`,
   );
 }
 

@@ -28,8 +28,17 @@ const ALL = '__all__';
  * الكتالوج يأتي من الخادم لا من ملف المحتوى: حالة النشر قد يكون المالك
  * غيّرها من اللوحة، والعميل لا يعرفها.
  */
-export function StoreGrid({ catalogue, locale }: { catalogue: Product[]; locale: Locale }) {
-  const [category, setCategory] = useState<string>(ALL);
+export function StoreGrid({
+  catalogue,
+  locale,
+  initialCategory,
+}: {
+  catalogue: Product[];
+  locale: Locale;
+  /** تصنيف يُفتح عليه المتجر — يأتي من `?category=` في العنوان */
+  initialCategory?: string;
+}) {
+  const [category, setCategory] = useState<string>(initialCategory ?? ALL);
   const t = dict(locale);
   const isArabic = locale === 'ar';
 
