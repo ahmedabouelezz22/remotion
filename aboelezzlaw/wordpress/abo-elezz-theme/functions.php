@@ -60,6 +60,7 @@ remove_action('woocommerce_after_main_content', 'woocommerce_output_content_wrap
 remove_action('woocommerce_sidebar', 'woocommerce_get_sidebar', 10);
 add_filter('loop_shop_columns', fn() => 3);
 add_filter('loop_shop_per_page', fn() => 24);
+add_filter('woocommerce_show_page_title', '__return_false');
 
 /* الصفحات الخاصة لا تُفهرس */
 add_filter('wp_robots', function ($robots) {

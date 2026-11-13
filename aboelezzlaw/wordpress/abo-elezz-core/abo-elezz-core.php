@@ -26,6 +26,7 @@ require_once ABZ_CORE_DIR . 'includes/newsletter.php';
 require_once ABZ_CORE_DIR . 'includes/comments.php';
 require_once ABZ_CORE_DIR . 'includes/woo.php';
 require_once ABZ_CORE_DIR . 'includes/importer.php';
+require_once ABZ_CORE_DIR . 'includes/dependencies.php';
 
 register_activation_hook(__FILE__, function () {
     abz_register_content_types();

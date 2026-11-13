@@ -14,9 +14,13 @@ function abz_seed(): array
     return $seed;
 }
 
+/** نسخة البيانات + مراجعة المستورد: تغيّر أيّهما يعيد الاستيراد مرة واحدة */
+const ABZ_IMPORTER_REVISION = 'r4';
+
 function abz_seed_version(): string
 {
-    return (string) (abz_seed()['version'] ?? '');
+    $version = (string) (abz_seed()['version'] ?? '');
+    return $version === '' ? '' : $version . '-' . ABZ_IMPORTER_REVISION;
 }
 
 /** قسم من البيانات بمسار منقوط: abz_data('firm.team') */

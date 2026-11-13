@@ -17,6 +17,15 @@ function abz_import_log(string $line): void
     $log = get_option('abz_import_log', []);
     $log[] = '[' . current_time('mysql') . '] ' . $line;
     update_option('abz_import_log', array_slice($log, -200), false);
+    // نسخة في ملف محمي من التصفّح، تُقرأ من لوحة الاستضافة عند التشخيص
+    $dir = trailingslashit(wp_upload_dir()['basedir']) . 'abz-private';
+    if (wp_mkdir_p($dir)) {
+        if (!file_exists($dir . '/.htaccess')) {
+            file_put_contents($dir . '/.htaccess', "deny from all\n");
+            file_put_contents($dir . '/index.php', "<?php // Silence\n");
+        }
+        file_put_contents($dir . '/import.log', end($log) . "\n", FILE_APPEND | LOCK_EX);
+    }
 }
 
 /** يجد عنصراً بمفتاح الاستيراد */
@@ -297,8 +306,10 @@ function abz_import_seed(bool $force = false): void
         abz_import_store($seed);
     }
 
-    update_option('abz_seed_version', $seed['version'] ?? '');
-    abz_import_log('اكتمل استيراد النسخة ' . ($seed['version'] ?? ''));
+    update_option('abz_seed_version', abz_seed_version());
+    update_option('abz_flush_rewrite', 1);
+    $GLOBALS['abz_flush_set_now'] = true;
+    abz_import_log('اكتمل استيراد النسخة ' . abz_seed_version());
 }
 
 /** يرفع صورة من seed/media إلى المكتبة مرة واحدة */
@@ -357,6 +368,20 @@ function abz_download_url(string $file): string
 
 function abz_import_store(array $seed): void
 {
+    // صفحة متجر خاصة بـ WooCommerce — لا نعتمد على صفحة «shop» قد تكون لإضافة متجر أخرى
+    $store_page = abz_upsert('page:store', [
+        'post_type' => 'page',
+        'post_name' => 'store',
+        'post_title' => 'المتجر',
+        'post_content' => '',
+        'comment_status' => 'closed',
+    ]);
+    if ($store_page && (int) get_option('woocommerce_shop_page_id') !== $store_page) {
+        update_option('woocommerce_shop_page_id', $store_page);
+        // روابط الأرشيف تُبنى من صفحة المتجر في بداية الطلب، فتُحدَّث في الطلب التالي
+        update_option('abz_flush_rewrite', 1);
+        $GLOBALS['abz_flush_set_now'] = true;
+    }
     update_option('woocommerce_currency', 'EGP');
     update_option('woocommerce_default_country', 'EG');
     update_option('woocommerce_enable_reviews', 'yes');
@@ -364,6 +389,9 @@ function abz_import_store(array $seed): void
     update_option('woocommerce_downloads_grant_access_after_payment', 'yes');
     update_option('woocommerce_price_num_decimals', '0');
     update_option('woocommerce_currency_pos', 'right_space');
+    // وضع «قريباً» في WooCommerce يخفي المتجر عن الزوار؛ الموقع كله تجريبي ومحجوب عن البحث،
+    // والمالك يحتاج أن يرى المتجر كما سيراه عملاؤه. لا بوابة دفع مفعّلة قبل إدخال مفاتيحه.
+    update_option('woocommerce_coming_soon', 'no');
 
     $category_slugs = array_flip($seed['site']['categoryKeys'] ?? []);
     $keys = [
@@ -461,3 +489,11 @@ function abz_import_store(array $seed): void
         abz_product_term($category['title'], 'market-' . $category['slug'], $root, $category['body']);
     }
 }
+
+add_action('init', function () {
+    // لا يُنفَّذ في نفس الطلب الذي غيّر الصفحة: الروابط هنا ما زالت مبنيّة على القديمة
+    if (get_option('abz_flush_rewrite') && empty($GLOBALS['abz_flush_set_now'])) {
+        delete_option('abz_flush_rewrite');
+        flush_rewrite_rules(false);
+    }
+}, 99);
