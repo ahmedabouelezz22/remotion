@@ -285,7 +285,8 @@ function abz_import_seed(bool $force = false): void
             'post_excerpt' => $article['excerpt'],
             'post_content' => $article['html'],
             'post_author' => $author,
-            'post_date' => $article['publishedAt'] . ' 09:00:00',
+            // تاريخ في المستقبل يجعل المقال «مجدولاً»، ولا يعمل WP-cron على هذه الاستضافة
+            'post_date' => min($article['publishedAt'] . ' 09:00:00', current_time('mysql')),
             'post_category' => $category_id ? [$category_id] : [],
             'comment_status' => 'open',
         ], [
@@ -294,6 +295,9 @@ function abz_import_seed(bool $force = false): void
         ]);
         if ($id) {
             wp_set_post_tags($id, $article['tags'], false);
+            if (get_post_status($id) === 'future') {
+                wp_publish_post($id);
+            }
         }
     }
 

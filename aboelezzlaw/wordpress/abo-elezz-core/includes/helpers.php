@@ -15,7 +15,7 @@ function abz_seed(): array
 }
 
 /** نسخة البيانات + مراجعة المستورد: تغيّر أيّهما يعيد الاستيراد مرة واحدة */
-const ABZ_IMPORTER_REVISION = 'r4';
+const ABZ_IMPORTER_REVISION = 'r5';
 
 function abz_seed_version(): string
 {
