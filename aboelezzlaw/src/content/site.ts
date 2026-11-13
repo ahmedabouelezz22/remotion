@@ -4,14 +4,17 @@
  */
 
 export const site = {
-  name: 'مكتب أبو العز للمحاماة',
-  shortName: 'أبو العز للمحاماة',
-  nameEn: 'Law Firm Abo Elezz',
+  name: 'مؤسسة أبو العز للمحاماة والاستشارات القانونية',
+  shortName: 'مؤسسة أبو العز للمحاماة',
+  nameEn: 'Abo Elezz Law Firm',
+  /** سطر الحقوق في التذييل */
+  copyright: 'جميع الحقوق محفوظة لمؤسسة أبو العز للمحاماة والاستشارات القانونية',
+  copyrightEn: 'All rights reserved — Abo Elezz Law Firm',
   tagline: 'خدمات قانونية متخصصة عن بُعد في جميع أنحاء العالم',
   description:
-    'مكتب أبو العز للمحاماة — خدمات قانونية متخصصة عن بُعد: صياغة ومراجعة العقود، التقاضي والنزاعات، خدمات الشركات والشركات الناشئة، قانون العمل، الامتثال الرقمي، والاستشارات القانونية.',
+    'مؤسسة أبو العز للمحاماة والاستشارات القانونية — خدمات قانونية متخصصة عن بُعد: صياغة ومراجعة العقود، التقاضي والنزاعات، خدمات الشركات والشركات الناشئة، قانون العمل، الامتثال الرقمي، والاستشارات القانونية.',
   descriptionEn:
-    'Law Firm Abo Elezz — specialist legal services delivered remotely: contract drafting and review, litigation and disputes, corporate and start-up services, employment law, digital compliance, and legal consultancy.',
+    'Abo Elezz Law Firm — specialist legal services delivered remotely: contract drafting and review, litigation and disputes, corporate and start-up services, employment law, digital compliance, and legal consultancy.',
   url: 'https://aboelezzlaw.com',
   locale: 'ar_EG',
   lang: 'ar',
@@ -24,12 +27,26 @@ export const site = {
     phoneE164: '+201157844664',
     /** رقم واتساب بدون علامة + (لصيغة wa.me) */
     whatsapp: '201157844664',
+    /** رقم واتساب الثاني */
+    phone2Local: '01201098097',
+    phone2E164: '+201201098097',
+    whatsapp2: '201201098097',
+    /** الهاتف الأرضي — الجيزة (02) */
+    landlineLocal: '0238374803',
+    landlineE164: '+20238374803',
     /** البريد الذي تصل إليه إشعارات النماذج */
     email: 'aboelezzlawfirm@gmail.com',
-    address: 'خدمات قانونية عن بُعد — في جميع أنحاء العالم',
-    addressEn: 'Remote legal services — worldwide',
-    /** البريد المعروض للزوار على الموقع */
+    /** البريد الرسمي المعروض للزوار، والبريد البديل */
     publicEmail: 'ahmed@aboelezzlaw.com',
+    altEmail: 'aboelezzlawfirm@gmail.com',
+    /** المقرّ — والخدمة متاحة عن بُعد في جميع أنحاء العالم */
+    address: 'الحي الثاني، المجاورة الثامنة، مدينة 6 أكتوبر، الجيزة، مصر',
+    addressEn: '8th Neighbourhood, 2nd District, 6th of October City, Giza, Egypt',
+    serviceArea: 'خدمات قانونية عن بُعد في جميع أنحاء العالم',
+    serviceAreaEn: 'Remote legal services worldwide',
+    mapUrl:
+      'https://www.google.com/maps/search/?api=1&query=' +
+      encodeURIComponent('المجاورة الثامنة الحي الثاني مدينة 6 أكتوبر الجيزة'),
   },
 
   /**
@@ -52,11 +69,20 @@ export const site = {
     founderPhoto: null as string | null,
   },
 
+  /** حسابات المؤسسة — تظهر في الرأس والتذييل وصفحة التواصل وآخر كل مقال */
   social: {
+    facebook: 'https://www.facebook.com/profile.php?id=100075908354254',
+    instagram: 'https://www.instagram.com/aboelezzlawfirm/',
+    tiktok: 'https://www.tiktok.com/@aboelezzlawfirm',
+    x: 'https://x.com/aboelezzlawfirm',
     youtube: 'https://www.youtube.com/@-ahmedaboelezz',
+    telegram: 'https://t.me/+cMSuUzL_mJ5mZDA0',
+    whatsappChannel: 'https://whatsapp.com/channel/0029Vb9FI94I7BeLXdzU7V0L',
+    whatsappGroups: [
+      'https://chat.whatsapp.com/I1d00WhNySEBU3JSJcE6IR',
+      'https://chat.whatsapp.com/FdoNqtd5Yg15ZnxNuXmbgo',
+    ],
     linkedin: '',
-    facebook: '',
-    x: '',
   },
 
   /** ساعات العمل المستخدمة في مُنتقي مواعيد الاستشارة */

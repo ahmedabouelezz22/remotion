@@ -193,7 +193,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             />
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-display text-[0.92rem] font-extrabold text-navy-900 sm:text-[0.98rem]">
-                {isArabic ? 'مكتب أبو العز' : 'Law Firm Abo Elezz'}
+                {isArabic ? 'مؤسسة أبو العز' : 'Abo Elezz Law Firm'}
               </span>
               <span className="hidden truncate text-[0.7rem] font-semibold tracking-wide text-slate-500 sm:block lg:hidden xl:block">
                 {isArabic ? 'للمحاماة والاستشارات القانونية' : 'Law & Legal Consultancy'}

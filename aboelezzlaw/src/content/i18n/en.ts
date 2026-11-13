@@ -49,8 +49,8 @@ export const en: Dictionary = {
   },
 
   common: {
-    firmName: 'Law Firm Abo Elezz',
-    firmShort: 'Law Firm Abo Elezz',
+    firmName: 'Abo Elezz Law Firm',
+    firmShort: 'Abo Elezz Law Firm',
     tagline: 'Specialist legal services, delivered remotely',
     whatsapp: 'WhatsApp',
     whatsappUs: 'Message us on WhatsApp',
@@ -494,7 +494,7 @@ export const en: Dictionary = {
     description:
       'Every message sent through this form goes straight to the firm’s mailbox and to the responsible lawyer’s WhatsApp. A reply follows within one business day under normal circumstances.',
     metaDescription:
-      'Contact Law Firm Abo Elezz — by form, phone, WhatsApp or email. A reply within one business day.',
+      'Contact Abo Elezz Law Firm — by form, phone, WhatsApp or email. A reply within one business day.',
     formTitle: 'Contact form',
     requiredNote: 'Fields marked * are required.',
     phoneNote: 'During working hours',
@@ -707,7 +707,7 @@ export const en: Dictionary = {
     title: 'Book a legal consultation',
     description: (hours: string) => `Fill in your details and choose a time that suits you. ${hours}`,
     metaDescription:
-      'Book a legal consultation with Law Firm Abo Elezz — choose the date, time and channel, and receive confirmation within one business day.',
+      'Book a legal consultation with Abo Elezz Law Firm — choose the date, time and channel, and receive confirmation within one business day.',
     howItWorks: 'How a consultation runs',
     notesTitle: 'Important notes',
     notes: [
@@ -917,7 +917,7 @@ export const en: Dictionary = {
       templatesBody: 'Twelve templates in Word format; the download link arrives on payment.',
       templatesCta: 'View templates',
       membershipsTitle: 'Memberships',
-      membershipsBody: 'For individuals, companies, lawyers and law firms — starting with a free plan.',
+      membershipsBody: 'For individuals, companies, lawyers and law firms — monthly or annual.',
       membershipsCta: 'Compare plans',
       knowledgeTitle: 'Articles and library',
       knowledgeBody: 'Analysis documented from its sources, and open references.',
@@ -930,7 +930,7 @@ export const en: Dictionary = {
     servicesCount: (count: number) => `${count} services`,
     membershipsEyebrow: 'Memberships',
     membershipsTitle: 'A membership for each kind of client',
-    membershipsDescription: 'Each group has its own plans and benefits, and all of them start with a free plan.',
+    membershipsDescription: 'Each group has its own plans and benefits, and the annual plan costs less than paying monthly.',
     tiersCount: (count: number) => (count === 1 ? 'By invitation from the firm' : `${count} plans`),
     membershipsCta: 'All memberships and benefits',
   },
@@ -972,13 +972,13 @@ export const en: Dictionary = {
     eyebrow: 'Memberships',
     title: 'Memberships for individuals, companies and lawyers',
     metaDescription:
-      'Law Firm Abo Elezz memberships: for individuals, companies, lawyers and law firms. Each group starts with a free plan and steps up in benefits, discounts and allowances.',
+      'Abo Elezz Law Firm memberships: for individuals, companies, lawyers and law firms. Each group starts with a basic membership and steps up in benefits, discounts and allowances, billed monthly or annually.',
     description:
-      'Five groups, each with its own plans. All start free, then step up in discounts, allowances and priority.',
-    free: 'Free',
+      'Five groups, each with its own plans. Each starts with a basic membership on sign-up, then steps up in discounts, allowances and priority; annual billing costs less than monthly.',
+    free: 'On sign-up',
     perMonth: '/ month',
     soonPrice: 'Price to be announced',
-    startFree: 'Start free',
+    startFree: 'Create your account',
     subscribe: 'Subscribe',
     registerInterest: 'Register your interest',
     interestSubject: (audience: string, tier: string) => `Interest in the ${audience} membership — ${tier} plan`,

@@ -35,7 +35,7 @@ const privacyAr: LegalDoc = {
   title: 'كيف نتعامل مع بياناتك',
   description: 'سياسة مكتوبة لتصف ما يحدث فعلاً على هذا الموقع، لا صيغة عامة منسوخة.',
   metaTitle: 'سياسة الخصوصية',
-  metaDescription: 'كيف يجمع مكتب أبو العز للمحاماة بياناتك الشخصية ويستخدمها ويحميها.',
+  metaDescription: 'كيف يجمع مؤسسة أبو العز للمحاماة والاستشارات القانونية بياناتك الشخصية ويستخدمها ويحميها.',
   updatedLabel: 'آخر تحديث',
   sections: [
     {
@@ -143,7 +143,7 @@ const privacyEn: LegalDoc = {
     'A policy written to describe what actually happens on this website, not a copied boilerplate.',
   metaTitle: 'Privacy policy',
   metaDescription:
-    'How Law Firm Abo Elezz collects, uses and protects your personal data.',
+    'How Abo Elezz Law Firm collects, uses and protects your personal data.',
   updatedLabel: 'Last updated',
   sections: [
     {
@@ -249,7 +249,7 @@ const termsAr: LegalDoc = {
   title: 'شروط الاستخدام والشراء',
   description: 'اقرأ هذه الشروط قبل استخدام الموقع أو شراء أي خدمة منه.',
   metaTitle: 'الشروط والأحكام',
-  metaDescription: 'شروط استخدام موقع مكتب أبو العز للمحاماة وشروط شراء الخدمات والمنتجات منه.',
+  metaDescription: 'شروط استخدام موقع مؤسسة أبو العز للمحاماة والاستشارات القانونية وشروط شراء الخدمات والمنتجات منه.',
   updatedLabel: 'آخر تحديث',
   sections: [
     {
@@ -363,7 +363,7 @@ const termsEn: LegalDoc = {
   description: 'Please read these terms before using the website or buying any service from it.',
   metaTitle: 'Terms and conditions',
   metaDescription:
-    'The terms for using the Law Firm Abo Elezz website and for purchasing its services and products.',
+    'The terms for using the Abo Elezz Law Firm website and for purchasing its services and products.',
   updatedLabel: 'Last updated',
   sections: [
     {

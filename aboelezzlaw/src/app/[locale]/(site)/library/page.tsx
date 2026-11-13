@@ -109,7 +109,7 @@ export default async function LibraryPage({ params }: { params: Promise<{ locale
                     </p>
 
                     <div className="flex flex-wrap items-center gap-2 border-t border-sand-200 pt-4 text-xs">
-                      <Badge tone={item.access === 'مجاني ومفتوح' ? 'green' : 'muted'}>
+                      <Badge tone={item.access === 'مفتوح للعموم' ? 'green' : 'muted'}>
                         {isArabic ? item.access : accessLabelsEn[item.access]}
                       </Badge>
                       <span className="text-slate-500">{text.language}</span>

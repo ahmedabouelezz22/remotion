@@ -1,7 +1,7 @@
 import type { Bilingual } from './practice-areas';
 
 /**
- * العضويات: خمس فئات، ولكل فئة باقات تبدأ بمجانية محدودة المزايا.
+ * العضويات: خمس فئات، ولكل فئة باقات تبدأ بعضوية أساسية محدودة المزايا.
  *
  * ⚠️ للمالك — ما هنا **مقترح بنية** لا قرار تجاري:
  *   • المزايا والحدود (نسب الخصم، عدد النماذج، دقائق الاستشارة) تعتمدها أو
@@ -20,7 +20,7 @@ export type AudienceKey = 'individuals' | 'companies' | 'lawyers' | 'law-firms' 
 export interface MembershipTier {
   key: string;
   name: Bilingual;
-  /** 0 = مجانية · null = لم يُحدَّد السعر بعد · رقم = سعر شهري بالجنيه */
+  /** 0 = أساسية بلا رسوم · null = لم يُحدَّد السعر بعد · رقم = سعر شهري بالجنيه */
   price: number | null;
   /** إن كانت الباقة منتجاً في المتجر، فسعرها ومزاياها من هناك */
   productSlug?: string;
@@ -39,7 +39,17 @@ export interface MembershipAudience {
   tiers: MembershipTier[];
 }
 
-const free = { ar: 'المجانية', en: 'Free' };
+const free = { ar: 'الأساسية', en: 'Basic' };
+
+/**
+ * الاشتراك السنوي يُحتسب بعشرة أشهر بدل اثني عشر (توفير شهرين).
+ * ⚠️ مقترح ينتظر اعتماد المالك — غيّر الرقم هنا وحده.
+ */
+export const ANNUAL_MONTHS_CHARGED = 10;
+export const annualPrice = (monthly: number) => monthly * ANNUAL_MONTHS_CHARGED;
+
+/** ميزة لم تُطلق بعد: تُعرض بوسم «عند إطلاقها» ولا تُحسب ضمن ما يُباع الآن */
+const soon = (ar: string, en: string) => ({ ar: `${ar} (عند إطلاقها)`, en: `${en} (once launched)` });
 
 export const memberships: MembershipAudience[] = [
   {
@@ -67,10 +77,12 @@ export const memberships: MembershipAudience[] = [
         price: null,
         highlight: true,
         features: [
-          { ar: 'كل مزايا المجانية', en: 'Everything in Free' },
+          { ar: 'كل مزايا الأساسية', en: 'Everything in Basic' },
           { ar: 'خصم 10% على الاستشارات والخدمات', en: '10% off consultations and services' },
           { ar: 'نموذج فوري واحد شهرياً ضمن العضوية', en: 'One instant template a month included' },
           { ar: 'أولوية في حجز المواعيد', en: 'Priority when booking appointments' },
+          { ar: 'حفظ مستنداتك وطلباتك في مساحة عمل خاصة', en: 'Keep your documents and requests in a private workspace' },
+          soon('شروحات الأنظمة والتشريعات', 'Plain-language guides to laws and regulations'),
         ],
       },
       {
@@ -83,6 +95,8 @@ export const memberships: MembershipAudience[] = [
           { ar: 'استشارة 30 دقيقة شهرياً ضمن العضوية', en: 'A 30-minute consultation a month included' },
           { ar: 'ثلاثة نماذج فورية شهرياً', en: 'Three instant templates a month' },
           { ar: 'أولوية في الرد على الاستفسارات', en: 'Priority response to enquiries' },
+          soon('المساعد القانوني «مُفيد» للأسئلة العامة', 'The “Mufeed” legal assistant for general questions'),
+          soon('تنبيهات بالتعديلات التشريعية في موضوعاتك', 'Alerts on legislative changes in your topics'),
         ],
       },
     ],
@@ -159,10 +173,12 @@ export const memberships: MembershipAudience[] = [
         price: null,
         highlight: true,
         features: [
-          { ar: 'كل مزايا المجانية', en: 'Everything in Free' },
+          { ar: 'كل مزايا الأساسية', en: 'Everything in Basic' },
           { ar: 'مكتبة نماذج الصياغة للمحامين', en: 'The drafting template library for lawyers' },
           { ar: 'خصم 15% على المنتجات الرقمية', en: '15% off digital products' },
           { ar: 'أولوية في فرص التعاون والإحالة', en: 'Priority for collaboration and referral opportunities' },
+          { ar: 'ملف مهني في دليل المتعاونين بعد التحقّق من الترخيص', en: 'A professional profile in the collaborators’ directory after licence verification' },
+          soon('مساعد صياغة العقود', 'Contract drafting assistant'),
         ],
       },
       {
@@ -174,6 +190,8 @@ export const memberships: MembershipAudience[] = [
           { ar: 'خصم 25% على المنتجات الرقمية', en: '25% off digital products' },
           { ar: 'جلسة مراجعة صياغة شهرية (30 دقيقة)', en: 'A monthly drafting review session (30 minutes)' },
           { ar: 'محتوى التدريب المهني للأعضاء عند إطلاقه', en: 'Members’ professional training content once launched' },
+          soon('البحث في المبادئ والأحكام القضائية المتاحة', 'Search of available judicial principles and judgments'),
+          soon('مساعد المذكرات وتنظيم الوقائع', 'Pleadings assistant for organising facts and requests'),
         ],
       },
     ],
@@ -207,6 +225,7 @@ export const memberships: MembershipAudience[] = [
           { ar: 'مكتبة نماذج الصياغة مشتركة للفريق', en: 'The drafting template library shared across the team' },
           { ar: 'خصم 15% على المنتجات الرقمية', en: '15% off digital products' },
           { ar: 'التعاون والإحالة في الأعمال العابرة للحدود', en: 'Collaboration and referral on cross-border work' },
+          soon('لوحة متابعة طلبات المكتب ومستنداته', 'A dashboard for the firm’s requests and documents'),
         ],
       },
       {
@@ -218,6 +237,8 @@ export const memberships: MembershipAudience[] = [
           { ar: 'حتى 15 مقعداً', en: 'Up to 15 seats' },
           { ar: 'خصم 25% على المنتجات الرقمية', en: '25% off digital products' },
           { ar: 'أولوية في شبكة الشركاء', en: 'Priority in the partner network' },
+          soon('صلاحيات متعدّدة لأعضاء المكتب', 'Multiple user roles for the firm’s members'),
+          soon('خصومات الموردين في سوق مستلزمات المحامين', 'Supplier discounts in the lawyers’ marketplace'),
         ],
       },
     ],
@@ -225,7 +246,7 @@ export const memberships: MembershipAudience[] = [
   {
     key: 'team',
     icon: 'badge-check',
-    name: { ar: 'فريق Law Firm Abo Elezz', en: 'Law Firm Abo Elezz team' },
+    name: { ar: 'فريق مؤسسة أبو العز', en: 'Abo Elezz Law Firm team' },
     tagline: {
       ar: 'لأعضاء فريق المؤسسة — وصول بلا مقابل إلى مزايا العضويات المدفوعة.',
       en: 'For members of the firm’s own team — access to the paid membership benefits at no charge.',
