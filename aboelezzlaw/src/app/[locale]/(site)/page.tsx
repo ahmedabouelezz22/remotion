@@ -59,6 +59,7 @@ const audienceIcons = {
   scale: Scale,
   landmark: Landmark,
   'badge-check': BadgeCheck,
+  plane: BadgeCheck,
 } as const;
 
 /** خطوط الطول والعرض لكرةٍ أرضية مرسومة — زخرفة لا خريطة: لا تدّعي مواقع */

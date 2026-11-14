@@ -15,7 +15,7 @@ function abz_seed(): array
 }
 
 /** نسخة البيانات + مراجعة المستورد: تغيّر أيّهما يعيد الاستيراد مرة واحدة */
-const ABZ_IMPORTER_REVISION = 'r5';
+const ABZ_IMPORTER_REVISION = 'r7';
 
 function abz_seed_version(): string
 {
@@ -73,6 +73,8 @@ function abz_social_links(): array
         'telegram' => 'تيليجرام',
         'whatsapp_channel' => 'قناة واتساب',
         'linkedin' => 'لينكدإن',
+        'snapchat' => 'سناب شات',
+        'threads' => 'ثريدز',
     ];
     $links = [];
     foreach ($labels as $key => $label) {

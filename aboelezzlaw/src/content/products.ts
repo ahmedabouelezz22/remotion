@@ -719,8 +719,8 @@ export const products: Product[] = [
     description:
       'الباقة الأشمل: تغطية قانونية مستمرة للمنشأة مع مدير حساب مخصّص وأولوية قصوى في الاستجابة.',
     highlights: [
-      'استشارات غير محدودة',
-      'مراجعة عقود غير محدودة',
+      'حتى 12 ساعة استشارات شهرياً',
+      'مراجعة حتى 12 عقداً شهرياً (حتى 20 صفحة للعقد)',
       'صياغة 3 عقود شهرياً',
       'أولوية قصوى في الاستجابة',
       'أتعاب مخفّضة على التمثيل القانوني',
@@ -732,8 +732,8 @@ export const products: Product[] = [
       description:
         'The fullest cover: continuous legal support for the business with a dedicated account manager and top priority in response.',
       highlights: [
-        'Unlimited consultations',
-        'Unlimited contract review',
+        'Up to 12 hours of consultations a month',
+        'Review of up to 12 contracts a month (up to 20 pages each)',
         'Three contracts drafted a month',
         'Top priority in response',
         'Reduced fees on legal representation',

@@ -69,3 +69,69 @@ add_filter('wp_robots', function ($robots) {
     }
     return $robots;
 });
+
+/* ── صور المتجر: منتج بلا صورة يأخذ صورة قسمه بدل المربّع الرمادي ── */
+add_filter('woocommerce_placeholder_img', function ($html, $size, $dimensions) {
+    global $product;
+    $photo = $product instanceof WC_Product ? abz_product_photo($product->get_parent_id() ?: $product->get_id()) : 'lawbooks';
+    return '<img src="' . esc_url(abz_img($photo)) . '" alt="' . esc_attr($product instanceof WC_Product ? $product->get_name() : '') . '" width="1200" height="750" loading="lazy" class="abz-product-photo woocommerce-placeholder wp-post-image">';
+}, 10, 3);
+add_filter('woocommerce_placeholder_img_src', function ($src) {
+    global $product;
+    return abz_img($product instanceof WC_Product ? abz_product_photo($product->get_parent_id() ?: $product->get_id()) : 'lawbooks');
+});
+
+/* ملخّص قصير تحت اسم المنتج في شبكة المتجر */
+add_action('woocommerce_after_shop_loop_item_title', function () {
+    global $product;
+    $summary = $product ? wp_strip_all_tags($product->get_short_description()) : '';
+    if ($summary !== '') {
+        echo '<p class="abz-loop-summary">' . esc_html(wp_trim_words($summary, 16, '…')) . '</p>';
+    }
+}, 4);
+
+/* صفحة المنتج: ما يطمئن المشتري بعد زر الشراء */
+add_action('woocommerce_single_product_summary', function () {
+    global $product;
+    if (!$product) {
+        return;
+    }
+    $wa = abz_wa_link('السلام عليكم، لديّ سؤال عن: ' . $product->get_name());
+    echo '<div class="abz-buybox"><ul>';
+    foreach (['نطاق العمل والسعر معلومان قبل الدفع', $product->is_downloadable() ? 'رابط التحميل يصلك فور تأكيد الدفع' : 'نتواصل معك خلال يوم عمل لبدء التنفيذ', 'سرّية كاملة لبياناتك ومستنداتك', 'الأعضاء يحصلون على خصم حتى 30% تلقائياً'] as $line) {
+        echo '<li>' . abz_icon('check', 'h-4 w-4') . '<span>' . esc_html($line) . '</span></li>';
+    }
+    echo '</ul><p><a class="abz-buybox-wa" target="_blank" rel="noopener" href="' . esc_url($wa) . '">' . abz_icon('message-circle', 'h-4 w-4') . ' لديك سؤال قبل الشراء؟ راسلنا على واتساب</a> · <a href="' . esc_url(abz_url('memberships')) . '">تعرّف على العضويات</a></p></div>';
+}, 35);
+
+/* وسم الرابط الأساسي يولّده ووردبريس/إضافة SEO — لا نكرّره. وبيانات منظَّمة للمؤسسة في الرئيسية. */
+add_action('wp_head', function () {
+    if (!is_front_page()) {
+        return;
+    }
+    $same = array_values(array_filter(array_map(fn($l) => $l['url'], abz_social_links())));
+    $data = [
+        '@context' => 'https://schema.org',
+        '@type' => 'LegalService',
+        'name' => get_bloginfo('name'),
+        'alternateName' => 'Abo Elezz Law Firm',
+        'url' => home_url('/'),
+        'logo' => get_template_directory_uri() . '/assets/logo.png',
+        'image' => abz_img('lawbooks'),
+        'email' => (string) abz_setting('email', ''),
+        'telephone' => '+' . preg_replace('/\D+/', '', (string) abz_setting('whatsapp', '201157844664')),
+        'address' => ['@type' => 'PostalAddress', 'streetAddress' => (string) abz_setting('address', ''), 'addressLocality' => '6th of October City', 'addressRegion' => 'Giza', 'addressCountry' => 'EG'],
+        'areaServed' => 'Worldwide',
+        'founder' => ['@type' => 'Person', 'name' => 'أحمد أبو العز', 'alternateName' => 'Ahmed Abo Elezz'],
+        'sameAs' => $same,
+    ];
+    echo '<script type="application/ld+json">' . wp_json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>' . "\n";
+    echo '<meta property="og:image" content="' . esc_url(abz_img('lawbooks')) . '">' . "\n";
+}, 20);
+
+/* إضافة SEO تولّد وسم الرابط الأساسي: لا يُكرَّر بوسم ووردبريس الافتراضي */
+add_action('wp', function () {
+    if (function_exists('aioseo') || defined('WPSEO_VERSION') || defined('RANK_MATH_VERSION')) {
+        remove_action('wp_head', 'rel_canonical');
+    }
+});

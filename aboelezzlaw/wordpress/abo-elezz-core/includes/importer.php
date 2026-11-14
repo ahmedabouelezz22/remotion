@@ -142,6 +142,24 @@ function abz_import_seed(bool $force = false): void
     if (!get_option('abz_settings')) {
         add_option('abz_settings', abz_default_settings());
     }
+    // ترحيل: مفاتيح جديدة تُضاف بقيمها الأولى، وسطر «مواعيد العمل» القديم يُستبدل
+    // بقرار المالك (2026-11). ما عدّله المالك بنفسه لا يُمسّ.
+    $settings = (array) get_option('abz_settings', []);
+    $defaults = abz_default_settings();
+    $changed = false;
+    foreach ($defaults as $key => $value) {
+        if (!array_key_exists($key, $settings) || ($settings[$key] === '' && in_array($key, ['social_linkedin', 'social_snapchat', 'social_threads'], true))) {
+            $settings[$key] = $value;
+            $changed = true;
+        }
+    }
+    if (str_contains((string) ($settings['hours'] ?? ''), 'من الأحد إلى الخميس')) {
+        $settings['hours'] = $defaults['hours'];
+        $changed = true;
+    }
+    if ($changed) {
+        update_option('abz_settings', $settings);
+    }
 
     // 2) إعدادات ووردبريس العامة
     update_option('blogname', $seed['site']['name'] ?? get_bloginfo('name'));
@@ -197,10 +215,34 @@ function abz_import_seed(bool $force = false): void
         'privacy' => [$seed['legal']['privacy']['title'], $seed['legal']['privacy']['html']],
         'terms' => [$seed['legal']['terms']['title'], $seed['legal']['terms']['html']],
         'blog' => ['المدونة', ''],
+        'law-firms' => ['خدمات لمكاتب وشركات المحاماة', ''],
+        'register' => ['أنشئ حسابك', ''],
+        'support' => ['ادعم المنصّة', ''],
+        'games' => ['ألعاب وألغاز قانونية', ''],
     ];
     $page_ids = [];
     $order = 0;
     foreach ($pages as $slug => [$title, $content]) {
+        // صفحة بالمسار نفسه من قالب سابق (محتوى تجريبي) تُضَمّ بدل إنشاء نسخة ثانية «slug-2»
+        $seeded_page = abz_find_seeded('page', 'page:' . $slug);
+        if ($seeded_page && $seeded_page->post_name !== $slug) {
+            // صفحتنا أخذت «slug-2» لأن صفحة تجريبية من قالب سابق تحتل المسار: تُنقل تلك إلى
+            // سلة المحذوفات (قابلة للاستعادة) وتأخذ صفحتنا مسارها الصحيح.
+            $legacy = get_page_by_path($slug, OBJECT, 'page');
+            if ($legacy && (int) $legacy->ID !== (int) $seeded_page->ID) {
+                wp_trash_post($legacy->ID);
+                abz_import_log("نُقلت صفحة قديمة إلى السلة: {$slug} (#{$legacy->ID})");
+            }
+            wp_update_post(['ID' => $seeded_page->ID, 'post_name' => $slug]);
+        }
+        if (!$seeded_page) {
+            $legacy = get_page_by_path($slug, OBJECT, 'page');
+            if ($legacy) {
+                update_post_meta($legacy->ID, '_abz_seed_key', 'page:' . $slug);
+                update_post_meta($legacy->ID, '_abz_seed_hash', abz_current_fingerprint($legacy, []));
+                abz_import_log("ضُمّت صفحة قديمة: {$slug}");
+            }
+        }
         $page_ids[$slug] = abz_upsert('page:' . $slug, [
             'post_type' => 'page',
             'post_name' => $slug,
@@ -396,11 +438,16 @@ function abz_import_store(array $seed): void
     // وضع «قريباً» في WooCommerce يخفي المتجر عن الزوار؛ الموقع كله تجريبي ومحجوب عن البحث،
     // والمالك يحتاج أن يرى المتجر كما سيراه عملاؤه. لا بوابة دفع مفعّلة قبل إدخال مفاتيحه.
     update_option('woocommerce_coming_soon', 'no');
+    // التسجيل من صفحة «حسابي» مع اختيار نوع الحساب، وكلمة مرور يختارها العميل
+    update_option('woocommerce_enable_myaccount_registration', 'yes');
+    update_option('woocommerce_registration_generate_username', 'yes');
+    update_option('woocommerce_registration_generate_password', 'no');
 
     $category_slugs = array_flip($seed['site']['categoryKeys'] ?? []);
     $keys = [
         'الاستشارات' => 'consultations', 'الخدمات القانونية' => 'legal-services', 'الامتثال الرقمي' => 'digital-compliance',
         'نماذج ووثائق' => 'templates', 'كتب وأبحاث' => 'books', 'باقات الشركات' => 'retainers',
+        'العضويات' => 'memberships', 'باقات السياح' => 'tourist-plans',
     ];
     $annual = (int) ($seed['memberships']['annualMonthsCharged'] ?? 10);
 
@@ -482,6 +529,9 @@ function abz_import_store(array $seed): void
         update_post_meta($id, '_abz_coming_soon', !empty($p['comingSoon']) ? '1' : '');
         update_post_meta($id, '_abz_requires_booking', !empty($p['requiresBooking']) ? '1' : '');
         update_post_meta($id, '_abz_badge', $p['badge'] ?? '');
+        update_post_meta($id, '_abz_membership_discount', (string) (int) ($p['membershipDiscount'] ?? 0));
+        update_post_meta($id, '_abz_membership_days', (string) (int) ($p['membershipDays'] ?? 0));
+        update_post_meta($id, '_abz_membership_label', (string) ($p['membershipLabel'] ?? ''));
         clean_post_cache($id);
         update_post_meta($id, '_abz_seed_hash', md5((string) get_post($id)->post_modified_gmt));
     }

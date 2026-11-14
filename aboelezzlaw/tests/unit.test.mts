@@ -950,18 +950,28 @@ describe('القطاعات ومجالات الممارسة', () => {
 // ───────────────────── العضويات ─────────────────────
 
 describe('العضويات', () => {
-  it('خمس فئات: الأفراد والشركات والمحامون ومكاتب المحاماة والفريق', () => {
+  it('ست فئات: الأفراد والشركات والمحامون ومكاتب المحاماة والسياح والفريق', () => {
     assert.deepEqual(
       memberships.map((audience) => audience.key),
-      ['individuals', 'companies', 'lawyers', 'law-firms', 'team'],
+      ['individuals', 'companies', 'lawyers', 'law-firms', 'tourists', 'team'],
     );
   });
 
   it('كل فئة مفتوحة للتسجيل تبدأ بباقة مجانية ولها أكثر من باقة', () => {
     for (const audience of memberships) {
-      if (audience.key === 'team') continue;
+      if (audience.key === 'team' || audience.key === 'tourists') continue;
       assert.ok(audience.tiers.length > 1, `${audience.key}: باقة واحدة`);
       assert.equal(audience.tiers[0]?.price, 0, `${audience.key}: الأولى ليست مجانية`);
+    }
+  });
+
+  it('كل باقة مدفوعة لها خصم، والخصم يزيد كلما ارتفعت الباقة', () => {
+    for (const audience of memberships) {
+      const discounts = audience.tiers.filter((tier) => tier.price !== 0).map((tier) => tier.discount ?? 0);
+      for (const [i, discount] of discounts.entries()) {
+        assert.ok(discount > 0, `${audience.key}: باقة مدفوعة بلا خصم`);
+        if (i > 0) assert.ok(discount > discounts[i - 1]!, `${audience.key}: الخصم لا يتصاعد`);
+      }
     }
   });
 

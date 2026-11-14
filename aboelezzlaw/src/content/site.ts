@@ -10,7 +10,7 @@ export const site = {
   /** سطر الحقوق في التذييل */
   copyright: 'جميع الحقوق محفوظة لمؤسسة أبو العز للمحاماة والاستشارات القانونية',
   copyrightEn: 'All rights reserved — Abo Elezz Law Firm',
-  tagline: 'خدمات قانونية متخصصة عن بُعد في جميع أنحاء العالم',
+  tagline: 'منصّة قانونية دولية — إدارة من الجيزة وفريق وخدمات في جميع أنحاء العالم',
   description:
     'مؤسسة أبو العز للمحاماة والاستشارات القانونية — خدمات قانونية متخصصة عن بُعد: صياغة ومراجعة العقود، التقاضي والنزاعات، خدمات الشركات والشركات الناشئة، قانون العمل، الامتثال الرقمي، والاستشارات القانونية.',
   descriptionEn:
@@ -39,7 +39,7 @@ export const site = {
     /** البريد الرسمي المعروض للزوار، والبريد البديل */
     publicEmail: 'ahmed@aboelezzlaw.com',
     altEmail: 'aboelezzlawfirm@gmail.com',
-    /** المقرّ — والخدمة متاحة عن بُعد في جميع أنحاء العالم */
+    /** مقرّ الإدارة — والفريق والخدمة في جميع أنحاء العالم */
     address: 'الحي الثاني، المجاورة الثامنة، مدينة 6 أكتوبر، الجيزة، مصر',
     addressEn: '8th Neighbourhood, 2nd District, 6th of October City, Giza, Egypt',
     serviceArea: 'خدمات قانونية عن بُعد في جميع أنحاء العالم',
@@ -82,7 +82,9 @@ export const site = {
       'https://chat.whatsapp.com/I1d00WhNySEBU3JSJcE6IR',
       'https://chat.whatsapp.com/FdoNqtd5Yg15ZnxNuXmbgo',
     ],
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/company/abo-elezz-law-firm/',
+    snapchat: 'https://www.snapchat.com/add/aboelezzlawfirm',
+    threads: 'https://www.threads.com/@aboelezzlawfirm',
   },
 
   /** ساعات العمل المستخدمة في مُنتقي مواعيد الاستشارة */
@@ -93,7 +95,7 @@ export const site = {
     endHour: 18,
     slotMinutes: 60,
     timezone: 'Africa/Cairo',
-    label: 'من الأحد إلى الخميس، 10:00 ص – 6:00 م (بتوقيت القاهرة)',
+    label: 'استقبال الطلبات على مدار الساعة — والردّ خلال يوم عمل',
   },
 
   currency: {

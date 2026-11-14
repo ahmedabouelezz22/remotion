@@ -2,12 +2,13 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+/* أصناف الشبكة المحسوبة: lg:grid-cols-1 lg:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 */
 get_header();
 the_post();
 $audiences = abz_data('memberships.audiences', []);
 $annual = (int) abz_data('memberships.annualMonthsCharged', 10);
-$icons = ['user' => 'user', 'building' => 'building', 'scale' => 'scale', 'landmark' => 'landmark', 'badge-check' => 'badge-check'];
-abz_page_hero('العضويات', 'عضويات للأفراد والشركات والمحامين', 'خمس فئات، لكل منها باقاتها. تبدأ بعضوية أساسية بالتسجيل، ثم تتدرّج في الخصومات والأرصدة والأولوية. والاشتراك السنوي يُحتسب بـ' . $annual . ' أشهر بدل 12.', [['العضويات', '']]);
+$icons = ['user' => 'user', 'building' => 'building', 'scale' => 'scale', 'landmark' => 'landmark', 'badge-check' => 'badge-check', 'plane' => 'plane'];
+abz_page_hero('العضويات', 'عضويات وباقات لكل نوع من العملاء', 'تبدأ بحساب بالتسجيل، ثم تتدرّج: كلما ارتفعت باقتك زادت نسبة خصمك على كل خدمات المتجر — حتى 30%. والاشتراك السنوي يُحتسب بـ' . $annual . ' أشهر بدل 12، أي شهران بلا مقابل.', [['العضويات', '']], 'team');
 ?>
 <div class="sticky top-[72px] z-30 border-b border-sand-200 bg-sand-50/95 backdrop-blur">
   <nav aria-label="فئات العضوية" class="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-3 sm:px-8">
@@ -33,11 +34,14 @@ abz_page_hero('العضويات', 'عضويات للأفراد والشركات 
           $monthly = $wc ? (float) ($wc->get_type() === 'variable' ? $wc->get_variation_price('min') : $wc->get_price()) : ($tier['price'] ?? null);
           $highlight = !empty($tier['highlight']); ?>
         <div class="abz-reveal relative flex flex-col rounded-3xl border p-6 <?php echo $highlight ? 'border-gold-500 bg-white shadow-[0_18px_44px_rgba(11,31,58,0.12)]' : 'border-sand-200 bg-white'; ?>" data-abz-tilt>
-          <?php if ($highlight) : ?><span class="absolute -top-3 start-6 rounded-full bg-gold-500 px-3 py-0.5 text-xs font-black text-navy-950">الأنسب لأغلب العملاء</span><?php endif; ?>
-          <h3 class="text-lg text-navy-900"><?php echo esc_html($tier['name']['ar']); ?></h3>
+          <?php if ($highlight) : ?><span class="absolute -top-3 start-6 rounded-full bg-gold-500 px-3 py-0.5 text-xs font-black text-navy-950">الأكثر طلباً</span><?php endif; ?>
+          <div class="flex items-center justify-between gap-2"><h3 class="text-lg text-navy-900"><?php echo esc_html($tier['name']['ar']); ?></h3><?php if (!empty($tier['discount'])) : ?><span class="numeric rounded-full bg-forest-600 px-3 py-1 text-xs font-black text-white">خصم <?php echo esc_html((string) $tier['discount']); ?>%</span><?php endif; ?></div>
           <div class="mt-3 min-h-[4.5rem]">
             <?php if ($monthly === 0.0 || $tier['price'] === 0) : ?>
               <p class="font-display text-2xl font-black text-navy-900"><?php echo $audience['key'] === 'team' ? 'بدعوة من المؤسسة' : 'بالتسجيل'; ?></p>
+            <?php elseif ($monthly && !empty($tier['oneTime'])) : ?>
+              <p class="numeric font-display text-2xl font-black text-navy-900"><?php echo esc_html(number_format_i18n($monthly)); ?> <span class="text-base">ج.م</span></p>
+              <p class="mt-1 text-sm font-bold text-forest-600">دفعة واحدة — <?php echo esc_html($tier['oneTime']['ar']); ?></p>
             <?php elseif ($monthly) : ?>
               <p class="numeric font-display text-2xl font-black text-navy-900"><?php echo esc_html(number_format_i18n($monthly)); ?> <span class="text-base">ج.م / شهرياً</span></p>
               <p class="numeric mt-1 text-sm font-bold text-forest-600">أو <?php echo esc_html(number_format_i18n($monthly * $annual)); ?> ج.م سنوياً — وفّر <?php echo esc_html((string) (12 - $annual)); ?> أشهر</p>
@@ -55,7 +59,7 @@ abz_page_hero('العضويات', 'عضويات للأفراد والشركات 
             } elseif ($tier['price'] === 0) {
                 echo abz_button(function_exists('wc_get_page_permalink') ? wc_get_page_permalink('myaccount') : abz_url('contact'), 'أنشئ حسابك', 'outline', 'md', 'w-full');
             } elseif ($wc) {
-                echo abz_button($wc->get_permalink(), 'اشترك شهرياً أو سنوياً', 'gold', 'md', 'w-full');
+                echo abz_button($wc->get_permalink(), !empty($tier['oneTime']) ? 'اشترِ الباقة' : 'اشترك شهرياً أو سنوياً', $highlight ? 'gold' : 'primary', 'md', 'w-full');
             } else {
                 echo abz_button(abz_url('contact') . '?topic=' . rawurlencode('اهتمام بعضوية ' . $audience['name']['ar'] . ' — باقة ' . $tier['name']['ar']), 'سجّل اهتمامك', 'primary', 'md', 'w-full');
             }
@@ -72,6 +76,7 @@ abz_page_hero('العضويات', 'عضويات للأفراد والشركات 
   <div class="mx-auto max-w-4xl px-5 sm:px-8">
     <h2 class="text-xl text-navy-900">ما يجب أن تعرفه</h2>
     <ul class="mt-4 grid gap-3 leading-8 text-slate-700">
+      <li class="flex gap-3"><?php echo abz_icon('info', 'mt-1.5 h-4 w-4 shrink-0 text-gold-600'); ?>خصم العضوية يُطبَّق تلقائياً في السلة على الخدمات والمنتجات (عدا العضويات نفسها) من لحظة تأكيد الدفع وحتى نهاية المدة، ويجب أن تكون مسجّلاً بحسابك عند الشراء.</li>
       <li class="flex gap-3"><?php echo abz_icon('info', 'mt-1.5 h-4 w-4 shrink-0 text-gold-600'); ?>كل باقة تمنح ما هو مذكور فيها من أرصدة وخصومات، وما زاد على رصيد الباقة يُسعَّر منفرداً بعرض مكتوب قبل البدء.</li>
       <li class="flex gap-3"><?php echo abz_icon('info', 'mt-1.5 h-4 w-4 shrink-0 text-gold-600'); ?>الاشتراك يُدفع مقدَّماً عن المدة المختارة (شهر أو سنة)، ولا يُخصم من بطاقتك تلقائياً؛ نذكّرك قبل انتهاء المدة لتجدّد إن أردت.</li>
       <li class="flex gap-3"><?php echo abz_icon('info', 'mt-1.5 h-4 w-4 shrink-0 text-gold-600'); ?>المزايا الموسومة «عند إطلاقها» أدوات قيد التطوير، تُضاف إلى عضويتك حين تُطلق دون زيادة في سعر مدّتك الجارية.</li>

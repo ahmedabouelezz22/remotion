@@ -5,11 +5,11 @@ if (!defined('ABSPATH')) {
 get_header();
 the_post();
 $members = get_posts(['post_type' => 'abz_team', 'numberposts' => 50, 'orderby' => 'menu_order', 'order' => 'ASC']);
-abz_page_hero('من نحن', 'فريقنا', 'خبرة قانونية وتكوين أكاديمي، وشبكة من المختصّين المرخَّصين في كل ولاية قضائية حيث يلزم.', [['عن المؤسسة', abz_url('about')], ['فريقنا', '']]);
+abz_page_hero('من نحن', 'فريقنا', 'قيادة قانونية، وإدارات مساندة، وشبكة مختصّين مرخَّصين تعمل عن بُعد من دول متعدّدة — يُسنَد إليها كل ملف بحسب النظام واجب التطبيق وقطاع العميل.', [['عن المؤسسة', abz_url('about')], ['فريقنا', '']], 'team');
 ?>
 <section class="py-14 sm:py-20">
   <div class="mx-auto max-w-7xl px-5 sm:px-8">
-    <div class="prose-page mx-auto max-w-3xl text-center"><?php the_content(); ?></div>
+    <?php abz_section_heading('القيادة', 'المؤسس والشركاء'); ?>
     <div class="mt-12 grid gap-8">
       <?php foreach ($members as $i => $member) :
           $role = (string) get_post_meta($member->ID, 'abz_role', true);
@@ -50,13 +50,45 @@ abz_page_hero('من نحن', 'فريقنا', 'خبرة قانونية وتكوي
       <?php endforeach; ?>
     </div>
 
+  </div>
+</section>
+
+<section class="bg-sand-100 py-14 sm:py-20">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8">
+    <?php abz_section_heading('إدارات المؤسسة', 'فريق يعمل خلف كل ملف', (string) abz_data('platform.departmentsNote', '')); ?>
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <?php foreach ((array) abz_data('platform.departments', []) as $dept) : ?>
+        <div class="abz-reveal rounded-3xl border border-sand-200 bg-white p-6" data-abz-tilt>
+          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-900 text-gold-300"><?php echo abz_icon($dept['icon'], 'h-6 w-6'); ?></span>
+          <h3 class="mt-5 text-lg leading-8 text-navy-900"><?php echo esc_html($dept['title']); ?></h3>
+          <p class="mt-2 text-sm leading-7 text-slate-600"><?php echo esc_html($dept['body']); ?></p>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+
+<section class="py-14 sm:py-20">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8">
+    <?php abz_section_heading('حوكمة الجودة', 'كيف يمرّ ملفك داخل المؤسسة', 'ثلاث مراحل يمرّ بها كل عمل قبل أن يصل إليك.'); ?>
+    <div class="mt-12 grid gap-5 md:grid-cols-3">
+      <?php foreach ([['compass', 'الإسناد بحسب النظام والقطاع', 'يُحال الطلب إلى المختص بالنظام واجب التطبيق وبقطاع العميل.'], ['pen-tool', 'الصياغة والتحليل', 'يُفصَّل العمل على وقائعك ومستنداتك، لا على قالب عام.'], ['badge-check', 'المراجعة والاعتماد', 'يُراجَع المخرج مراجعة ثانية للصياغة واللغة والإحالات، ثم تعتمده الإدارة قبل التسليم.']] as $i => [$icon, $title, $body]) : ?>
+        <div class="abz-reveal relative rounded-3xl bg-navy-900 p-7 text-white">
+          <span class="numeric absolute end-6 top-5 font-display text-5xl font-black text-white/10" dir="ltr" aria-hidden="true"><?php echo esc_html('0' . ($i + 1)); ?></span>
+          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-500 text-navy-950"><?php echo abz_icon($icon, 'h-6 w-6'); ?></span>
+          <h3 class="mt-5 text-lg text-white"><?php echo esc_html($title); ?></h3>
+          <p class="mt-2 leading-8 text-navy-100"><?php echo esc_html($body); ?></p>
+        </div>
+      <?php endforeach; ?>
+    </div>
+
     <div class="mt-12 grid gap-6 rounded-3xl bg-forest-900 p-8 text-white md:grid-cols-[1fr_auto] md:items-center">
       <div>
         <p class="text-sm font-bold tracking-[0.15em] text-gold-300">انضم إلينا</p>
-        <h2 class="mt-2 text-2xl text-white">محامٍ أو مستشار أو خبير؟ نرحّب بانضمامك إلى الفريق أو شبكة المتعاونين</h2>
-        <p class="mt-2 leading-8 text-forest-100">نعرض في هذه الصفحة أعضاء الفريق الفعليين فقط، ويُضاف كل عضو جديد بعد انضمامه واعتماد ملفه.</p>
+        <h2 class="mt-2 text-2xl text-white">محامٍ أو مستشار أو خبير أو مورّد؟ نرحّب بانضمامك</h2>
+        <p class="mt-2 leading-8 text-forest-100">نوسّع شبكة المختصّين والموردين باستمرار، في مختلف الدول والتخصّصات.</p>
       </div>
-      <?php echo abz_button(abz_url('careers'), 'الوظائف والانضمام', 'gold'); ?>
+      <?php echo abz_button(abz_url('careers'), 'الانضمام إلى الشبكة', 'gold'); ?>
     </div>
   </div>
 </section>

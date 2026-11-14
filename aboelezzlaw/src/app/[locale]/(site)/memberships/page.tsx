@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { BadgeCheck, Building2, Check, Landmark, Scale, UserRound, type LucideIcon } from 'lucide-react';
+import { BadgeCheck, Building2, Check, Landmark, Plane, Scale, UserRound, type LucideIcon } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { Container, Section } from '@/components/ui/container';
@@ -25,6 +25,7 @@ export async function generateMetadata({
 }
 
 const icons: Record<MembershipAudience['icon'], LucideIcon> = {
+  plane: Plane,
   user: UserRound,
   building: Building2,
   scale: Scale,

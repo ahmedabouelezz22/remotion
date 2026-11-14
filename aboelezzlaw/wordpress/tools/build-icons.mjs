@@ -20,6 +20,7 @@ const names = {
   lightbulb: 'lightbulb', 'clipboard-check': 'clipboard-check', store: 'store', armchair: 'armchair',
   printer: 'printer', laptop: 'laptop', 'pen-tool': 'pen-tool', globe: 'globe', 'help-circle': 'circle-help',
   info: 'info', facebook: 'facebook', instagram: 'instagram', youtube: 'youtube', linkedin: 'linkedin', 'library': 'library', video: 'video', newspaper: 'newspaper', 'user-plus': 'user-plus',
+  monitor: 'monitor', languages: 'languages', ghost: 'ghost', 'at-sign': 'at-sign', gamepad: 'gamepad-2', puzzle: 'puzzle', heart: 'heart', 'credit-card': 'credit-card', 'qr-code': 'qr-code', 'log-in': 'log-in', 'chevron-up': 'chevron-up', zap: 'zap', timer: 'timer', 'refresh-cw': 'refresh-cw', handshake: 'handshake', 'map': 'map', 'building-2': 'building-2', tag: 'tag', 'circle-dollar': 'circle-dollar-sign', 'image': 'image', compass: 'compass',
 };
 const attr = (o) => Object.entries(o).filter(([k]) => k !== 'key').map(([k, v]) => `${k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())}="${v}"`).join(' ');
 let php = "<?php\n// مولَّد من lucide (ISC) بالأداة wordpress/tools/build-icons.mjs — لا تعدّله يدوياً.\nif (!defined('ABSPATH')) exit;\nfunction abz_icon_paths(): array {\n  return [\n";

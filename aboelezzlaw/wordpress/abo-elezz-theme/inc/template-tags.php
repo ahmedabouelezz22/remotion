@@ -92,11 +92,15 @@ function abz_section_heading(string $eyebrow, string $title, string $description
 }
 
 /** رأس الصفحات الداخلية */
-function abz_page_hero(string $eyebrow, string $title, string $lead = '', array $crumbs = []): void
+function abz_page_hero(string $eyebrow, string $title, string $lead = '', array $crumbs = [], string $photo = ''): void
 {
     ?>
     <section class="relative isolate overflow-hidden bg-navy-950 text-white">
       <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+        <?php if ($photo) : ?>
+          <img src="<?php echo esc_url(abz_img($photo)); ?>" alt="" class="absolute inset-0 h-full w-full object-cover opacity-35" fetchpriority="high">
+          <div class="absolute inset-0 bg-gradient-to-l from-navy-950 via-navy-950/85 to-navy-950/55"></div>
+        <?php endif; ?>
         <div class="abz-drift absolute top-0 start-[-8%] h-[26rem] w-[26rem] rounded-full bg-forest-600/40 blur-[110px]"></div>
         <div class="abz-grid absolute inset-0"></div>
       </div>
@@ -118,17 +122,89 @@ function abz_page_hero(string $eyebrow, string $title, string $lead = '', array 
     <?php
 }
 
+/** رابط صورة من مجموعة صور القالب */
+function abz_img(string $key): string
+{
+    return get_template_directory_uri() . '/assets/img/' . $key . '.webp';
+}
+
+/** صورة بغلاف متدرّج وأيقونة — تُستخدم في بطاقات الخدمات والقطاعات والمتجر */
+function abz_cover(string $photo, string $icon = '', string $ratio = 'aspect-[16/10]', string $extra = ''): string
+{
+    $html = '<span class="abz-cover relative block overflow-hidden ' . esc_attr($ratio . ' ' . $extra) . '">';
+    $html .= '<img src="' . esc_url(abz_img($photo ?: 'lawbooks')) . '" alt="" loading="lazy" decoding="async" width="1200" height="750" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">';
+    $html .= '<span class="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/20 to-transparent"></span>';
+    if ($icon) {
+        $html .= '<span class="absolute bottom-3 start-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500 text-navy-950 shadow-lg">' . abz_icon($icon, 'h-5 w-5') . '</span>';
+    }
+    return $html . '</span>';
+}
+
+function abz_sector_photo(string $slug): string
+{
+    return (string) (abz_data('platform.sectorPhotos', [])[$slug] ?? 'meeting');
+}
+
+function abz_service_photo(string $slug): string
+{
+    return (string) (abz_data('platform.servicePhotos', [])[$slug] ?? 'lawbooks');
+}
+
+function abz_category_photo(string $slug): string
+{
+    $slug = preg_replace('/^market-/', '', $slug);
+    return (string) (abz_data('platform.categoryPhotos', [])[$slug] ?? 'lawbooks');
+}
+
+/** صورة المنتج: من فئته */
+function abz_product_photo(int $product_id): string
+{
+    $terms = function_exists('wc_get_product') ? wp_get_post_terms($product_id, 'product_cat') : [];
+    return $terms && !is_wp_error($terms) ? abz_category_photo($terms[0]->slug) : 'lawbooks';
+}
+
+/** القطاعات مرتّبة في مجموعاتها: [ [title, photo, WP_Post[]], ... ] */
+function abz_sector_groups(): array
+{
+    $posts = [];
+    foreach (get_posts(['post_type' => 'abz_sector', 'numberposts' => 60, 'orderby' => 'menu_order', 'order' => 'ASC']) as $sector) {
+        $posts[$sector->post_name] = $sector;
+    }
+    $groups = [];
+    foreach ((array) abz_data('platform.sectorGroups', []) as $group) {
+        $items = [];
+        foreach ($group['slugs'] as $slug) {
+            if (isset($posts[$slug])) {
+                $items[] = $posts[$slug];
+                unset($posts[$slug]);
+            }
+        }
+        if ($items) {
+            $groups[] = ['title' => $group['title'], 'photo' => $group['photo'], 'key' => $group['key'], 'items' => $items];
+        }
+    }
+    if ($posts) {
+        $groups[] = ['title' => 'قطاعات أخرى', 'photo' => 'meeting', 'key' => 'other', 'items' => array_values($posts)];
+    }
+    return $groups;
+}
+
+function abz_account_url(string $type = ''): string
+{
+    $url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('myaccount') : wp_registration_url();
+    return $type ? add_query_arg('type', $type, $url) : $url;
+}
+
 /** هيكل القائمة الرئيسية بقوائمها المنسدلة */
 function abz_nav(): array
 {
     $services = get_posts(['post_type' => 'abz_service', 'numberposts' => 12, 'orderby' => 'menu_order', 'order' => 'ASC']);
-    $groups = abz_data('practiceGroups', []);
-    $sectors = get_posts(['post_type' => 'abz_sector', 'numberposts' => 40, 'orderby' => 'menu_order', 'order' => 'ASC']);
     $store = [['المتجر كله', abz_shop_url()]];
-    foreach (['consultations' => 'الاستشارات', 'legal-services' => 'الخدمات القانونية', 'templates' => 'نماذج ووثائق — تحميل فوري', 'digital-compliance' => 'الامتثال الرقمي', 'books' => 'كتب وأبحاث', 'retainers' => 'باقات الشركات'] as $slug => $label) {
+    foreach (['consultations' => 'الاستشارات', 'legal-services' => 'الخدمات القانونية', 'templates' => 'نماذج ووثائق — تحميل فوري', 'digital-compliance' => 'الامتثال الرقمي', 'books' => 'كتب وأبحاث', 'retainers' => 'باقات الشركات', 'tourist-plans' => 'باقات السياح'] as $slug => $label) {
         $store[] = [$label, abz_shop_url($slug)];
     }
     $store[] = ['سوق مستلزمات المحامين', abz_url('marketplace')];
+    $store[] = ['سيارات للمحامين', abz_url('marketplace') . '#cars'];
 
     return [
         ['label' => 'من نحن', 'items' => [
@@ -136,18 +212,27 @@ function abz_nav(): array
             ['رسالتنا وقيمنا وأهدافنا', abz_url('mission-values')],
             ['فريقنا', abz_url('team')],
             ['عملاؤنا', abz_url('clients')],
-            ['الوظائف', abz_url('careers')],
+            ['الانضمام إلى الفريق والشبكة', abz_url('careers')],
+            ['ادعم المنصّة', abz_url('support')],
         ]],
         ['label' => 'الخدمات', 'wide' => true, 'columns' => [
             ['title' => 'خدماتنا الأساسية', 'items' => array_merge(array_map(fn($p) => [$p->post_title, get_permalink($p)], $services), [['كل الخدمات', get_post_type_archive_link('abz_service') ?: abz_url('services')]])],
-            ['title' => 'مجالات الممارسة', 'items' => array_merge(array_map(fn($g) => [$g['title']['ar'], abz_url('practice-areas') . '#' . $g['key']], $groups), [['الخدمات المهنية والاستشارية', abz_url('practice-areas') . '#professional']])],
+            ['title' => 'حلول بحسب العميل', 'items' => [
+                ['للأفراد — استشارة بموعد', abz_url('booking')],
+                ['للشركات — إدارة قانونية خارجية', abz_shop_url('retainers')],
+                ['لمكاتب وشركات المحاماة — إسناد الأعمال', abz_url('law-firms')],
+                ['للسياح والزائرين — باقات الحماية القانونية', abz_url('memberships') . '#tourists'],
+                ['للموردين — انضم إلى سوق المستلزمات', abz_url('register') . '#supplier'],
+                ['فروع القانون التي نعمل فيها', abz_url('practice-areas')],
+            ]],
         ]],
-        ['label' => 'القطاعات', 'wide' => true, 'sectors' => $sectors],
+        ['label' => 'القطاعات', 'wide' => true, 'groups' => abz_sector_groups()],
         ['label' => 'المتجر', 'items' => $store],
         ['label' => 'العضويات', 'href' => abz_url('memberships')],
         ['label' => 'المعرفة', 'items' => [
             ['المدونة', abz_url('blog')],
             ['المكتبة القانونية', abz_url('library')],
+            ['ألعاب وألغاز قانونية', abz_url('games')],
             ['قاعدة الأحكام القضائية', '', 'قريباً'],
             ['قاعدة التشريعات', '', 'قريباً'],
             ['الأكاديمية', '', 'قريباً'],
@@ -159,7 +244,7 @@ function abz_nav(): array
 /** أيقونات حسابات التواصل */
 function abz_social_icons(string $variant = 'dark', string $size = 'h-10 w-10'): void
 {
-    $icons = ['facebook' => 'facebook', 'instagram' => 'instagram', 'tiktok' => 'tiktok', 'x' => 'x-brand', 'youtube' => 'youtube', 'telegram' => 'telegram', 'whatsapp_channel' => 'message-circle', 'linkedin' => 'linkedin'];
+    $icons = ['facebook' => 'facebook', 'instagram' => 'instagram', 'tiktok' => 'tiktok', 'x' => 'x-brand', 'youtube' => 'youtube', 'telegram' => 'telegram', 'whatsapp_channel' => 'message-circle', 'linkedin' => 'linkedin', 'snapchat' => 'ghost', 'threads' => 'at-sign'];
     $links = abz_social_links();
     if (!$links) {
         return;

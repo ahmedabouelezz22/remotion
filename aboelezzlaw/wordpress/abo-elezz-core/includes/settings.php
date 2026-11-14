@@ -17,7 +17,7 @@ function abz_settings_fields(): array
         'notify_email' => ['البريد الذي تصله إشعارات النماذج', 'email'],
         'address' => ['عنوان المقر', 'text'],
         'map_url' => ['رابط الخريطة', 'url'],
-        'hours' => ['مواعيد العمل', 'text'],
+        'hours' => ['سطر الاستجابة (يظهر بجوار وسائل التواصل)', 'text'],
         'social_facebook' => ['فيسبوك', 'url'],
         'social_instagram' => ['إنستجرام', 'url'],
         'social_tiktok' => ['تيك توك', 'url'],
@@ -26,6 +26,8 @@ function abz_settings_fields(): array
         'social_telegram' => ['تيليجرام', 'url'],
         'social_whatsapp_channel' => ['قناة واتساب', 'url'],
         'social_linkedin' => ['لينكدإن', 'url'],
+        'social_snapchat' => ['سناب شات', 'url'],
+        'social_threads' => ['ثريدز', 'url'],
         'whatsapp_groups' => ['روابط مجموعات واتساب (سطر لكل رابط)', 'textarea'],
     ];
 }
@@ -55,6 +57,8 @@ function abz_default_settings(): array
         'social_telegram' => $s['telegram'] ?? '',
         'social_whatsapp_channel' => $s['whatsappChannel'] ?? '',
         'social_linkedin' => $s['linkedin'] ?? '',
+        'social_snapchat' => $s['snapchat'] ?? '',
+        'social_threads' => $s['threads'] ?? '',
         'whatsapp_groups' => implode("\n", $s['whatsappGroups'] ?? []),
     ];
 }

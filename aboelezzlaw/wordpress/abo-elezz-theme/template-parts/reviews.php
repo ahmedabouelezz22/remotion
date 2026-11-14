@@ -1,5 +1,5 @@
 <?php
-/* بطاقات آراء حقيقية منقولة حرفياً من خمسات، مع ذكر المصدر */
+/* بطاقات آراء عملاء حقيقية منقولة حرفياً — بلا ذكر مصدر ولا عدد بقرار المالك */
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -15,7 +15,7 @@ foreach ($args['reviews'] ?? [] as $review) :
     <figcaption class="mt-5 border-t border-sand-200 pt-4 text-sm">
       <span class="block font-extrabold text-navy-900"><?php echo esc_html($review['author']); ?></span>
       <span class="mt-0.5 block text-slate-600"><?php echo esc_html($review['service']); ?></span>
-      <span class="mt-1 block text-xs text-slate-600">خمسات · <?php echo esc_html(($months[$month] ?? $month) . ' ' . $year); ?></span>
+      <span class="mt-1 block text-xs text-slate-600"><?php echo esc_html(($months[$month] ?? $month) . ' ' . $year); ?></span>
     </figcaption>
   </figure>
 <?php endforeach;

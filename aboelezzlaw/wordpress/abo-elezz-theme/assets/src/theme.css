@@ -316,3 +316,46 @@
   .js .abz-reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
   .js .abz-reveal.is-visible { opacity: 1; transform: none; }
 }
+
+/* ── لوحة الواجهة التفاعلية ── */
+.abz-orbit { --dir: normal; perspective: 1100px; }
+.abz-orbit-stage { transform-style: preserve-3d; transition: transform .35s ease-out; transform: rotateX(calc(var(--my, 0) * -10deg)) rotateY(calc(var(--mx, 0) * 14deg)); }
+.abz-orbit-card { transform: translateZ(40px); }
+.abz-orbit-ring { --r: 48%; list-style: none; margin: 0; padding: 0; }
+.abz-orbit-item { position: absolute; inset: calc(50% - var(--r)); transform: rotate(var(--a)); pointer-events: none; }
+.abz-orbit-pos { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%) rotate(calc(var(--a) * -1)); pointer-events: auto; }
+.abz-glare { background: radial-gradient(circle at var(--px, 50%) var(--py, 30%), rgba(255, 244, 200, .5), transparent 42%); mix-blend-mode: soft-light; }
+.abz-spotlight { background: radial-gradient(520px circle at var(--px) var(--py), rgba(212,175,55,.22), transparent 62%), radial-gradient(900px circle at var(--px) var(--py), rgba(28,107,87,.18), transparent 70%); }
+@keyframes abz-spin { to { transform: rotate(360deg); } }
+@keyframes abz-spin-back { to { transform: rotate(-360deg); } }
+@media (prefers-reduced-motion: no-preference) {
+  .abz-orbit-ring { animation: abz-spin 46s linear infinite; animation-direction: var(--dir); }
+  .abz-orbit-ring-2 { animation-duration: 64s; }
+  .abz-orbit-chip { animation: abz-spin-back 46s linear infinite; animation-direction: var(--dir); }
+  .abz-orbit-ring-2 .abz-orbit-chip { animation-duration: 64s; }
+}
+@media (prefers-reduced-motion: reduce) { .abz-orbit-stage { transform: none !important; } }
+
+/* ── WooCommerce: بطاقات المنتجات والحسابات ── */
+.abz-account-types { display: grid; gap: .6rem; margin-block: 1rem; border: 0; padding: 0; }
+.abz-account-types legend { font-weight: 800; color: var(--color-navy-900); margin-bottom: .5rem; }
+.abz-account-type { display: flex; gap: .75rem; align-items: flex-start; border: 1px solid var(--color-sand-200); border-radius: 1rem; background: #fff; padding: .85rem 1rem; cursor: pointer; }
+.abz-account-type:has(input:checked) { border-color: var(--color-gold-500); background: var(--color-gold-50); }
+.abz-account-type input { margin-top: .4rem; accent-color: var(--color-navy-900); }
+.abz-account-type small { display: block; color: #475569; line-height: 1.8; }
+.abz-account-type em { color: var(--color-gold-600); font-style: normal; font-weight: 700; }
+.abz-account-card { margin-bottom: 1.5rem; border-radius: 1.25rem; border: 1px solid var(--color-gold-500); background: var(--color-gold-50); padding: 1.25rem 1.5rem; }
+.abz-account-card h3 { font-size: 1.1rem; }
+.abz-account-card ul { margin: .75rem 0; padding-inline-start: 1.25rem; list-style: disc; line-height: 2; }
+.abz-account-card a { font-weight: 800; text-decoration: underline; }
+
+.abz-product-photo { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; border-radius: 1rem; }
+.woocommerce ul.products li.product a img { aspect-ratio: 16 / 10; object-fit: cover; border-radius: 1rem; }
+.abz-loop-summary { margin-top: .35rem; font-size: .88rem; line-height: 1.9; color: #475569; }
+.abz-buybox { margin-top: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--color-sand-200); background: #fff; padding: 1.1rem 1.25rem; }
+.abz-buybox ul { display: grid; gap: .5rem; }
+.abz-buybox li { display: flex; gap: .6rem; align-items: flex-start; line-height: 1.9; color: var(--color-navy-900); font-weight: 600; }
+.abz-buybox li svg { margin-top: .45rem; flex-shrink: 0; color: var(--color-forest-600); }
+.abz-buybox p { margin-top: .9rem; border-top: 1px solid var(--color-sand-200); padding-top: .8rem; font-size: .9rem; }
+.abz-buybox a { font-weight: 800; text-decoration: underline; }
+.abz-buybox-wa svg { display: inline; vertical-align: -2px; }

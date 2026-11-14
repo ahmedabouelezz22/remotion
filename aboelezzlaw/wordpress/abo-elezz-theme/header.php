@@ -3,8 +3,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 $nav = abz_nav();
-$phone = (string) abz_setting('phone', '01157844664');
-$phone2 = (string) abz_setting('phone2', '');
 $email = (string) abz_setting('email', 'ahmed@aboelezzlaw.com');
 $hours = (string) abz_setting('hours', '');
 $cart_count = function_exists('WC') && WC()->cart ? (int) WC()->cart->get_cart_contents_count() : 0;
@@ -23,20 +21,23 @@ $link = 'inline-flex h-full items-center gap-1 px-3 text-[0.95rem] font-bold tex
 <!-- الشريط العلوي: وسائل التواصل -->
 <div class="hidden bg-navy-950 text-[0.82rem] text-navy-100 lg:block">
   <div class="mx-auto flex h-10 max-w-7xl items-center justify-between gap-6 px-8">
-    <ul class="flex items-center gap-5">
-      <li class="flex items-center gap-1.5"><?php echo abz_icon('phone', 'h-3.5 w-3.5 text-gold-400'); ?><?php echo abz_phone_link($phone, 'hover:text-gold-300'); ?></li>
-      <?php if ($phone2) : ?><li class="flex items-center gap-1.5"><?php echo abz_icon('message-circle', 'h-3.5 w-3.5 text-gold-400'); ?><?php echo abz_phone_link($phone2, 'hover:text-gold-300'); ?></li><?php endif; ?>
-      <li class="flex items-center gap-1.5"><?php echo abz_icon('mail', 'h-3.5 w-3.5 text-gold-400'); ?><a dir="ltr" class="hover:text-gold-300" href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a></li>
-      <?php if ($hours) : ?><li class="hidden items-center gap-1.5 xl:flex"><?php echo abz_icon('clock', 'h-3.5 w-3.5 text-gold-400'); ?><?php echo esc_html($hours); ?></li><?php endif; ?>
+    <ul class="flex items-center gap-5 whitespace-nowrap">
+      <li class="flex items-center gap-1.5 font-semibold text-gold-300"><?php echo abz_icon('globe', 'h-3.5 w-3.5'); ?>منصّة قانونية دولية عن بُعد</li>
+      <?php if ($hours) : ?><li class="hidden items-center gap-1.5 2xl:flex"><?php echo abz_icon('clock', 'h-3.5 w-3.5 text-gold-400'); ?><?php echo esc_html($hours); ?></li><?php endif; ?>
+      <li><a class="flex items-center gap-1.5 hover:text-gold-300" target="_blank" rel="noopener" href="<?php echo esc_url(abz_wa_link('السلام عليكم، أودّ الاستفسار عن خدماتكم القانونية.')); ?>"><?php echo abz_icon('message-circle', 'h-3.5 w-3.5 text-gold-400'); ?>واتساب <span dir="ltr" class="numeric">+<?php echo esc_html(abz_digits((string) abz_setting('whatsapp', '201157844664'))); ?></span></a></li>
+      <li class="hidden items-center gap-1.5 xl:flex"><?php echo abz_icon('mail', 'h-3.5 w-3.5 text-gold-400'); ?><a dir="ltr" class="hover:text-gold-300" href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a></li>
     </ul>
-    <?php abz_social_icons('dark', 'h-7 w-7'); ?>
+    <div class="flex shrink-0 items-center gap-4 whitespace-nowrap [&_ul]:flex-nowrap">
+      <?php abz_social_icons('dark', 'h-7 w-7'); ?>
+      <a class="flex items-center gap-1.5 font-bold text-white hover:text-gold-300" href="<?php echo esc_url(is_user_logged_in() ? abz_account_url() : abz_url('register')); ?>"><?php echo abz_icon(is_user_logged_in() ? 'user' : 'log-in', 'h-3.5 w-3.5'); ?><?php echo is_user_logged_in() ? 'حسابي' : 'دخول / حساب جديد'; ?></a>
+    </div>
   </div>
 </div>
 
 <header class="sticky top-0 z-50 border-b border-sand-200 bg-sand-50/95 shadow-[0_1px_0_rgba(11,31,58,0.04)] supports-[backdrop-filter]:bg-sand-50/90 supports-[backdrop-filter]:backdrop-blur">
   <div class="relative mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
     <a href="<?php echo esc_url(home_url('/')); ?>" class="flex shrink-0 items-center gap-3" aria-label="<?php echo esc_attr(get_bloginfo('name')); ?> — الرئيسية">
-      <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/logo-eagle.svg'); ?>" alt="" width="48" height="48" class="h-12 w-12">
+      <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy-950 p-1.5"><img src="<?php echo esc_url(get_template_directory_uri() . '/assets/logo-256.png'); ?>" alt="شعار مؤسسة أبو العز للمحاماة والاستشارات القانونية" width="48" height="43" class="h-full w-full object-contain"></span>
       <span class="leading-tight">
         <span class="block font-display text-[1.05rem] font-black text-navy-900">مؤسسة أبو العز</span>
         <span class="block text-[0.72rem] font-semibold text-slate-600">للمحاماة والاستشارات القانونية</span>
@@ -70,14 +71,20 @@ $link = 'inline-flex h-full items-center gap-1 px-3 text-[0.95rem] font-bold tex
                         </div>
                       <?php endforeach; ?>
                     </div>
-                  <?php elseif (!empty($item['sectors'])) : ?>
-                    <p class="mb-3 text-xs font-bold tracking-[0.15em] text-gold-600">القطاعات التي نخدمها</p>
-                    <ul class="grid gap-x-6 gap-y-0.5 sm:grid-cols-2 xl:grid-cols-3">
-                      <?php foreach ($item['sectors'] as $sector) : ?>
-                        <li><a class="flex min-h-[40px] items-center gap-2.5 rounded-lg px-3 text-[0.9rem] font-semibold text-navy-900 hover:bg-sand-100 hover:text-gold-600" href="<?php echo esc_url(get_permalink($sector)); ?>"><?php echo abz_icon((string) get_post_meta($sector->ID, 'abz_icon', true), 'h-4 w-4 shrink-0 text-gold-600'); ?><?php echo esc_html($sector->post_title); ?></a></li>
+                  <?php elseif (!empty($item['groups'])) : ?>
+                    <div class="grid gap-x-6 gap-y-5 md:grid-cols-2 xl:grid-cols-4">
+                      <?php foreach ($item['groups'] as $group) : ?>
+                        <div>
+                          <p class="mb-2 border-b border-sand-200 pb-2 text-xs font-bold tracking-[0.08em] text-gold-600"><?php echo esc_html($group['title']); ?></p>
+                          <ul class="grid gap-0.5">
+                            <?php foreach ($group['items'] as $sector) : ?>
+                              <li><a class="flex min-h-[36px] items-center gap-2.5 rounded-lg px-2 text-[0.88rem] font-semibold text-navy-900 hover:bg-sand-100 hover:text-gold-600" href="<?php echo esc_url(get_permalink($sector)); ?>"><?php echo abz_icon((string) get_post_meta($sector->ID, 'abz_icon', true), 'h-4 w-4 shrink-0 text-gold-600'); ?><?php echo esc_html($sector->post_title); ?></a></li>
+                            <?php endforeach; ?>
+                          </ul>
+                        </div>
                       <?php endforeach; ?>
-                    </ul>
-                    <a class="mt-3 inline-flex min-h-[40px] items-center gap-1.5 px-3 font-bold text-navy-900 hover:text-gold-600" href="<?php echo esc_url(get_post_type_archive_link('abz_sector') ?: abz_url('sectors')); ?>">كل القطاعات <?php echo abz_arrow('h-3.5 w-3.5'); ?></a>
+                    </div>
+                    <a class="mt-4 inline-flex min-h-[40px] items-center gap-1.5 px-2 font-bold text-navy-900 hover:text-gold-600" href="<?php echo esc_url(get_post_type_archive_link('abz_sector') ?: abz_url('sectors')); ?>">كل القطاعات <?php echo abz_arrow('h-3.5 w-3.5'); ?></a>
                   <?php else : ?>
                     <ul class="grid gap-0.5">
                       <?php foreach ($item['items'] as $entry) : [$label, $href] = $entry; $soon = $entry[2] ?? ''; ?>
@@ -105,7 +112,7 @@ $link = 'inline-flex h-full items-center gap-1 px-3 text-[0.95rem] font-bold tex
           <?php echo abz_icon('shopping-cart'); ?>
           <?php if ($cart_count) : ?><span class="numeric absolute -top-0.5 -end-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-500 px-1 text-[0.7rem] font-black text-navy-950"><?php echo esc_html((string) $cart_count); ?></span><?php endif; ?>
         </a>
-        <a href="<?php echo esc_url(wc_get_page_permalink('myaccount')); ?>" class="hidden h-11 w-11 items-center justify-center rounded-xl text-navy-900 hover:bg-sand-100 sm:inline-flex" aria-label="حسابي"><?php echo abz_icon('user'); ?></a>
+        <a href="<?php echo esc_url(is_user_logged_in() ? wc_get_page_permalink('myaccount') : abz_url('register')); ?>" class="hidden h-11 w-11 items-center justify-center rounded-xl text-navy-900 hover:bg-sand-100 sm:inline-flex" aria-label="<?php echo is_user_logged_in() ? 'حسابي' : 'دخول أو حساب جديد'; ?>"><?php echo abz_icon('user'); ?></a>
       <?php endif; ?>
       <span class="hidden xl:block"><?php echo abz_button(abz_url('booking'), 'احجز استشارة', 'primary', 'sm'); ?></span>
 
@@ -128,8 +135,11 @@ $link = 'inline-flex h-full items-center gap-1 px-3 text-[0.95rem] font-bold tex
                         if (!empty($item['columns'])) {
                             $entries = array_merge(...array_map(fn($c) => $c['items'], $item['columns']));
                         }
-                        if (!empty($item['sectors'])) {
-                            $entries = array_merge(array_map(fn($s) => [$s->post_title, get_permalink($s)], $item['sectors']), [['كل القطاعات', get_post_type_archive_link('abz_sector') ?: abz_url('sectors')]]);
+                        if (!empty($item['groups'])) {
+                            $entries = [['كل القطاعات (' . array_sum(array_map(fn($g) => count($g['items']), $item['groups'])) . ')', get_post_type_archive_link('abz_sector') ?: abz_url('sectors')]];
+                            foreach ($item['groups'] as $g) {
+                                $entries[] = [$g['title'], (get_post_type_archive_link('abz_sector') ?: abz_url('sectors')) . '#' . $g['key']];
+                            }
                         }
                         foreach ($entries as $entry) : [$label, $href] = $entry;
                             if (!$href) { continue; } ?>
@@ -144,6 +154,7 @@ $link = 'inline-flex h-full items-center gap-1 px-3 text-[0.95rem] font-bold tex
           </nav>
           <div class="mt-6 grid gap-3">
             <?php echo abz_button(abz_url('booking'), 'احجز استشارة', 'primary', 'md', 'w-full'); ?>
+            <?php echo abz_button(is_user_logged_in() ? abz_account_url() : abz_url('register'), is_user_logged_in() ? 'حسابي' : 'دخول / حساب جديد', 'outline', 'md', 'w-full'); ?>
             <?php echo abz_button(abz_wa_link('السلام عليكم، أودّ الاستفسار عن خدماتكم القانونية.'), abz_icon('message-circle', 'h-4 w-4') . ' واتساب', 'whatsapp', 'md', 'w-full', true); ?>
           </div>
           <div class="mt-6"><?php abz_social_icons('light', 'h-11 w-11'); ?></div>

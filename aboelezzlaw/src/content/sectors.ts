@@ -527,6 +527,8 @@ export const sectors: Sector[] = [
       'عقود الحجوزات ومنظّمي الرحلات',
       'الاستثمار والتطوير السياحي',
       'علاقات العمل في قطاع الضيافة',
+      'باقات الحماية القانونية للسياح والزائرين (مساندة مدفوعة مسبقاً لمدة الرحلة)',
+      'شكاوى ومطالبات السياح ضد الفنادق وشركات الطيران والتأجير',
     ],
     en: {
       name: 'Hospitality & Tourism',
@@ -538,6 +540,8 @@ export const sectors: Sector[] = [
         'Booking and tour operator agreements',
         'Tourism investment and development',
         'Employment relations in hospitality',
+        'Legal protection plans for tourists and visitors (prepaid support for the trip)',
+        'Tourist complaints and claims against hotels, airlines and rental companies',
       ],
     },
   },
