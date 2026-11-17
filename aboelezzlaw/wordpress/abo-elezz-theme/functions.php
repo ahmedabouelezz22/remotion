@@ -32,6 +32,9 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('abz-fonts', $uri . '/assets/fonts/fonts.css', [], $ver('/assets/fonts/fonts.css'));
     wp_enqueue_style('abz-app', $uri . '/assets/app.css', ['abz-fonts'], $ver('/assets/app.css'));
     wp_enqueue_script('abz-app', $uri . '/assets/app.js', [], $ver('/assets/app.js'), ['strategy' => 'defer', 'in_footer' => true]);
+    if (is_page('games') || is_page_template('page-games.php')) {
+        wp_enqueue_script('abz-games', $uri . '/assets/games.js', [], $ver('/assets/games.js'), ['strategy' => 'defer', 'in_footer' => true]);
+    }
     if (is_singular('post') && comments_open() && get_option('thread_comments')) {
         wp_enqueue_script('comment-reply');
     }

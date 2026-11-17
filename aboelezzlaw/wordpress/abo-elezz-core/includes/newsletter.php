@@ -113,6 +113,7 @@ add_action('template_redirect', function () {
         update_post_meta($subscriber->ID, 'abz_status', $state);
         if ($state === 'confirmed') {
             update_post_meta($subscriber->ID, 'abz_confirmed_at', current_time('mysql'));
+            do_action('abz_subscriber_confirmed', $subscriber->ID);
         }
         wp_safe_redirect(add_query_arg('abz_nl', $state, home_url('/')) . '#abz-newsletter');
         exit;

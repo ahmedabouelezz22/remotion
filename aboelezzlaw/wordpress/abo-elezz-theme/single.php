@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 get_header();
 the_post();
 $post_id = get_the_ID();
-[$content, $toc] = abz_prepare_article((string) apply_filters('the_content', get_the_content()));
+[$content, $toc] = abz_prepare_article((string) apply_filters('the_content', get_the_content()), get_the_ID());
 $category = get_the_category()[0] ?? null;
 $sources = abz_post_sources($post_id);
 $related = abz_related_posts($post_id, 4);

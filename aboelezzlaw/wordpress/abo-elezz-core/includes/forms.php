@@ -175,6 +175,7 @@ function abz_handle_form(): void
             update_post_meta($post_id, 'abz_' . $key, $data[$key]);
         }
         update_post_meta($post_id, 'abz_status', 'new');
+        do_action('abz_request_created', $post_id, $type, $data, $title);
     }
 
     $to = (string) abz_setting('notify_email', get_option('admin_email'));

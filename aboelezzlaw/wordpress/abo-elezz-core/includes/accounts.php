@@ -40,6 +40,31 @@ add_action('init', function () {
     update_option('abz_roles_version', '1');
 }, 6);
 
+/** هل للمستخدم نوع حساب معتمد بعينه؟ (المدير يملك كل الصلاحيات) */
+function abz_user_is(string $type, int $user_id = 0): bool
+{
+    $user_id = $user_id ?: get_current_user_id();
+    if (!$user_id) {
+        return false;
+    }
+    if (user_can($user_id, 'manage_options')) {
+        return true;
+    }
+    $roles = abz_account_roles();
+    $user = get_userdata($user_id);
+    return $user && isset($roles[$type]) && in_array($roles[$type][0], (array) $user->roles, true);
+}
+
+/** عضو مدفوع العضوية أو شريك معتمد أو مدير */
+function abz_is_member(int $user_id = 0): bool
+{
+    $user_id = $user_id ?: get_current_user_id();
+    if (!$user_id) {
+        return false;
+    }
+    return user_can($user_id, 'manage_options') || abz_active_membership($user_id) !== null || abz_user_is('partner', $user_id);
+}
+
 /** حالة حساب المستخدم: [type, status] — status: active | pending | approved | rejected */
 function abz_account_state(int $user_id): array
 {
@@ -92,6 +117,11 @@ add_action('woocommerce_created_customer', function ($user_id) {
     update_user_meta($user_id, 'abz_account_details', sanitize_textarea_field(mb_substr((string) wp_unslash($_POST['abz_account_details'] ?? ''), 0, 600))); // phpcs:ignore
     if ($needs_review) {
         $user = get_userdata($user_id);
+        if (function_exists('abz_notify')) {
+            abz_notify('approval', 'حساب ينتظر اعتمادك: ' . ($types[$type]['title'] ?? $type), [
+                'بيانات التحقّق' => mb_substr((string) get_user_meta($user_id, 'abz_account_details', true), 0, 160),
+            ], admin_url('users.php?abz_status=pending'));
+        }
         wp_mail(
             (string) abz_setting('notify_email', get_option('admin_email')),
             'حساب جديد ينتظر الاعتماد: ' . ($types[$type]['title'] ?? $type),

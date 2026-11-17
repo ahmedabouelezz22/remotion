@@ -124,7 +124,10 @@ function abz_list_html(array $items, string $class = ''): string
     }
     $html = '<ul' . ($class ? ' class="' . esc_attr($class) . '"' : '') . '>';
     foreach ($items as $item) {
-        $html .= '<li>' . esc_html($item) . '</li>';
+        // عنصر نصّي، أو {title, body}
+        $html .= is_array($item)
+            ? '<li><strong>' . esc_html((string) ($item['title'] ?? '')) . '</strong>' . (!empty($item['body']) ? ' — ' . esc_html((string) $item['body']) : '') . '</li>'
+            : '<li>' . esc_html((string) $item) . '</li>';
     }
     return $html . '</ul>';
 }
@@ -219,6 +222,9 @@ function abz_import_seed(bool $force = false): void
         'register' => ['أنشئ حسابك', ''],
         'support' => ['ادعم المنصّة', ''],
         'games' => ['ألعاب وألغاز قانونية', ''],
+        'e-delegate' => ['النائب الإلكتروني', ''],
+        'judgments' => ['قاعدة الأحكام القضائية', ''],
+        'legislation' => ['قاعدة التشريعات', ''],
     ];
     $page_ids = [];
     $order = 0;
@@ -316,7 +322,9 @@ function abz_import_seed(bool $force = false): void
         }
     }
 
-    // 7) المقالات
+    // 7) المقالات — مع صورة الغلاف وصورتين داخل المقال (seed/media/blog/manifest.json)
+    $blog_manifest = ABZ_CORE_DIR . 'seed/media/blog/manifest.json';
+    $blog_media = is_readable($blog_manifest) ? (array) json_decode((string) file_get_contents($blog_manifest), true) : [];
     foreach ($seed['articles'] as $article) {
         $category = term_exists($article['category'], 'category') ?: wp_insert_term($article['category'], 'category');
         $category_id = is_array($category) ? (int) $category['term_id'] : 0;
@@ -340,6 +348,7 @@ function abz_import_seed(bool $force = false): void
             if (get_post_status($id) === 'future') {
                 wp_publish_post($id);
             }
+            abz_import_article_images($id, $article['slug'], $blog_media[$article['slug']] ?? []);
         }
     }
 
@@ -352,6 +361,10 @@ function abz_import_seed(bool $force = false): void
         abz_import_store($seed);
     }
 
+    if (!empty($GLOBALS['abz_media_pending'])) {
+        abz_import_log('بقيت صور لم تُرفع بعد — يُستكمل الاستيراد في الطلب التالي');
+        return;
+    }
     update_option('abz_seed_version', abz_seed_version());
     update_option('abz_flush_rewrite', 1);
     $GLOBALS['abz_flush_set_now'] = true;
@@ -369,12 +382,20 @@ function abz_import_media(string $file, string $title): int
     if (!is_readable($source)) {
         return 0;
     }
-    $upload = wp_upload_bits($file, null, (string) file_get_contents($source));
+    // حدّ لكل طلب: توليد المقاسات بطيء على الاستضافة المشتركة، والباقي يُستكمل في الطلب التالي
+    $GLOBALS['abz_media_budget'] = $GLOBALS['abz_media_budget'] ?? 8;
+    if ($GLOBALS['abz_media_budget'] <= 0) {
+        $GLOBALS['abz_media_pending'] = true;
+        return 0;
+    }
+    $GLOBALS['abz_media_budget']--;
+    $upload = wp_upload_bits(basename($file), null, (string) file_get_contents($source));
     if (!empty($upload['error'])) {
         abz_import_log('فشل رفع الصورة ' . $file . ': ' . $upload['error']);
         return 0;
     }
-    $id = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => $title, 'post_status' => 'inherit'], $upload['file']);
+    $mime = wp_check_filetype($upload['file'])['type'] ?: 'image/jpeg';
+    $id = wp_insert_attachment(['post_mime_type' => $mime, 'post_title' => $title, 'post_status' => 'inherit'], $upload['file']);
     require_once ABSPATH . 'wp-admin/includes/image.php';
     wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $upload['file']));
     update_post_meta($id, '_abz_media', $file);
@@ -551,3 +572,32 @@ add_action('init', function () {
         flush_rewrite_rules(false);
     }
 }, 99);
+
+/**
+ * صور المقال: الغلاف صورةً بارزة (إن لم يضع المالك صورة)، والصور الداخلية تُحفظ في
+ * abz_inline_images ويُدرجها القالب بين أقسام المقال — دون تعديل نصّ المقال.
+ */
+function abz_import_article_images(int $post_id, string $slug, array $items): void
+{
+    if (!$items) {
+        return;
+    }
+    $inline = [];
+    foreach ($items as $item) {
+        $attachment = abz_import_media((string) $item['file'], (string) $item['alt']);
+        if (!$attachment) {
+            continue;
+        }
+        if (($item['role'] ?? '') === 'cover') {
+            if (!has_post_thumbnail($post_id)) {
+                set_post_thumbnail($post_id, $attachment);
+            }
+        } else {
+            $inline[] = ['id' => $attachment, 'alt' => (string) $item['alt']];
+        }
+    }
+    // يُحدَّث إن اكتملت صور لم تكن قد رُفعت في دفعة سابقة
+    if ($inline && count($inline) > count(abz_list(get_post_meta($post_id, 'abz_inline_images', true)))) {
+        update_post_meta($post_id, 'abz_inline_images', $inline);
+    }
+}

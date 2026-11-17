@@ -37,7 +37,7 @@ $item = 'inline-flex min-h-[36px] items-center text-sm text-navy-100 transition-
           <span class="block text-xs font-semibold text-navy-100">للمحاماة والاستشارات القانونية</span>
         </span>
       </a>
-      <p class="mt-5 max-w-sm text-sm leading-8">منصّة قانونية ومهنية تعمل عن بُعد: إدارة من الجيزة، وفريق وشبكة مختصّين وخدمات في جميع أنحاء العالم. نطاق العمل والأتعاب يُحدَّدان كتابةً قبل البدء.</p>
+      <p class="mt-5 max-w-sm text-sm leading-8">منصّة قانونية دولية: فريق وشبكة مختصّين وخدمات في جميع أنحاء العالم، حضورياً وعن بُعد. نطاق العمل والأتعاب يُحدَّدان كتابةً قبل البدء.</p>
       <p class="mb-3 mt-6 text-sm font-bold text-white">تابعنا</p>
       <?php abz_social_icons('dark'); ?>
     </div>
@@ -68,7 +68,7 @@ $item = 'inline-flex min-h-[36px] items-center text-sm text-navy-100 transition-
       <h2 class="<?php echo $heading; ?>">للتواصل</h2>
       <ul class="grid gap-3 text-sm">
         <?php if ($address) : ?>
-          <li class="flex gap-2.5"><?php echo abz_icon('map-pin', 'mt-1 h-4 w-4 shrink-0 text-gold-400'); ?><span><span class="block text-xs font-bold text-gold-300">مقرّ الإدارة</span><?php echo esc_html($address); ?><?php if ($map) : ?><br><a class="font-bold text-gold-300 underline underline-offset-4" href="<?php echo esc_url($map); ?>" target="_blank" rel="noopener">عرض على الخريطة</a><?php endif; ?><br><span class="text-navy-100/80">وخدماتنا متاحة عن بُعد في جميع أنحاء العالم</span></span></li>
+          <li class="flex gap-2.5"><?php echo abz_icon('map-pin', 'mt-1 h-4 w-4 shrink-0 text-gold-400'); ?><span><span class="block text-xs font-bold text-gold-300">العنوان</span><?php echo esc_html($address); ?><?php if ($map) : ?><br><a class="font-bold text-gold-300 underline underline-offset-4" href="<?php echo esc_url($map); ?>" target="_blank" rel="noopener">عرض على الخريطة</a><?php endif; ?><br><span class="text-navy-100/80">وخدماتنا متاحة عن بُعد في جميع أنحاء العالم</span></span></li>
         <?php endif; ?>
         <li class="flex items-center gap-2.5"><?php echo abz_icon('message-circle', 'h-4 w-4 shrink-0 text-gold-400'); ?><span class="grid gap-1"><?php echo abz_phone_link($phone, 'block hover:text-gold-300'); ?><?php if ($phone2) : ?><?php echo abz_phone_link($phone2, 'block hover:text-gold-300'); ?><?php endif; ?></span></li>
         <?php if ($landline) : ?><li class="flex items-center gap-2.5"><?php echo abz_icon('phone', 'h-4 w-4 shrink-0 text-gold-400'); ?><?php echo abz_phone_link($landline, 'hover:text-gold-300'); ?></li><?php endif; ?>

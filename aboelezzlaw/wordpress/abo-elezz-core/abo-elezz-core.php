@@ -21,11 +21,16 @@ define('ABZ_CORE_URL', plugin_dir_url(__FILE__));
 require_once ABZ_CORE_DIR . 'includes/helpers.php';
 require_once ABZ_CORE_DIR . 'includes/content-types.php';
 require_once ABZ_CORE_DIR . 'includes/settings.php';
+require_once ABZ_CORE_DIR . 'includes/notify.php';
 require_once ABZ_CORE_DIR . 'includes/forms.php';
 require_once ABZ_CORE_DIR . 'includes/newsletter.php';
 require_once ABZ_CORE_DIR . 'includes/comments.php';
 require_once ABZ_CORE_DIR . 'includes/woo.php';
 require_once ABZ_CORE_DIR . 'includes/accounts.php';
+require_once ABZ_CORE_DIR . 'includes/marketplace.php';
+require_once ABZ_CORE_DIR . 'includes/delegate.php';
+require_once ABZ_CORE_DIR . 'includes/library.php';
+require_once ABZ_CORE_DIR . 'includes/assistant.php';
 require_once ABZ_CORE_DIR . 'includes/importer.php';
 require_once ABZ_CORE_DIR . 'includes/dependencies.php';
 
@@ -42,12 +47,22 @@ register_activation_hook(__FILE__, function () {
 add_action('init', function () {
     $seed_version = abz_seed_version();
     if ($seed_version && get_option('abz_seed_version') !== $seed_version && !wp_doing_ajax()) {
-        if (get_transient('abz_import_lock')) {
+        // قفل ذرّي (add_option يفشل إن سبقه طلب آخر) حتى لا يعمل استيرادان معاً فتتكرّر الصور
+        $locked_at = (int) get_option('abz_import_lock_at');
+        if ($locked_at && $locked_at > time() - 5 * MINUTE_IN_SECONDS) {
             return;
         }
-        set_transient('abz_import_lock', 1, 5 * MINUTE_IN_SECONDS);
-        abz_import_seed(false);
-        delete_transient('abz_import_lock');
+        if ($locked_at) {
+            delete_option('abz_import_lock_at');
+        }
+        if (!add_option('abz_import_lock_at', time(), '', false)) {
+            return;
+        }
+        try {
+            abz_import_seed(false);
+        } finally {
+            delete_option('abz_import_lock_at');
+        }
         flush_rewrite_rules(false);
     }
 }, 20);

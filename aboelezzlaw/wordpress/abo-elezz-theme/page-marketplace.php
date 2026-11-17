@@ -15,14 +15,27 @@ abz_page_hero('المتجر', $market['title'] ?? get_the_title(), 'مستلزم
     </div>
     <p class="mt-6 rounded-2xl border border-forest-100 bg-forest-50 p-5 font-semibold text-forest-900"><?php echo esc_html($market['status'] ?? ''); ?></p>
     <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <?php foreach ($market['categories'] ?? [] as $category) : ?>
+      <?php foreach ($market['categories'] ?? [] as $category) :
+          // منتجات الموردين المعتمدة في هذا القسم (تُنشر بعد مراجعة الإدارة)
+          $items = function_exists('wc_get_products') ? wc_get_products(['status' => 'publish', 'category' => ['market-' . $category['slug']], 'limit' => 4, 'orderby' => 'date', 'order' => 'DESC']) : [];
+          $term = get_term_by('slug', 'market-' . $category['slug'], 'product_cat');
+          ?>
         <div id="<?php echo esc_attr($category['slug']); ?>" class="abz-reveal group flex scroll-mt-28 flex-col overflow-hidden rounded-3xl border border-sand-200 bg-white" data-abz-tilt>
-          <span class="relative block"><?php echo abz_cover(abz_category_photo($category['slug']), $icons[$category['slug']] ?? 'store'); ?><span class="absolute end-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-navy-900">قريباً</span></span>
+          <span class="relative block"><?php echo abz_cover(abz_category_photo($category['slug']), $icons[$category['slug']] ?? 'store'); ?><span class="absolute end-3 top-3 rounded-full px-3 py-1 text-xs font-black <?php echo $items ? 'bg-forest-600 text-white' : 'bg-white/95 text-navy-900'; ?>"><?php echo $items ? esc_html(number_format_i18n($term ? (int) $term->count : count($items)) . ' عرض متاح') : 'قريباً'; ?></span></span>
           <div class="flex flex-1 flex-col p-6">
             <h2 class="text-xl text-navy-900"><?php echo esc_html($category['title']); ?></h2>
             <p class="mt-2 flex-1 leading-8 text-slate-600"><?php echo esc_html($category['body']); ?></p>
             <p class="mt-3 flex items-center gap-2 text-sm font-bold text-forest-600"><?php echo abz_icon('tag', 'h-4 w-4'); ?>أسعار خاصة للسادة المحامين</p>
-            <div class="mt-4"><?php echo abz_button(abz_url('contact') . '?topic=' . rawurlencode('اهتمام بسوق المستلزمات — ' . $category['title']), 'أبلغني عند توفّر العروض', 'primary', 'sm', 'w-full'); ?></div>
+            <?php if ($items) : ?>
+              <ul class="mt-4 divide-y divide-sand-200 rounded-2xl border border-sand-200">
+                <?php foreach ($items as $item) : ?>
+                  <li><a class="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-sand-100" href="<?php echo esc_url($item->get_permalink()); ?>"><span class="font-bold text-navy-900"><?php echo esc_html($item->get_name()); ?></span><span class="shrink-0 text-slate-600"><?php echo $item->get_price() !== '' ? wp_kses_post(wc_price((float) $item->get_price())) : 'اطلب السعر'; ?></span></a></li>
+                <?php endforeach; ?>
+              </ul>
+              <div class="mt-4"><?php echo abz_button($term ? (string) get_term_link($term) : abz_shop_url(), 'كل عروض القسم', 'primary', 'sm', 'w-full'); ?></div>
+            <?php else : ?>
+              <div class="mt-4"><?php echo abz_button(abz_url('contact') . '?topic=' . rawurlencode('اهتمام بسوق المستلزمات — ' . $category['title']), 'أبلغني عند توفّر العروض', 'primary', 'sm', 'w-full'); ?></div>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>

@@ -6,14 +6,16 @@ if (!defined('ABSPATH')) {
 get_header();
 the_post();
 $data = ['quiz' => abz_data('platform.quiz', []), 'glossary' => abz_data('platform.glossary', [])];
-abz_page_hero('استراحة', 'ألعاب وألغاز قانونية', 'ثلاث ألعاب خفيفة تختبر بها معلوماتك القانونية وتتعلّم مصطلحاً جديداً. للتسلية والتعلّم — لا للاستشارة.', [['المعرفة', abz_url('blog')], ['ألعاب وألغاز', '']], 'books');
+abz_page_hero('استراحة', 'ألعاب وألغاز قانونية', 'سبع ألعاب خفيفة تختبر بها معلوماتك القانونية وتتعلّم مصطلحاً جديداً. للتسلية والتعلّم — لا للاستشارة.', [['المعرفة', abz_url('blog')], ['ألعاب وألغاز', '']], 'books');
 ?>
 <section class="py-12 sm:py-16" data-abz-games>
   <div class="mx-auto max-w-5xl px-5 sm:px-8">
-    <div class="flex flex-wrap gap-2" role="tablist" aria-label="الألعاب">
-      <?php foreach ([['quiz', 'help-circle', 'اختبر معلوماتك'], ['scramble', 'puzzle', 'رتّب الحروف'], ['memory', 'gamepad', 'طابق المصطلح بمعناه']] as $i => [$key, $icon, $label]) : ?>
-        <button type="button" role="tab" aria-selected="<?php echo $i ? 'false' : 'true'; ?>" data-game-tab="<?php echo esc_attr($key); ?>" class="abz-game-tab inline-flex min-h-[48px] items-center gap-2 rounded-full border-2 border-navy-900 px-5 font-bold text-navy-900 aria-selected:bg-navy-900 aria-selected:text-white"><?php echo abz_icon($icon, 'h-5 w-5'); ?><?php echo esc_html($label); ?></button>
-      <?php endforeach; ?>
+    <div class="-mx-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:px-0">
+      <div class="flex w-max gap-2 sm:w-auto sm:flex-wrap" role="tablist" aria-label="الألعاب">
+        <?php foreach ([['quiz', 'help-circle', 'اختبر معلوماتك'], ['scramble', 'puzzle', 'رتّب الحروف'], ['memory', 'gamepad', 'طابق المصطلح بمعناه'], ['truefalse', 'timer', 'صح أم خطأ؟'], ['guess', 'scale', 'خمّن المصطلح'], ['clauses', 'search', 'اكتشف البند الخطر'], ['order', 'list-ordered', 'رتّب الخطوات']] as $i => [$key, $icon, $label]) : ?>
+          <button type="button" role="tab" aria-selected="<?php echo $i ? 'false' : 'true'; ?>" data-game-tab="<?php echo esc_attr($key); ?>" class="abz-game-tab inline-flex min-h-[48px] shrink-0 items-center gap-2 whitespace-nowrap rounded-full border-2 border-navy-900 px-5 font-bold text-navy-900 aria-selected:bg-navy-900 aria-selected:text-white"><?php echo abz_icon($icon, 'h-5 w-5'); ?><?php echo esc_html($label); ?></button>
+        <?php endforeach; ?>
+      </div>
     </div>
 
     <div class="mt-8 rounded-[2rem] border border-sand-200 bg-white p-6 shadow-[0_18px_44px_rgba(11,31,58,0.08)] sm:p-10">
@@ -44,6 +46,12 @@ abz_page_hero('استراحة', 'ألعاب وألغاز قانونية', 'ثل�
         <p class="mt-5 min-h-[2rem] text-center font-bold text-forest-600" data-memory-feedback aria-live="polite"></p>
         <div class="mt-2 text-center"><button type="button" data-memory-restart class="min-h-[48px] rounded-xl bg-navy-900 px-6 font-bold text-white">وزّع من جديد</button></div>
       </div>
+
+      <!-- الألعاب الجديدة: واجهتها تُبنى من games.js -->
+      <div data-game="truefalse" hidden></div>
+      <div data-game="guess" hidden></div>
+      <div data-game="clauses" hidden></div>
+      <div data-game="order" hidden></div>
     </div>
     <p class="mt-6 text-center text-sm leading-7 text-slate-600">الأسئلة معلومات قانونية عامة للتسلية، وقد تختلف التفاصيل من نظام إلى آخر. لمسألتك أنت: <a class="font-bold text-navy-900 underline" href="<?php echo esc_url(abz_url('booking')); ?>">احجز موعداً مع مستشار</a>.</p>
   </div>

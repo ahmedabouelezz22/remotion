@@ -15,7 +15,7 @@ function abz_seed(): array
 }
 
 /** نسخة البيانات + مراجعة المستورد: تغيّر أيّهما يعيد الاستيراد مرة واحدة */
-const ABZ_IMPORTER_REVISION = 'r7';
+const ABZ_IMPORTER_REVISION = 'r8';
 
 function abz_seed_version(): string
 {
@@ -108,4 +108,10 @@ function abz_rate_limit(string $bucket, int $max, int $seconds): bool
     }
     set_transient($key, $count + 1, $seconds);
     return true;
+}
+
+/** قائمة من قيمة محفوظة: يحوّل القيمة الفارغة إلى [] ويحذف العناصر الفارغة (get_*_meta يرجع '' إن لم توجد) */
+function abz_list($value): array
+{
+    return is_array($value) ? array_values(array_filter($value, fn($item) => $item !== '' && $item !== null)) : [];
 }

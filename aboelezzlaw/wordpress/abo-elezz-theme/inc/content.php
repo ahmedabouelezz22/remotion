@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
  */
 
 /** يرجع [المتن المعدّل، قائمة العناوين] */
-function abz_prepare_article(string $html): array
+function abz_prepare_article(string $html, int $post_id = 0): array
 {
     $toc = [];
     $index = 0;
@@ -20,6 +20,27 @@ function abz_prepare_article(string $html): array
         $attrs = preg_replace('/\sid="[^"]*"/', '', $m[1]);
         return '<h2 id="' . $id . '"' . $attrs . '>' . $m[2] . '</h2>';
     }, $html);
+
+    // صور داخل المقال: قبل القسم الثاني والرابع (أو بعد الفقرة الثانية والسادسة)
+    $images = $post_id ? array_values(array_filter((array) get_post_meta($post_id, 'abz_inline_images', true), fn($i) => is_array($i) && wp_attachment_is_image((int) ($i['id'] ?? 0)))) : [];
+    if ($images) {
+        $figure = fn(array $i) => '<figure class="abz-figure not-prose my-8 overflow-hidden rounded-3xl bg-sand-100">'
+            . wp_get_attachment_image((int) $i['id'], 'large', false, ['class' => 'w-full object-cover', 'alt' => (string) ($i['alt'] ?? ''), 'loading' => 'lazy', 'decoding' => 'async'])
+            . '<figcaption class="px-4 py-2 text-xs text-slate-500">' . esc_html((string) ($i['alt'] ?? '')) . ' — صورة تعبيرية</figcaption></figure>';
+        $anchors = $index >= 4 ? [2, 4] : ($index >= 2 ? [2, 0] : [0, 0]);
+        foreach (array_slice($images, 0, 2) as $n => $image) {
+            if ($anchors[$n]) {
+                $html = preg_replace('/<h2 id="section-' . $anchors[$n] . '"/', $figure($image) . '<h2 id="section-' . $anchors[$n] . '"', $html, 1);
+            } else {
+                $count = 0;
+                $after = $n === 0 ? 2 : 6;
+                $html = preg_replace_callback('/<\/p>/', function ($m) use (&$count, $after, $figure, $image) {
+                    $count++;
+                    return $count === $after ? '</p>' . $figure($image) : '</p>';
+                }, $html);
+            }
+        }
+    }
 
     // الدعوة قبل العنوان الثالث، أو بعد الفقرة الرابعة إن قلّت العناوين
     $cta = abz_inline_cta_html();

@@ -58,13 +58,23 @@ abz_page_hero('من نحن', 'فريقنا', 'قيادة قانونية، وإد
     <?php abz_section_heading('إدارات المؤسسة', 'فريق يعمل خلف كل ملف', (string) abz_data('platform.departmentsNote', '')); ?>
     <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <?php foreach ((array) abz_data('platform.departments', []) as $dept) : ?>
-        <div class="abz-reveal rounded-3xl border border-sand-200 bg-white p-6" data-abz-tilt>
-          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-900 text-gold-300"><?php echo abz_icon($dept['icon'], 'h-6 w-6'); ?></span>
-          <h3 class="mt-5 text-lg leading-8 text-navy-900"><?php echo esc_html($dept['title']); ?></h3>
-          <p class="mt-2 text-sm leading-7 text-slate-600"><?php echo esc_html($dept['body']); ?></p>
+        <?php $dept_photo = (string) ($dept['photo'] ?? ''); ?>
+        <div class="abz-reveal group rounded-3xl border border-sand-200 bg-white <?php echo $dept_photo ? 'p-3' : 'p-6'; ?>" data-abz-tilt>
+          <?php if ($dept_photo) : ?>
+            <?php echo abz_cover($dept_photo, $dept['icon'], 'aspect-[4/3]', 'rounded-2xl'); ?>
+            <div class="px-3 pb-3 pt-4">
+              <h3 class="text-lg leading-8 text-navy-900"><?php echo esc_html($dept['title']); ?></h3>
+              <p class="mt-2 text-sm leading-7 text-slate-600"><?php echo esc_html($dept['body']); ?></p>
+            </div>
+          <?php else : ?>
+            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-900 text-gold-300"><?php echo abz_icon($dept['icon'], 'h-6 w-6'); ?></span>
+            <h3 class="mt-5 text-lg leading-8 text-navy-900"><?php echo esc_html($dept['title']); ?></h3>
+            <p class="mt-2 text-sm leading-7 text-slate-600"><?php echo esc_html($dept['body']); ?></p>
+          <?php endif; ?>
         </div>
       <?php endforeach; ?>
     </div>
+    <p class="mt-6 text-xs text-slate-500">الصور تعبيرية لإدارات المؤسسة.</p>
   </div>
 </section>
 

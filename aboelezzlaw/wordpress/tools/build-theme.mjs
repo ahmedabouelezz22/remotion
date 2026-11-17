@@ -9,4 +9,5 @@ const input = path.join(theme, 'assets/src/theme.css');
 const result = await postcss([tailwind({ base: theme, optimize: { minify: true } })]).process(readFileSync(input, 'utf8'), { from: input });
 writeFileSync(path.join(theme, 'assets/app.css'), result.css);
 copyFileSync(path.join(theme, 'assets/src/app.js'), path.join(theme, 'assets/app.js'));
+copyFileSync(path.join(theme, 'assets/src/games.js'), path.join(theme, 'assets/games.js'));
 console.log('app.css', (result.css.length / 1024).toFixed(1), 'KB');

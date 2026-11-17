@@ -48,7 +48,7 @@ abz_page_hero('من نحن', 'عملاؤنا', (string) ($clients['lead'] ?? '')
 <?php if ($reviews) : ?>
 <section class="py-14 sm:py-20">
   <div class="mx-auto max-w-7xl px-5 sm:px-8">
-    <?php abz_section_heading('آراء العملاء', 'ما كتبه العملاء عن تجربتهم', 'آراء حقيقية منقولة كما كتبها أصحابها، بأسمائهم المختصرة حفاظاً على خصوصيتهم.'); ?>
+    <?php abz_section_heading('آراء العملاء', 'ما كتبه العملاء عن تجربتهم', 'تجارب عملائنا بكلماتهم، بأسمائهم المختصرة حفاظاً على خصوصيتهم.'); ?>
     <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <?php get_template_part('template-parts/reviews', null, ['reviews' => $reviews]); ?>
     </div>

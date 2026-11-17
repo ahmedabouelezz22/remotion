@@ -33,7 +33,7 @@ $service_icons = ['building' => 'building', 'file-text' => 'file-text', 'calcula
       <div>
         <span class="abz-rise mb-6 inline-flex items-center gap-2 rounded-full border border-gold-500/35 bg-navy-900 px-4 py-1.5 text-xs font-bold tracking-wide text-gold-300">
           <span class="abz-pulse h-1.5 w-1.5 rounded-full bg-gold-400" aria-hidden="true"></span>
-          منصّة قانونية دولية — إدارة من الجيزة وفريق من أنحاء العالم
+          منصّة قانونية دولية — فريق وشبكة مختصّين في دول متعدّدة
         </span>
         <h1 class="abz-rise abz-rise-1 text-[2.1rem] leading-[1.3] sm:text-5xl sm:leading-[1.25] lg:text-[3.4rem]">
           حلول قانونية متكاملة <span class="block text-gold-400">بدقّة المستشار وسرعة المنصّة</span>
@@ -63,29 +63,37 @@ $service_icons = ['building' => 'building', 'file-text' => 'file-text', 'calcula
             </ul>
           <?php endforeach; ?>
           <div class="absolute inset-[9%] rounded-full border border-gold-400/25"></div>
-          <div class="absolute inset-[21%] rounded-full border border-dashed border-white/15"></div>
-          <figure class="abz-orbit-card absolute inset-[23%] overflow-hidden rounded-[2.25rem] border-2 border-gold-400/70 shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
-            <img src="<?php echo esc_url(abz_img('lawbooks')); ?>" alt="تمثال العدالة يحمل الميزان" width="1200" height="750" fetchpriority="high" class="h-full w-full object-cover">
-            <span class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/25 to-transparent"></span>
-            <span class="abz-glare absolute inset-0"></span>
-            <figcaption class="absolute inset-x-0 bottom-0 flex items-center gap-3 p-4">
-              <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/logo-256.png'); ?>" alt="" width="44" height="40" class="h-10 w-11 object-contain">
-              <span class="leading-tight"><span class="block font-display text-sm font-black text-white">مؤسسة أبو العز</span><span class="block text-[0.68rem] font-semibold tracking-wide text-gold-300" dir="ltr">ABO ELEZZ LAW FIRM</span></span>
-            </figcaption>
-          </figure>
+          <!-- النسر السينمائي: يظهر من الضوء ثم يرفرف ويحوم، وحوله شرر ذهبي وأشعة دوّارة -->
+          <div class="abz-eagle absolute inset-[13%]">
+            <span class="abz-eagle-rays" aria-hidden="true"></span>
+            <span class="abz-eagle-glow" aria-hidden="true"></span>
+            <span class="abz-eagle-sparks" aria-hidden="true"><?php for ($i = 0; $i < 14; $i++) : ?><i style="--i:<?php echo (int) $i; ?>"></i><?php endfor; ?></span>
+            <div class="abz-eagle-bird" role="img" aria-label="نسر ذهبي يفرد جناحيه — شعار مؤسسة أبو العز للمحاماة">
+              <img class="abz-wing abz-wing-l" src="<?php echo esc_url(abz_img('eagle')); ?>" alt="" width="710" height="444" fetchpriority="high" decoding="async">
+              <img class="abz-wing abz-wing-r" src="<?php echo esc_url(abz_img('eagle')); ?>" alt="" width="710" height="444" decoding="async">
+            </div>
+            <p class="abz-eagle-title font-display">مؤسسة أبو العز للمحاماة</p>
+            <p class="abz-eagle-sub" dir="ltr">ABO ELEZZ LAW FIRM</p>
+          </div>
         </div>
-        <div class="abz-layer abz-layer-3 abz-float absolute -start-2 top-[6%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
+        <div class="hidden sm:block abz-layer abz-layer-3 abz-float absolute -start-2 top-[6%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
           <p class="numeric font-display text-2xl font-black text-gold-400" dir="ltr"><span data-count="1000" data-prefix="+">+1000</span></p>
           <p class="mt-0.5 text-xs leading-6 text-navy-100">خدمة قانونية منجزة</p>
         </div>
-        <div class="abz-layer abz-layer-2 abz-float-slow absolute -end-2 top-[44%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
+        <div class="hidden sm:block abz-layer abz-layer-2 abz-float-slow absolute -end-2 top-[44%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
           <p class="flex items-center gap-1 text-gold-400" aria-label="خمس نجوم"><?php for ($i = 0; $i < 5; $i++) { echo abz_icon('star', 'h-4 w-4 fill-gold-400'); } ?></p>
-          <p class="mt-1 text-xs leading-6 text-navy-100">آراء عملاء حقيقية</p>
+          <p class="mt-1 text-xs leading-6 text-navy-100">تقييمات عملائنا</p>
         </div>
-        <div class="abz-layer abz-layer-3 abz-float absolute bottom-[3%] start-[6%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
+        <div class="hidden sm:block abz-layer abz-layer-3 abz-float absolute bottom-[3%] start-[6%] rounded-2xl border border-white/15 bg-navy-900/95 px-5 py-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
           <p class="numeric font-display text-2xl font-black text-gold-400" dir="ltr"><span data-count="<?php echo esc_attr((string) count($sectors)); ?>"><?php echo esc_html((string) count($sectors)); ?></span></p>
           <p class="mt-0.5 text-xs leading-6 text-navy-100">قطاعاً نخدمه</p>
         </div>
+        <!-- الهاتف: الإحصاءات صفاً أسفل النسر بدل البطاقات العائمة -->
+        <ul class="mt-2 grid grid-cols-3 gap-2 text-center sm:hidden">
+          <li class="rounded-2xl border border-white/15 bg-navy-900/90 px-2 py-3"><p class="numeric font-display text-xl font-black text-gold-400" dir="ltr">+1000</p><p class="text-[0.7rem] leading-5 text-navy-100">خدمة منجزة</p></li>
+          <li class="rounded-2xl border border-white/15 bg-navy-900/90 px-2 py-3"><p class="flex justify-center gap-0.5 text-gold-400" aria-label="خمس نجوم"><?php for ($i = 0; $i < 5; $i++) { echo abz_icon('star', 'h-3.5 w-3.5 fill-gold-400'); } ?></p><p class="mt-1 text-[0.7rem] leading-5 text-navy-100">تقييمات عملائنا</p></li>
+          <li class="rounded-2xl border border-white/15 bg-navy-900/90 px-2 py-3"><p class="numeric font-display text-xl font-black text-gold-400" dir="ltr"><?php echo esc_html((string) count($sectors)); ?></p><p class="text-[0.7rem] leading-5 text-navy-100">قطاعاً نخدمه</p></li>
+        </ul>
       </div>
     </div>
   </div>
@@ -247,7 +255,7 @@ $service_icons = ['building' => 'building', 'file-text' => 'file-text', 'calcula
 <!-- ── آراء العملاء (حقيقية، كما كتبها أصحابها) ── -->
 <section class="bg-sand-100 py-16 sm:py-24">
   <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-    <?php abz_section_heading('آراء العملاء', 'ما كتبه العملاء عن تجربتهم', 'آراء حقيقية منقولة كما كتبها أصحابها.'); ?>
+    <?php abz_section_heading('آراء العملاء', 'ما كتبه العملاء عن تجربتهم', 'تجارب عملائنا بكلماتهم.'); ?>
     <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <?php get_template_part('template-parts/reviews', null, ['reviews' => $reviews]); ?>
     </div>

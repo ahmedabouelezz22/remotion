@@ -5,9 +5,17 @@ if (!defined('ABSPATH')) {
 get_header();
 the_post();
 $items = abz_data('library', []);
-abz_page_hero('المعرفة', 'المكتبة القانونية', 'مصادر رسمية ومؤسسية متاحة للعموم وبصفة مشروعة. نحيل إلى المصدر الأصلي مباشرةً ولا نعيد نشر مؤلفات محمية.', [['المكتبة القانونية', '']]);
+abz_page_hero('المعرفة', 'المكتبة القانونية', 'كتب وأبحاث ونماذج بصيغة PDF تتصفّحها داخل الموقع، ومصادر رسمية نحيل إليها مباشرةً.', [['المكتبة القانونية', '']], 'lawbooks');
+get_template_part('template-parts/doc-library', null, ['section' => 'library']);
+if (!empty($_GET['doc'])) { // phpcs:ignore -- عرض ملف: لا حاجة لقائمة المصادر
+    get_footer();
+    return;
+}
 ?>
-<section class="py-14 sm:py-20">
+<section class="pb-6">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8"><?php abz_section_heading('مصادر رسمية', 'مصادر رسمية ومؤسسية متاحة للعموم', 'نحيل إلى المصدر الأصلي مباشرةً ولا نعيد نشر مؤلفات محمية.'); ?></div>
+</section>
+<section class="pb-14 pt-6 sm:pb-20">
   <div class="mx-auto grid max-w-7xl gap-5 px-5 sm:px-8 md:grid-cols-2 lg:grid-cols-3">
     <?php foreach ($items as $item) : ?>
       <a href="<?php echo esc_url($item['url']); ?>" target="_blank" rel="noopener" class="abz-reveal flex flex-col rounded-2xl border border-sand-200 bg-white p-6 hover:border-gold-500/60 hover:shadow-[0_12px_32px_rgba(11,31,58,0.1)]">

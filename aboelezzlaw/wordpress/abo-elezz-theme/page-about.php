@@ -51,7 +51,7 @@ abz_page_hero('من نحن', 'مؤسسة أبو العز للمحاماة وال
   <div class="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
     <div class="abz-reveal overflow-hidden rounded-[2rem]"><img src="<?php echo esc_url(abz_img('forum')); ?>" alt="كرة أرضية زجاجية ترمز إلى العمل عبر الحدود" width="1200" height="750" loading="lazy" class="aspect-[4/3] w-full object-cover"></div>
     <div>
-      <?php abz_section_heading('الإدارة والفريق', 'إدارة من الجيزة… وفريق من دول متعدّدة', 'مقرّ إدارة المؤسسة في مدينة 6 أكتوبر بالجيزة. أما العمل فيجري عن بُعد: مستشارون ومختصّون وإدارات مساندة يعملون من أماكن مختلفة، ويُسنَد كل ملف إلى المختص بنظام الدولة المعنية وبقطاع العميل.', 'start'); ?>
+      <?php abz_section_heading('الإدارة والفريق', 'فريق موزَّع على دول متعدّدة', 'يعمل في المؤسسة مستشارون ومختصّون وإدارات مساندة من دول مختلفة، ويُسنَد كل ملف إلى المختص بنظام الدولة المعنية وبقطاع العميل، لنخدم عملاءنا في أي مكان، حضورياً وعن بُعد.', 'start'); ?>
       <div class="mt-8 grid gap-3 sm:grid-cols-2">
         <?php foreach ($about['howWeServe'] ?? [] as $row) : ?>
           <div class="rounded-2xl border border-sand-200 bg-white p-5"><h3 class="text-base text-navy-900"><?php echo esc_html($row['title']); ?></h3><p class="mt-1.5 text-sm leading-7 text-slate-600"><?php echo esc_html($row['body']); ?></p></div>
