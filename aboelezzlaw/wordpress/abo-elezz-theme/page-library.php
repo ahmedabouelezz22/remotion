@@ -12,7 +12,16 @@ if (!empty($_GET['doc'])) { // phpcs:ignore -- عرض ملف: لا حاجة لق
     return;
 }
 ?>
-<section class="pb-6">
+<section class="bg-sand-100 py-14 sm:py-20">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8">
+    <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+      <?php abz_section_heading('فيديوهات', 'شروحات مرئية من قناتنا على يوتيوب', 'أحدث ما نشرناه من شروحات قانونية مبسّطة.', 'start'); ?>
+      <?php echo abz_button(abz_url('videos'), 'كل الفيديوهات ' . abz_arrow(), 'outline', 'sm'); ?>
+    </div>
+    <?php if (function_exists('abz_render_videos')) { abz_render_videos(6); } ?>
+  </div>
+</section>
+<section class="pb-6 pt-14">
   <div class="mx-auto max-w-7xl px-5 sm:px-8"><?php abz_section_heading('مصادر رسمية', 'مصادر رسمية ومؤسسية متاحة للعموم', 'نحيل إلى المصدر الأصلي مباشرةً ولا نعيد نشر مؤلفات محمية.'); ?></div>
 </section>
 <section class="pb-14 pt-6 sm:pb-20">

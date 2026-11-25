@@ -233,6 +233,7 @@ function abz_nav(): array
         ['label' => 'المعرفة', 'items' => [
             ['المدونة', abz_url('blog')],
             ['المكتبة القانونية', abz_url('library')],
+            ['فيديوهات القناة', abz_url('videos')],
             ['ألعاب وألغاز قانونية', abz_url('games')],
             ['قاعدة الأحكام القضائية', abz_url('judgments')],
             ['قاعدة التشريعات', abz_url('legislation')],

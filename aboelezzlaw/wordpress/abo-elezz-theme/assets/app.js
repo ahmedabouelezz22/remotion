@@ -199,4 +199,22 @@
     };
     document.head.appendChild(pdfScript);
   }
+  // 9) فيديوهات يوتيوب: يُحمَّل المشغّل فقط عند الضغط (youtube-nocookie)
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('[data-abz-yt]');
+    if (!link || e.ctrlKey || e.metaKey) return;
+    var id = link.getAttribute('data-abz-yt');
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+    e.preventDefault();
+    var frame = document.createElement('iframe');
+    frame.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+    frame.title = link.getAttribute('aria-label') || 'فيديو';
+    frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    frame.allowFullscreen = true;
+    frame.className = 'absolute inset-0 h-full w-full';
+    var box = document.createElement('div');
+    box.className = 'relative aspect-video bg-black';
+    box.appendChild(frame);
+    link.replaceWith(box);
+  });
 })();

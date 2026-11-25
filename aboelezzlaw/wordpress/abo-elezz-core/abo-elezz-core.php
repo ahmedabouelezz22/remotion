@@ -30,6 +30,7 @@ require_once ABZ_CORE_DIR . 'includes/accounts.php';
 require_once ABZ_CORE_DIR . 'includes/marketplace.php';
 require_once ABZ_CORE_DIR . 'includes/delegate.php';
 require_once ABZ_CORE_DIR . 'includes/library.php';
+require_once ABZ_CORE_DIR . 'includes/videos.php';
 require_once ABZ_CORE_DIR . 'includes/assistant.php';
 require_once ABZ_CORE_DIR . 'includes/importer.php';
 require_once ABZ_CORE_DIR . 'includes/dependencies.php';

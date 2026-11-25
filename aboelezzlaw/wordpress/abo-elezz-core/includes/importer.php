@@ -225,6 +225,7 @@ function abz_import_seed(bool $force = false): void
         'e-delegate' => ['النائب الإلكتروني', ''],
         'judgments' => ['قاعدة الأحكام القضائية', ''],
         'legislation' => ['قاعدة التشريعات', ''],
+        'videos' => ['فيديوهات القناة', ''],
     ];
     $page_ids = [];
     $order = 0;
