@@ -83,3 +83,16 @@ add_action('woocommerce_thankyou', function ($order_id) {
 /* التقييمات من مشترين فعليين فقط */
 add_filter('pre_option_woocommerce_review_rating_verification_required', fn() => 'yes');
 add_filter('pre_option_woocommerce_review_rating_verification_label', fn() => 'yes');
+
+/* صفحة shop القديمة (أنشأها WooCommerce تلقائياً وبقيت فارغة) حُذفت؛ المتجر الحقيقي صفحة store */
+add_action('template_redirect', function () {
+    $path = trim((string) wp_parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/');
+    if ($path === 'shop' && is_404() && function_exists('wc_get_page_permalink')) {
+        wp_safe_redirect(wc_get_page_permalink('shop'), 301);
+        exit;
+    }
+}, 1);
+
+/* خريطة الموقع لا تكشف أسماء المستخدمين (ومنها اسم المدير) */
+add_filter('wp_sitemaps_add_provider', fn($provider, $name) => $name === 'users' ? false : $provider, 10, 2);
+add_filter('aioseo_sitemap_author_archives', '__return_false');

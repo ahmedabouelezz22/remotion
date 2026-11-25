@@ -9,7 +9,7 @@ abz_page_hero('المعرفة', 'فيديوهات القناة', 'شروحات �
 ?>
 <section class="py-14 sm:py-20">
   <div class="mx-auto max-w-7xl px-5 sm:px-8">
-    <?php if (function_exists('abz_render_videos')) { abz_render_videos(15); } ?>
+    <?php if (function_exists('abz_render_videos')) { abz_render_videos(30); } ?>
     <div class="mt-10 text-center"><?php echo abz_button(function_exists('abz_youtube_channel_url') ? abz_youtube_channel_url() : 'https://www.youtube.com/@-ahmedaboelezz', 'القناة كاملة على يوتيوب', 'primary', 'md', '', true); ?></div>
   </div>
 </section>
